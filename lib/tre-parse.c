@@ -1279,6 +1279,23 @@ tre_parse(tre_parse_ctx_t *ctx)
 			  depth++;
 			  break;
 			}
+		      else if (*ctx->re == CHAR_HASH)
+			{
+			  DPRINT(("tre_parse:    comment: '%.*" STRF "\n",
+				  ctx->re_end - ctx->re, ctx->re));
+			  /* A comment can contain any character except a 
+			     right parenthesis */
+			  while (*ctx->re != CHAR_RPAREN
+				 && ctx->re < ctx->re_end)
+			    ctx->re++;
+			  if (*ctx->re == CHAR_RPAREN && ctx->re < ctx->re_end)
+			    {
+			      ctx->re++;
+			      break;
+			    }
+			  else
+			    return REG_BADPAT;
+			}
 		      else if (*ctx->re == CHAR_RPAREN)
 			{
 			  ctx->re++;

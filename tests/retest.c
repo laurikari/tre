@@ -1159,6 +1159,10 @@ main(int argc, char **argv)
   test_comp("foo(?U:o*)(o*)", REG_EXTENDED, 0);
   test_exec("foooo", 0, REG_OK, 0, 5, 3, 5, END);
 
+  /* Test comment syntax. */
+  test_comp("foo(?# This here is a comment. )bar", REG_EXTENDED, 0);
+  test_exec("foobar", 0, REG_OK, 0, 6, END);
+
   /* Tests for \Q and \E. */
   test_comp("\\((\\Q)?:\\<[^$\\E)", REG_EXTENDED, 0);
   test_exec("()?:\\<[^$", 0, REG_OK, 0, 9, 1, 9, END);
