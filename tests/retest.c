@@ -1140,7 +1140,7 @@ main(int argc, char **argv)
   test_comp("\\x{}r", REG_EXTENDED, 0);
   test_nexec("\000r", 2, 0, REG_OK, 0, 2, END);
 
-  /* Tests for (?inr-inr) and (?inr-inr:) */
+  /* Tests for (?inrU-inrU) and (?inrU-inrU:) */
   test_comp("foo(?i)bar", REG_EXTENDED, 0);
   test_exec("fooBaR", 0, REG_OK, 0, 6, END);
   test_comp("foo(?i)bar|zap", REG_EXTENDED, 0);
@@ -1156,6 +1156,8 @@ main(int argc, char **argv)
   test_exec("foobar", 0, REG_OK, 0, 6, END);
   test_exec("foobAr", 0, REG_OK, 0, 6, END);
   test_exec("fooZaP", 0, REG_OK, 0, 6, END);
+  test_comp("foo(?U:o*)(o*)", REG_EXTENDED, 0);
+  test_exec("foooo", 0, REG_OK, 0, 5, 3, 5, END);
 
   /* Tests for \Q and \E. */
   test_comp("\\((\\Q)?:\\<[^$\\E)", REG_EXTENDED, 0);
@@ -1395,8 +1397,15 @@ main(int argc, char **argv)
   test_comp("a(.*?)(foo|bar|zap)", REG_EXTENDED, 0);
   test_exec("hubba wooga-booga zabar gafoo wazap", 0, REG_OK,
 	    4, 23, 5, 20, 20, 23, END);
-  avoid_eflags = 0;
 
+  /* Test REG_UNGREEDY. */
+  test_comp(".*", REG_EXTENDED | REG_UNGREEDY, 0);
+  test_exec("abcd", 0, REG_OK, 0, 0, END);
+  test_comp(".*?", REG_EXTENDED | REG_UNGREEDY, 0);
+  test_exec("abcd", 0, REG_OK, 0, 4, END);
+
+  avoid_eflags = 0;
+  
 
   /*
    * Error reporting tests.

@@ -632,7 +632,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   int limit_ins, limit_del, limit_subst, limit_err;
   const tre_char_t *r = ctx->re;
   const tre_char_t *start;
-  int minimal = 0;
+  int minimal = (ctx->cflags & REG_UNGREEDY) ? 1 : 0;
   int approx = 0;
   int costs_set = 0;
   int counts_set = 0;
@@ -843,7 +843,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   /* Parse trailing '?' marking minimal repetition. */
   if (r < ctx->re_end && *r == CHAR_QUESTIONMARK)
     {
-      minimal = 1;
+      minimal = !(ctx->cflags & REG_UNGREEDY);
       r++;
     }
 
@@ -1129,21 +1129,28 @@ tre_parse(tre_parse_ctx_t *ctx)
 	    case CHAR_QUESTIONMARK:
 	      {
 		tre_ast_node_t *tmp_node;
-		int minimal = 0;
+		int minimal = (ctx->cflags & REG_UNGREEDY) ? 1 : 0;
 		int rep_min = 0;
 		int rep_max = -1;
+		const tre_char_t *tmp_re;
+
 		if (*ctx->re == CHAR_PLUS)
 		  rep_min = 1;
 		if (*ctx->re == CHAR_QUESTIONMARK)
 		  rep_max = 1;
-
+		tmp_re = ctx->re;
+		
 		if (ctx->re + 1 < ctx->re_end
 		    && *(ctx->re + 1) == CHAR_QUESTIONMARK)
-		  minimal = 1;
+		  { 
+		    minimal = !(ctx->cflags & REG_UNGREEDY);
+		    ctx->re++;
+		  }
+
 		DPRINT(("tre_parse: %s star: '%.*" STRF "'\n",
 			minimal ? "  minimal" : "greedy",
-			ctx->re_end - ctx->re, ctx->re));
-		ctx->re += minimal + 1;
+			ctx->re_end - tmp_re, tmp_re));
+		ctx->re++;
 		tmp_node = tre_ast_new_iter(ctx->mem, result, rep_min, rep_max,
 					    minimal);
 		if (tmp_node == NULL)
@@ -1245,6 +1252,18 @@ tre_parse(tre_parse_ctx_t *ctx)
 			  ctx->re++;
 			}
 #endif /* REG_RIGHT_ASSOC */
+#ifdef REG_UNGREEDY
+		      else if (*ctx->re == L'U')
+			{
+			  DPRINT(("tre_parse:    ungreedy: '%.*" STRF "\n",
+				  ctx->re_end - ctx->re, ctx->re));
+			  if (bit)
+			    new_cflags |= REG_UNGREEDY;
+			  else
+			    new_cflags &= ~REG_UNGREEDY;
+			  ctx->re++;
+			}
+#endif /* REG_UNGREEDY */
 		      else if (*ctx->re == CHAR_MINUS)
 			{
 			  DPRINT(("tre_parse:	 turn off: '%.*" STRF "\n",

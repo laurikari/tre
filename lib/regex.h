@@ -1,7 +1,7 @@
 /*
   regex.h - POSIX.2 compatible regexp interface and TRE extensions
 
-  Copyright (C) 2001-2004 Ville Laurikari <vl@iki.fi>.
+  Copyright (C) 2001-2005 Ville Laurikari <vl@iki.fi>.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2 (June
@@ -108,6 +108,7 @@ typedef enum {
 #define REG_BASIC	0
 #define REG_LITERAL	(REG_NOSUB << 1)
 #define REG_RIGHT_ASSOC (REG_LITERAL << 1)
+#define REG_UNGREEDY    (REG_RIGHT_ASSOC << 1)
 
 /* POSIX regexec() flags. */
 #define REG_NOTBOL 1
