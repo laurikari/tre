@@ -1,7 +1,7 @@
 /*
   tre-parse.c - Regexp parser
 
-  Copyright (C) 2001-2004 Ville Laurikari <vl@iki.fi>
+  Copyright (C) 2001-2005 Ville Laurikari <vl@iki.fi>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2 (June
@@ -1590,7 +1590,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  ctx->cflags &= ~temporary_cflags;
 		  temporary_cflags = 0;
 		  ctx->re += 2;
-		  STACK_PUSHX(stack, PARSE_ATOM);
+		  STACK_PUSHX(stack, PARSE_PIECE);
 		  break;
 		}
 
