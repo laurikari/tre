@@ -1,1 +1,4 @@
-EXTRA_DIST = autogen.sh build-rpm.sh mkinstalldirs
+EXTRA_DIST = \
+	autogen.sh \
+	build-rpm.sh \
+	mkinstalldirs

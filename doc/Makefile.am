@@ -3,4 +3,8 @@
 
 man_MANS = agrep.1
 
-EXTRA_DIST = $(man_MANS) tre-api.html tre-syntax.html default.css
+EXTRA_DIST = \
+	$(man_MANS) \
+	tre-api.html \
+	tre-syntax.html \
+	default.css

@@ -8,7 +8,8 @@ endif
 
 SUBDIRS = lib $(agrep_dirs) tests utils po m4
 
-EXTRA_DIST = utils/config.rpath  \
+EXTRA_DIST = \
+	utils/config.rpath  \
 	LICENSE \
 	win32/tre-config.h win32/config.h \
 	win32/tre.dsw \
