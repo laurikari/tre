@@ -135,10 +135,11 @@ regex ABI  @<:@default=disabled@:>@]),
 # find an absolute path to the system regex.h (so it can be included from
 # TRE regex.h using `#include "/path/to/regex.h"').  Then we need to
 # find a field in the system defined regex_t struct where a pointer to
-# a TNFA can be stored.
+# the compiled regex object can be stored.
 
 if test "$tre_system_abi" = "yes"; then
-  # Check that there is a system regex.h to beging with.
+  # Check that there is a system regex.h to begin with.  We may need
+  # to include sys/types.h before regex.h, so check for that first.
   AC_CHECK_HEADERS([sys/types.h])
   AC_CHECK_HEADERS([regex.h], [],
     [ tre_system_abi="no (regex.h not found)" ],
@@ -149,7 +150,9 @@ if test "$tre_system_abi" = "yes"; then
 fi
 
 if test "$tre_system_abi" = "yes"; then
-  # Find out where system <regex.h> is.
+  # Find out where system regex.h is.  This is done by running the C
+  # preprocessor and grepping its output, hopefully getting a full
+  # path to regex.h.
   AC_MSG_CHECKING([path to system regex.h])
   echo '#include <regex.h>' > conftest.c
   tre_system_regex_h=`$CPP conftest.c \
@@ -167,6 +170,8 @@ fi
 
 if test "$tre_system_abi" = "yes"; then
   # Find a field in the system regex_t struct where we can store a pointer.
+  # This is done by trying several names that are known to work on different
+  # systems.
   AC_MSG_CHECKING([for a usable field for a pointer in regex_t])
   tre_regex_t_field=""
   for field in buffer re_comp __re_comp __reg_expression \
@@ -193,8 +198,12 @@ $PACKAGE_BUGREPORT)"
   fi
 fi
 
-# Check if we can redefine the functions...
 if test "$tre_system_abi" = "yes"; then
+  # So far, so good.  Now check if we can redefine the system regex
+  # functions.  For example, the system headers may define the
+  # standard functions as static wrapper functions (like on IRIX)
+  # which prevents redefining them later.
+
   # IRIX has some macro magic which we need to turn off.
   AC_DEFINE(_REGCOMP_INTERNAL, 1, [ Define on IRIX ])
   AC_MSG_CHECKING([if POSIX regex functions can be redefined])
@@ -233,6 +242,10 @@ regerror(int errcode, const regex_t *preg, char *errbuf,
 fi
 
 if test "$tre_system_abi" = "yes"; then
+  # Great, everything seems to be OK for ABI compatibility.  Just check
+  # some additional types that may or may not be defined, and set up
+  # variables to enable ABI compatibility in regex.h.
+
   AC_CHECK_TYPES([reg_errcode_t],,,[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -341,6 +354,7 @@ if test "$tre_enable_wchar" != "no"; then
         AC_MSG_RESULT([no])
         tre_libutf8="no"
       else
+        # Fail if libutf8 was requested but was not found.
         AC_MSG_ERROR([not found])
       fi
     fi
@@ -418,7 +432,8 @@ if test "$tre_enable_wchar" != "no"; then
   fi
 fi
 
-
+# Fail if wide character support was specifically requested but is
+# not supported on this system.
 if test "$tre_enable_wchar" = "yes"; then
   if test "$tre_wchar" != "yes"; then
     AC_MSG_ERROR([Cannot enable wide character support: $tre_wchar_reason])
@@ -467,6 +482,9 @@ if test "$tre_enable_multibyte" != "no"; then
 else
   tre_multibyte="no (disabled with --disable-multibyte)"
 fi
+
+# Fail if multibyte character set support was specifically requested but
+# is not supported on this system.
 if test "$tre_enable_multibyte" = "yes"; then
   if test "$tre_multibyte" != "yes"; then
     AC_MSG_ERROR([Cannot enable multibyte character set support: \
