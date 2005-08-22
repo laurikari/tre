@@ -1,7 +1,7 @@
 /*
   agrep.c - Approximate grep
 
-  Copyright (C) 2002-2004 Ville Laurikari <vl@iki.fi>.
+  Copyright (C) 2002-2005 Ville Laurikari <vl@iki.fi>.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2 (June
@@ -54,7 +54,8 @@ char *program_name;
 #ifdef HAVE_GETOPT_LONG
 /* Long options that have no corresponding short equivalents. */
 enum {
-  COLOR_OPTION = CHAR_MAX + 1
+  COLOR_OPTION = CHAR_MAX + 1,
+  SHOW_POSITION_OPTION
 };
 
 /* Long option equivalences. */
@@ -83,6 +84,7 @@ static struct option const long_options[] =
   {"help", no_argument, &show_help, 1},
   {"colour", no_argument, NULL, COLOR_OPTION},
   {"color", no_argument, NULL, COLOR_OPTION},
+  {"show-position", no_argument, NULL, SHOW_POSITION_OPTION},
   {0, 0, 0, 0}
 };
 #endif /* HAVE_GETOPT_LONG */
@@ -176,6 +178,7 @@ static int print_cost;	   /* Output match cost. */
 static int count_matches;  /* Count matching records. */
 static int list_files;	   /* List matching files. */
 static int color_option;   /* Highlight matches. */
+static int print_position;  /* Show start and end offsets for matches. */
 
 static int best_match;	     /* Output only best matches. */
 static int best_cost;	     /* Best match cost found so far. */
@@ -332,7 +335,7 @@ tre_agrep_handle_file(const char *filename)
       memset(&match, 0, sizeof(match));
       if (best_match)
 	match_params.max_cost = best_cost;
-      if (color_option)
+      if (color_option || print_position)
 	{
 	  match.pmatch = pmatch;
 	  match.nmatch = 1;
@@ -375,6 +378,8 @@ tre_agrep_handle_file(const char *filename)
 		printf("%d:", recnum);
 	      if (print_cost)
 		printf("%d:", match.cost);
+	      if (print_position)
+		printf("%d-%d:", pmatch[0].rm_so, pmatch[0].rm_eo);
 
 	      if (color_option)
 		{
@@ -557,6 +562,9 @@ PARTICULAR PURPOSE.\n"));
 #ifdef HAVE_GETOPT_LONG
 	case COLOR_OPTION:
 	  color_option = 1;
+	  break;
+	case SHOW_POSITION_OPTION:
+	  print_position = 1;
 	  break;
 #endif /* HAVE_GETOPT_LONG */
 	case 0:
