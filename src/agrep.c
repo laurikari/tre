@@ -70,6 +70,7 @@ static struct option const long_options[] =
   {"ignore-case", no_argument, NULL, 'i'},
   {"literal", no_argument, NULL, 'k'},
   {"files-with-matches", no_argument, NULL, 'l'},
+  {"record-number", no_argument, NULL, 'n'},
   {"line-number", no_argument, NULL, 'n'},
   {"show-cost", no_argument, NULL, 's'},
   {"invert-match", no_argument, NULL, 'v'},
