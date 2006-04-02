@@ -2280,7 +2280,7 @@ tre_version(void)
   if (str[0] == 0)
     {
       tre_config(TRE_CONFIG_VERSION, &version);
-      sprintf(str, "TRE %s (GPL)", version);
+      sprintf(str, "TRE %s (LGPL)", version);
     }
   return str;
 }

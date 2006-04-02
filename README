@@ -136,11 +136,11 @@ Portable
 Free
 
    TRE is free; you can redistribute it and/or modify it under the
-   terms of the GNU General Public License version 2 (June 1991) as
-   published by the Free Software Foundation. See the file COPYING,
-   included in the distribution packages, for the complete license.
+   terms of the GNU Lesser General Public License as published by the
+   Free Software Foundation.  See the file COPYING, included in the
+   distribution packages, for the complete license.
 
-   If you cannot accept the GNU GPL, it may be possible that you can
+   If you cannot accept the GNU LGPL, it may be possible that you can
    persuade me to give or sell you a version which is licensed
    differently.  Please contact me for more information.
 

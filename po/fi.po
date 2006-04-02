@@ -1,5 +1,5 @@
 # Finnish translations for TRE package.
-# Copyright (C) 2002-2006 Ville Laurikari
+# Copyright (c) 2002-2006 Ville Laurikari
 # This file is distributed under the same license as the TRE package.
 # Ville Laurikari <vl@iki.fi>, 2006.
 #

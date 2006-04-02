@@ -1,19 +1,21 @@
 # setup.py - Builds and installs the TRE Python language bindings module
 #
-# Copyright (C) 2004 Nikolai SAOUKH <nms+python@otdel-1.org>
+# Copyright (c) 2004-2006 Nikolai SAOUKH <nms+python@otdel-1.org>
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License version 2 (June
-# 1991) as published by the Free Software Foundation.
 #
-# This program is distributed in the hope that it will be useful,
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from distutils.core import setup, Extension
 import sys
@@ -36,7 +38,7 @@ setup(
     description = "Python module for TRE",
     author = "Nikolai SAOUKH",
     author_email = "nms+python@otdel-1.org",
-    license = "GPL",
+    license = "LGPL",
     url = "http://laurikari.net/tre/",
     ext_modules = [
         Extension(
