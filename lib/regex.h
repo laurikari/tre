@@ -57,7 +57,9 @@ typedef int reg_errcode_t;
 #endif
 
 /* Extra regcomp() flags. */
+#define REG_BASIC	0
 #define REG_RIGHT_ASSOC (REG_LITERAL << 1)
+#define REG_UNGREEDY    (REG_RIGHT_ASSOC << 1)
 
 /* Extra regexec() flags. */
 #define REG_APPROX_MATCHER	 0x1000
