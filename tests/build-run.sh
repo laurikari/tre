@@ -12,10 +12,14 @@ sync
 
 . ./build-params.sh
 
-rm -rf build-tmp-$dir
-mkdir build-tmp-$dir
-mv $pkg build-tmp-$dir
-cd build-tmp-$dir
+# Make a unique temporary directory name.
+hostname=`hostname`
+tmpdir=build-tmp-$dir-$hostname-$$
+
+rm -rf $tmpdir
+mkdir $tmpdir
+cp $pkg $tmpdir
+cd $tmpdir
 
 gunzip -c $pkg | tar xf -
 cd $dir
