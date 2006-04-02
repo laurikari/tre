@@ -1,5 +1,9 @@
 Version 0.7.3
   - The license has been changed from GPL to LGPL.
+
+  - New command line option to agrep: --show-position
+
+  - New REG_UNGREEDY cflags and 'U' pattern modifier.
  
   - Bug fixes.
 
