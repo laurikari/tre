@@ -4,10 +4,6 @@ Free Software Foundation; either version 2.1 of the License, or (at
 your option) any later version.  See the file `COPYING' for the
 entire license.
 
-However, everything in the python/ subdirectory is still licensed
-under the terms of the GNU General Public License.  See the file
-`python/COPYING' for that license.
-
 This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
