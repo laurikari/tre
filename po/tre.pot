@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: vl@iki.fi\n"
-"POT-Creation-Date: 2004-12-10 22:32+0200\n"
+"POT-Creation-Date: 2006-04-02 12:00+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,78 +16,78 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/regerror.c:42
+#: lib/regerror.c:43
 msgid "No error"
 msgstr ""
 
-#: lib/regerror.c:43
+#: lib/regerror.c:44
 msgid "No match"
 msgstr ""
 
-#: lib/regerror.c:44
+#: lib/regerror.c:45
 msgid "Invalid regexp"
 msgstr ""
 
-#: lib/regerror.c:45
+#: lib/regerror.c:46
 msgid "Unknown collating element"
 msgstr ""
 
-#: lib/regerror.c:46
+#: lib/regerror.c:47
 msgid "Unknown character class name"
 msgstr ""
 
-#: lib/regerror.c:47
+#: lib/regerror.c:48
 msgid "Trailing backslash"
 msgstr ""
 
-#: lib/regerror.c:48
+#: lib/regerror.c:49
 msgid "Invalid back reference"
 msgstr ""
 
-#: lib/regerror.c:49
+#: lib/regerror.c:50
 msgid "Missing ']'"
 msgstr ""
 
-#: lib/regerror.c:50
+#: lib/regerror.c:51
 msgid "Missing ')'"
 msgstr ""
 
-#: lib/regerror.c:51
+#: lib/regerror.c:52
 msgid "Missing '}'"
 msgstr ""
 
-#: lib/regerror.c:52
+#: lib/regerror.c:53
 msgid "Invalid contents of {}"
 msgstr ""
 
-#: lib/regerror.c:53
+#: lib/regerror.c:54
 msgid "Invalid character range"
 msgstr ""
 
-#: lib/regerror.c:54 src/agrep.c:231 src/agrep.c:245 src/agrep.c:290
-#: src/agrep.c:621 src/agrep.c:660
+#: lib/regerror.c:55 src/agrep.c:236 src/agrep.c:250 src/agrep.c:295
+#: src/agrep.c:631 src/agrep.c:670
 msgid "Out of memory"
 msgstr ""
 
-#: lib/regerror.c:55
+#: lib/regerror.c:56
 msgid "XXX"
 msgstr ""
 
-#: lib/regerror.c:68
+#: lib/regerror.c:69
 msgid "Unknown error"
 msgstr ""
 
-#: src/agrep.c:95 src/agrep.c:102
+#: src/agrep.c:99 src/agrep.c:106
 #, c-format
 msgid "Usage: %s [OPTION]... PATTERN [FILE]...\n"
 msgstr ""
 
-#: src/agrep.c:97
+#: src/agrep.c:101
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr ""
 
-#: src/agrep.c:103
+#: src/agrep.c:107
 #, c-format
 msgid ""
 "Searches for approximate matches of PATTERN in each FILE or standard input.\n"
@@ -97,7 +97,7 @@ msgid ""
 "\"optmise\", and \"opitmize\" all match.\n"
 msgstr ""
 
-#: src/agrep.c:109
+#: src/agrep.c:113
 #, c-format
 msgid ""
 "Regexp selection and interpretation:\n"
@@ -133,7 +133,7 @@ msgid ""
 "      --colour, --color     use markers to distinguish the matching strings\n"
 msgstr ""
 
-#: src/agrep.c:143
+#: src/agrep.c:147
 #, c-format
 msgid ""
 "With no FILE, or when FILE is -, reads standard input.\tIf less than two\n"
@@ -143,7 +143,7 @@ msgid ""
 "exact matches are selected.\n"
 msgstr ""
 
-#: src/agrep.c:149
+#: src/agrep.c:153
 #, c-format
 msgid ""
 "PATTERN is a POSIX extended regular expression (ERE) with the TRE "
@@ -151,39 +151,39 @@ msgid ""
 "See tre(7) for a complete description.\n"
 msgstr ""
 
-#: src/agrep.c:153
+#: src/agrep.c:157
 #, c-format
 msgid "Report bugs to Ville Laurikari <vl@iki.fi>.\n"
 msgstr ""
 
-#: src/agrep.c:305
+#: src/agrep.c:310
 msgid "Cannot use -B when reading from standard input."
 msgstr ""
 
-#: src/agrep.c:309
+#: src/agrep.c:314
 msgid "(standard input)"
 msgstr ""
 
-#: src/agrep.c:545
+#: src/agrep.c:552
 #, c-format
-msgid "Copyright (C) 2002-2004 Ville Laurikari.\n"
+msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
 msgstr ""
 
-#: src/agrep.c:546
+#: src/agrep.c:553
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: src/agrep.c:675
+#: src/agrep.c:685
 msgid "Error in search pattern"
 msgstr ""
 
-#: src/agrep.c:686
+#: src/agrep.c:696
 msgid "Error in record delimiter pattern"
 msgstr ""
 
-#: src/agrep.c:693
+#: src/agrep.c:703
 msgid "Record delimiter pattern must not match an empty string"
 msgstr ""

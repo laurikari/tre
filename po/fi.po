@@ -1,13 +1,13 @@
 # Finnish translations for TRE package.
-# Copyright (C) 2002-2004 Ville Laurikari
+# Copyright (C) 2002-2006 Ville Laurikari
 # This file is distributed under the same license as the TRE package.
-# Ville Laurikari <vl@iki.fi>, 2004.
+# Ville Laurikari <vl@iki.fi>, 2006.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: TRE 0.7.1\n"
 "Report-Msgid-Bugs-To: vl@iki.fi\n"
-"POT-Creation-Date: 2004-12-10 22:32+0200\n"
+"POT-Creation-Date: 2006-04-02 12:00+0300\n"
 "PO-Revision-Date: 2002-07-29 23:46+0300\n"
 "Last-Translator: Ville Laurikari <vl@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -16,78 +16,78 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: lib/regerror.c:42
+#: lib/regerror.c:43
 msgid "No error"
 msgstr "Ei virhettä"
 
-#: lib/regerror.c:43
+#: lib/regerror.c:44
 msgid "No match"
 msgstr "Hakulausekkeen esiintymää ei löytynyt"
 
-#: lib/regerror.c:44
+#: lib/regerror.c:45
 msgid "Invalid regexp"
 msgstr "Virheellinen lauseke"
 
-#: lib/regerror.c:45
+#: lib/regerror.c:46
 msgid "Unknown collating element"
 msgstr "Tuntematon lajittuva merkki"
 
-#: lib/regerror.c:46
+#: lib/regerror.c:47
 msgid "Unknown character class name"
 msgstr "Tuntematon merkkiluokka"
 
-#: lib/regerror.c:47
+#: lib/regerror.c:48
 msgid "Trailing backslash"
 msgstr "Lauseke loppuu kenoviivaan"
 
-#: lib/regerror.c:48
+#: lib/regerror.c:49
 msgid "Invalid back reference"
 msgstr "Virheellinen osalausekeviittaus"
 
-#: lib/regerror.c:49
+#: lib/regerror.c:50
 msgid "Missing ']'"
 msgstr "Puuttuva ']'"
 
-#: lib/regerror.c:50
+#: lib/regerror.c:51
 msgid "Missing ')'"
 msgstr "Puuttuva ')'"
 
-#: lib/regerror.c:51
+#: lib/regerror.c:52
 msgid "Missing '}'"
 msgstr "Puuttuva '}'"
 
-#: lib/regerror.c:52
+#: lib/regerror.c:53
 msgid "Invalid contents of {}"
 msgstr "Virhe {} sisällä"
 
-#: lib/regerror.c:53
+#: lib/regerror.c:54
 msgid "Invalid character range"
 msgstr "Virheellinen merkkialue"
 
-#: lib/regerror.c:54 src/agrep.c:231 src/agrep.c:245 src/agrep.c:290
-#: src/agrep.c:621 src/agrep.c:660
+#: lib/regerror.c:55 src/agrep.c:236 src/agrep.c:250 src/agrep.c:295
+#: src/agrep.c:631 src/agrep.c:670
 msgid "Out of memory"
 msgstr "Muisti loppu"
 
-#: lib/regerror.c:55
+#: lib/regerror.c:56
 msgid "XXX"
 msgstr "XXX"
 
-#: lib/regerror.c:68
+#: lib/regerror.c:69
 msgid "Unknown error"
 msgstr "Tuntematon virhe"
 
-#: src/agrep.c:95 src/agrep.c:102
+#: src/agrep.c:99 src/agrep.c:106
 #, c-format
 msgid "Usage: %s [OPTION]... PATTERN [FILE]...\n"
 msgstr "Käyttö: %s [VALITSIN]... HAKULAUSEKE [TIEDOSTO]...\n"
 
-#: src/agrep.c:97
+#: src/agrep.c:101
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Kokeile `%s --help' saadaksesi lisää tietoa.\n"
 
-#: src/agrep.c:103
+#: src/agrep.c:107
 #, c-format
 msgid ""
 "Searches for approximate matches of PATTERN in each FILE or standard input.\n"
@@ -102,7 +102,7 @@ msgstr ""
 "`foo.txt' joihin hakukaava \"lähteä\" sopii enintään kahdella virheellä.\n"
 "Esimerkiksi rivit jotka sisältävät \"lähtee\" tai \"lähtö\" palautetaan.\n"
 
-#: src/agrep.c:109
+#: src/agrep.c:113
 #, c-format
 msgid ""
 "Regexp selection and interpretation:\n"
@@ -176,7 +176,7 @@ msgstr ""
 "      --colour, --color     korosta tulostetuista tietueista osat jotka\n"
 "                            sopivat hakulausekkeeseen\n"
 
-#: src/agrep.c:143
+#: src/agrep.c:147
 #, c-format
 msgid ""
 "With no FILE, or when FILE is -, reads standard input.\tIf less than two\n"
@@ -192,7 +192,7 @@ msgstr ""
 "niitä ei löytynyt ja 2 jos tapahtui virhe.  Jos -E tai -# ei ole annettu,\n"
 "vain tietueet jotka sopivat tarkasti hakulausekkeeseen valitaan.\n"
 
-#: src/agrep.c:149
+#: src/agrep.c:153
 #, c-format
 msgid ""
 "PATTERN is a POSIX extended regular expression (ERE) with the TRE "
@@ -204,25 +204,25 @@ msgstr ""
 "extended regular expression).  Lisäksi voidaan käyttää TRE:n laajennuksia.\n"
 "Hakulausekkeiden täysimittainen kuvaus on tre(7):ssä.\n"
 
-#: src/agrep.c:153
+#: src/agrep.c:157
 #, c-format
 msgid "Report bugs to Ville Laurikari <vl@iki.fi>.\n"
 msgstr "Ilmoita virheistä Ville Laurikarille osoitteeseen <vl@iki.fi>.\n"
 
-#: src/agrep.c:305
+#: src/agrep.c:310
 msgid "Cannot use -B when reading from standard input."
 msgstr "Vakiosyötteestä luettaessa -B ei ole sallittu."
 
-#: src/agrep.c:309
+#: src/agrep.c:314
 msgid "(standard input)"
 msgstr "(vakiosyöte)"
 
-#: src/agrep.c:545
+#: src/agrep.c:552
 #, c-format
-msgid "Copyright (C) 2002-2004 Ville Laurikari.\n"
-msgstr "Tekijänoikeus © 2002-2004 Ville Laurikari.\n"
+msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
+msgstr "Tekijänoikeus © 2002-2006 Ville Laurikari.\n"
 
-#: src/agrep.c:546
+#: src/agrep.c:553
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
@@ -233,14 +233,14 @@ msgstr ""
 "kaupallisesti hyväksyttävästä laadusta tai soveltuvuudesta tiettyyn\n"
 "tarkoitukseen.\n"
 
-#: src/agrep.c:675
+#: src/agrep.c:685
 msgid "Error in search pattern"
 msgstr "Virhe hakulausekkeessa"
 
-#: src/agrep.c:686
+#: src/agrep.c:696
 msgid "Error in record delimiter pattern"
 msgstr "Virhe tietueiden erotinlausekkeessa"
 
-#: src/agrep.c:693
+#: src/agrep.c:703
 msgid "Record delimiter pattern must not match an empty string"
 msgstr "Tietueiden erotinlauseke ei saa sopia tyhjään merkkijonoon"
