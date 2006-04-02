@@ -6,6 +6,8 @@ if test -z "$make"; then
   make=make
 fi
 
+hostname=`hostname`
+
 for opts in \
   "" \
   "--enable-debug" \
@@ -24,7 +26,7 @@ for opts in \
   mkdir tmp-build
   cd tmp-build
 
-  echo "Configure options \"$opts\"..." >&2
+  echo "$hostname: Configure options \"$opts\"..." >&2
   ../configure $opts > build-log.txt 2>&1
   $make >> build-log.txt 2>&1
   $make check >> build-log.txt 2>&1

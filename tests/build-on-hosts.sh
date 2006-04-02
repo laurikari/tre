@@ -41,7 +41,9 @@ for hostfile in $hosts; do
   echo "Starting job on $host..."
   ( ssh $host "cd build-tmp; ./build-run.sh";
     if test $? -ne 0; then
-      echo "FAILED: $host"
-    fi ) &
-  )
+      echo "$host: FAILED:"
+      exit 1
+    fi )
+  ) &
 done
+wait
