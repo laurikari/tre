@@ -93,7 +93,7 @@ hash_void_ptr(void *ptr)
   hash = 0;
   for (i = 0; i < sizeof(ptr)*8 / TABLE_BITS; i++)
     {
-      hash ^= (int)ptr >> i*8;
+      hash ^= (long)ptr >> i*8;
       hash += i * 17;
       hash &= TABLE_MASK;
     }
