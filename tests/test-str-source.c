@@ -47,7 +47,7 @@ str_handler_get_next(tre_char_t *c, unsigned int *pos_add, void *context)
   str_handler_ctx *ctx = context;
   unsigned char ch = ctx->str[ctx->pos];
 
-  printf("str[%d] = %d\n", ctx->pos, ch);
+  printf("str[%Zd] = %d\n", ctx->pos, ch);
   *c = ch;
   if (ch)
     ctx->pos++;
@@ -62,7 +62,7 @@ str_handler_rewind(size_t pos, void *context)
 {
   str_handler_ctx *ctx = context;
 
-  printf("rewind to %d\n", pos);
+  printf("rewind to %Zd\n", pos);
   ctx->pos = pos;
 }
 
@@ -72,7 +72,7 @@ static int
 str_handler_compare(size_t pos1, size_t pos2, size_t len, void *context)
 {
   str_handler_ctx *ctx = context;
-  printf("comparing %d-%d and %d-%d\n", pos1, pos1 + len, pos2, pos2 + len);
+  printf("comparing %Zd-%Zd and %Zd-%Zd\n", pos1, pos1 + len, pos2, pos2 + len);
   return strncmp(ctx->str + pos1, ctx->str + pos2, len);
 }
 

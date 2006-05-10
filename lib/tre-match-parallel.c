@@ -230,7 +230,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 #endif /* !TRE_USE_ALLOCA */
 	  return REG_NOMATCH;
 	}
-      DPRINT(("skipped %d chars\n", str_byte - orig_str));
+      DPRINT(("skipped %Zd chars\n", str_byte - orig_str));
       if (str_byte >= orig_str + 1)
 	prev_c = (unsigned char)*(str_byte - 1);
       next_c = (unsigned char)*str_byte;
