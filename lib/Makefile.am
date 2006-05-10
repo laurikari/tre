@@ -7,7 +7,6 @@ libtre_la_LIBADD = $(LTLIBINTL)
 noinst_HEADERS =		\
 	tre-ast.h		\
 	tre-compile.h		\
-	tre-filter.h		\
 	tre-internal.h		\
 	tre-match-utils.h	\
 	tre-mem.h		\
@@ -19,7 +18,6 @@ noinst_HEADERS =		\
 libtre_la_SOURCES =		\
 	tre-ast.c		\
 	tre-compile.c		\
-	tre-filter.c		\
 	tre-match-backtrack.c	\
 	tre-match-parallel.c	\
 	tre-mem.c		\

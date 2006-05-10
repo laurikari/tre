@@ -59,7 +59,6 @@ char *alloca ();
 
 #include "regex.h"
 #include "tre-internal.h"
-#include "tre-filter.h"
 #include "xmalloc.h"
 
 
@@ -284,19 +283,6 @@ tre_match_approx(const tre_tnfa_t *tnfa, const void *string, size_t len,
   /* Back references are not supported by the approximate matcher. */
   if (tnfa->have_backrefs)
     return REG_BADPAT;
-
-#if 0
-  {
-    int pos;
-    tre_filter_profile_t profile[] =
-      { {'b', 2}, {'e', 3}, {'l', 1}, {'B', 1}, {'r', 1},
-	{'o', 1}, {'x', 1}, {0, 0} };
-    tre_filter_t filter = { 10, profile };
-    pos = tre_filter_find((unsigned char *)string, len, &filter);
-    if (pos < 0)
-      return REG_NOMATCH;
-  }
-#endif
 
   if (tnfa->num_tags > 0 && match->nmatch > 0)
     {
