@@ -29,12 +29,17 @@
 #include "tre-internal.h"
 #include "xmalloc.h"
 
+union tre_stack_item {
+  void *voidptr_value;
+  int int_value;
+};
+
 struct tre_stack_rec {
   int size;
   int max_size;
   int increment;
   int ptr;
-  void **stack;
+  union tre_stack_item *stack;
 };
 
 
@@ -73,8 +78,8 @@ tre_stack_num_objects(tre_stack_t *s)
   return s->ptr;
 }
 
-reg_errcode_t
-tre_stack_push(tre_stack_t *s, void *value)
+static reg_errcode_t
+tre_stack_push(tre_stack_t *s, union tre_stack_item value)
 {
   if (s->ptr < s->size)
     {
@@ -90,7 +95,7 @@ tre_stack_push(tre_stack_t *s, void *value)
 	}
       else
 	{
-	  void **new_buffer;
+	  union tre_stack_item *new_buffer;
 	  int new_size;
 	  DPRINT(("tre_stack_push: trying to realloc more space\n"));
 	  new_size = s->size + s->increment;
@@ -112,10 +117,22 @@ tre_stack_push(tre_stack_t *s, void *value)
   return REG_OK;
 }
 
-void *
-tre_stack_pop(tre_stack_t *s)
-{
-  return s->stack[--s->ptr];
+#define define_pushf(typetag, type)  \
+  declare_pushf(typetag, type) {     \
+    union tre_stack_item item;	     \
+    item.typetag ## _value = value;  \
+    return tre_stack_push(s, item);  \
 }
+
+define_pushf(int, int)
+define_pushf(voidptr, void *)
+
+#define define_popf(typetag, type)		    \
+  declare_popf(typetag, type) {			    \
+    return s->stack[--s->ptr].typetag ## _value;    \
+  }
+
+define_popf(int, int)
+define_popf(voidptr, void *)
 
 /* EOF */

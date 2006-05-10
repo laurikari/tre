@@ -964,12 +964,12 @@ tre_parse(tre_parse_ctx_t *ctx)
 
   if (!ctx->nofirstsub)
     {
-      STACK_PUSH(stack, ctx->re);
-      STACK_PUSH(stack, ctx->submatch_id);
-      STACK_PUSH(stack, PARSE_MARK_FOR_SUBMATCH);
+      STACK_PUSH(stack, voidptr, (void*)ctx->re);
+      STACK_PUSH(stack, int, ctx->submatch_id);
+      STACK_PUSH(stack, int, PARSE_MARK_FOR_SUBMATCH);
       ctx->submatch_id++;
     }
-  STACK_PUSH(stack, PARSE_RE);
+  STACK_PUSH(stack, int, PARSE_RE);
   ctx->re_start = ctx->re;
   ctx->re_end = ctx->re + ctx->len;
 
@@ -982,7 +982,7 @@ tre_parse(tre_parse_ctx_t *ctx)
     {
       if (status != REG_OK)
 	break;
-      symbol = (tre_parse_re_stack_symbol_t)tre_stack_pop(stack);
+      symbol = tre_stack_pop_int(stack);
       switch (symbol)
 	{
 	case PARSE_RE:
@@ -992,15 +992,15 @@ tre_parse(tre_parse_ctx_t *ctx)
 	  if (!(ctx->cflags & REG_LITERAL)
 	      && ctx->cflags & REG_EXTENDED)
 #endif /* REG_LITERAL */
-	    STACK_PUSHX(stack, PARSE_UNION);
-	  STACK_PUSHX(stack, PARSE_BRANCH);
+	    STACK_PUSHX(stack, int, PARSE_UNION);
+	  STACK_PUSHX(stack, int, PARSE_BRANCH);
 	  break;
 
 	case PARSE_BRANCH:
 	  /* Parse a branch.  A branch is one or more pieces, concatenated.
 	     A piece is an atom possibly followed by a postfix operator. */
-	  STACK_PUSHX(stack, PARSE_CATENATION);
-	  STACK_PUSHX(stack, PARSE_PIECE);
+	  STACK_PUSHX(stack, int, PARSE_CATENATION);
+	  STACK_PUSHX(stack, int, PARSE_PIECE);
 	  break;
 
 	case PARSE_PIECE:
@@ -1009,8 +1009,8 @@ tre_parse(tre_parse_ctx_t *ctx)
 #ifdef REG_LITERAL
 	  if (!(ctx->cflags & REG_LITERAL))
 #endif /* REG_LITERAL */
-	    STACK_PUSHX(stack, PARSE_POSTFIX);
-	  STACK_PUSHX(stack, PARSE_ATOM);
+	    STACK_PUSHX(stack, int, PARSE_POSTFIX);
+	  STACK_PUSHX(stack, int, PARSE_ATOM);
 	  break;
 
 	case PARSE_CATENATION:
@@ -1049,26 +1049,26 @@ tre_parse(tre_parse_ctx_t *ctx)
 	    if (ctx->cflags & REG_RIGHT_ASSOC)
 	      {
 		/* Right associative concatenation. */
-		STACK_PUSHX(stack, result);
-		STACK_PUSHX(stack, PARSE_POST_CATENATION);
-		STACK_PUSHX(stack, PARSE_CATENATION);
-		STACK_PUSHX(stack, PARSE_PIECE);
+		STACK_PUSHX(stack, voidptr, result);
+		STACK_PUSHX(stack, int, PARSE_POST_CATENATION);
+		STACK_PUSHX(stack, int, PARSE_CATENATION);
+		STACK_PUSHX(stack, int, PARSE_PIECE);
 	      }
 	    else
 #endif /* REG_RIGHT_ASSOC */
 	      {
 		/* Default case, left associative concatenation. */
-		STACK_PUSHX(stack, PARSE_CATENATION);
-		STACK_PUSHX(stack, result);
-		STACK_PUSHX(stack, PARSE_POST_CATENATION);
-		STACK_PUSHX(stack, PARSE_PIECE);
+		STACK_PUSHX(stack, int, PARSE_CATENATION);
+		STACK_PUSHX(stack, voidptr, result);
+		STACK_PUSHX(stack, int, PARSE_POST_CATENATION);
+		STACK_PUSHX(stack, int, PARSE_PIECE);
 	      }
 	    break;
 	  }
 
 	case PARSE_POST_CATENATION:
 	  {
-	    tre_ast_node_t *tree = tre_stack_pop(stack);
+	    tre_ast_node_t *tree = tre_stack_pop_voidptr(stack);
 	    tre_ast_node_t *tmp_node;
 	    tmp_node = tre_ast_new_catenation(ctx->mem, tree, result);
 	    if (!tmp_node)
@@ -1089,10 +1089,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 	    case CHAR_PIPE:
 	      DPRINT(("tre_parse:	union: '%.*" STRF "'\n",
 		      ctx->re_end - ctx->re, ctx->re));
-	      STACK_PUSHX(stack, PARSE_UNION);
-	      STACK_PUSHX(stack, result);
-	      STACK_PUSHX(stack, PARSE_POST_UNION);
-	      STACK_PUSHX(stack, PARSE_BRANCH);
+	      STACK_PUSHX(stack, int, PARSE_UNION);
+	      STACK_PUSHX(stack, voidptr, result);
+	      STACK_PUSHX(stack, int, PARSE_POST_UNION);
+	      STACK_PUSHX(stack, int, PARSE_BRANCH);
 	      ctx->re++;
 	      break;
 
@@ -1108,7 +1108,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	case PARSE_POST_UNION:
 	  {
 	    tre_ast_node_t *tmp_node;
-	    tre_ast_node_t *tree = tre_stack_pop(stack);
+	    tre_ast_node_t *tree = tre_stack_pop_voidptr(stack);
 	    tmp_node = tre_ast_new_union(ctx->mem, tree, result);
 	    if (!tmp_node)
 	      return REG_ESPACE;
@@ -1158,7 +1158,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		if (tmp_node == NULL)
 		  return REG_ESPACE;
 		result = tmp_node;
-		STACK_PUSHX(stack, PARSE_POSTFIX);
+		STACK_PUSHX(stack, int, PARSE_POSTFIX);
 		break;
 	      }
 
@@ -1187,7 +1187,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	      status = tre_parse_bound(ctx, &result);
 	      if (status != REG_OK)
 		return status;
-	      STACK_PUSHX(stack, PARSE_POSTFIX);
+	      STACK_PUSHX(stack, int, PARSE_POSTFIX);
 	      break;
 	    }
 	  break;
@@ -1309,9 +1309,9 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 		  /* Turn on the cflags changes for the rest of the
 		     enclosing group. */
-		  STACK_PUSHX(stack, ctx->cflags);
-		  STACK_PUSHX(stack, PARSE_RESTORE_CFLAGS);
-		  STACK_PUSHX(stack, PARSE_RE);
+		  STACK_PUSHX(stack, int, ctx->cflags);
+		  STACK_PUSHX(stack, int, PARSE_RESTORE_CFLAGS);
+		  STACK_PUSHX(stack, int, PARSE_RE);
 		  ctx->cflags = new_cflags;
 		  break;
 		}
@@ -1330,7 +1330,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			      ctx->re_end - ctx->re, ctx->re));
 		      /* Don't mark for submatching. */
 		      ctx->re += 3;
-		      STACK_PUSHX(stack, PARSE_RE);
+		      STACK_PUSHX(stack, int, PARSE_RE);
 		    }
 		  else
 		    {
@@ -1341,9 +1341,9 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      ctx->re++;
 		      /* First parse a whole RE, then mark the resulting tree
 			 for submatching. */
-		      STACK_PUSHX(stack, ctx->submatch_id);
-		      STACK_PUSHX(stack, PARSE_MARK_FOR_SUBMATCH);
-		      STACK_PUSHX(stack, PARSE_RE);
+		      STACK_PUSHX(stack, int, ctx->submatch_id);
+		      STACK_PUSHX(stack, int, PARSE_MARK_FOR_SUBMATCH);
+		      STACK_PUSHX(stack, int, PARSE_RE);
 		      ctx->submatch_id++;
 		    }
 		}
@@ -1390,7 +1390,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      || *(ctx->re + 1) == CHAR_RPAREN))
 		{
 		  ctx->re++;
-		  STACK_PUSHX(stack, PARSE_ATOM);
+		  STACK_PUSHX(stack, int, PARSE_ATOM);
 		  break;
 		}
 
@@ -1428,7 +1428,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  ctx->cflags |= REG_LITERAL;
 		  temporary_cflags |= REG_LITERAL;
 		  ctx->re += 2;
-		  STACK_PUSHX(stack, PARSE_ATOM);
+		  STACK_PUSHX(stack, int, PARSE_ATOM);
 		  break;
 		}
 #endif /* REG_LITERAL */
@@ -1628,7 +1628,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  ctx->cflags &= ~temporary_cflags;
 		  temporary_cflags = 0;
 		  ctx->re += 2;
-		  STACK_PUSHX(stack, PARSE_PIECE);
+		  STACK_PUSHX(stack, int, PARSE_PIECE);
 		  break;
 		}
 
@@ -1709,7 +1709,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 	case PARSE_MARK_FOR_SUBMATCH:
 	  {
-	    int submatch_id = (int)tre_stack_pop(stack);
+	    int submatch_id = tre_stack_pop_int(stack);
 
 	    if (result->submatch_id >= 0)
 	      {
@@ -1729,7 +1729,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	  }
 
 	case PARSE_RESTORE_CFLAGS:
-	  ctx->cflags = (int)tre_stack_pop(stack);
+	  ctx->cflags = tre_stack_pop_int(stack);
 	  break;
 	}
     }
