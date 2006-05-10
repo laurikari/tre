@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-noinst_PROGRAMS = retest bench randtest test-str-source
+check_PROGRAMS = retest bench randtest test-str-source
 LDADD = $(LTLIBINTL)
 
 retest_SOURCES = retest.c
@@ -23,7 +23,7 @@ else !TRE_DEBUG
   ## Debugging is not turned on.  Make a malloc-debugging version of the
   ## library and use it with `retest' and `randtest'.  Malloc-debugging is
   ## not used for the debugging version since it would just get in the way.
-  noinst_LTLIBRARIES = libxtre.la
+  check_LTLIBRARIES = libxtre.la
   libxtre_la_SOURCES =			\
 	../lib/tre-mem.c		\
 	../lib/tre-stack.c		\
