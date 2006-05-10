@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
 lib_LTLIBRARIES = libtre.la
-libtre_la_LDFLAGS = -version-info 6:2:2 $(LDFLAGS)
+libtre_la_LDFLAGS = -no-undefined -version-info 6:3:2 $(LDFLAGS)
 libtre_la_LIBADD = $(LTLIBINTL)
 
 noinst_HEADERS =		\
