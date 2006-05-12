@@ -154,7 +154,8 @@ exact matches are selected.\n"));
 PATTERN is a POSIX extended regular expression (ERE) with the TRE extensions.\n\
 See tre(7) for a complete description.\n"));
       printf("\n");
-      printf(_("Report bugs to Ville Laurikari <vl@iki.fi>.\n"));
+      printf(_("Report bugs to: "));
+      printf("%s.\n", PACKAGE_BUGREPORT);
     }
   exit(status);
 }

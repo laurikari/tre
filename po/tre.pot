@@ -1,5 +1,5 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (c) YEAR Ville Laurikari
+# Copyright (C) YEAR Ville Laurikari
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: vl@iki.fi\n"
-"POT-Creation-Date: 2006-04-02 12:00+0300\n"
+"Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
+"POT-Creation-Date: 2006-05-12 14:59+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,8 +64,8 @@ msgstr ""
 msgid "Invalid character range"
 msgstr ""
 
-#: lib/regerror.c:55 src/agrep.c:236 src/agrep.c:250 src/agrep.c:295
-#: src/agrep.c:631 src/agrep.c:670
+#: lib/regerror.c:55 src/agrep.c:237 src/agrep.c:251 src/agrep.c:296
+#: src/agrep.c:632 src/agrep.c:671
 msgid "Out of memory"
 msgstr ""
 
@@ -153,37 +153,37 @@ msgstr ""
 
 #: src/agrep.c:157
 #, c-format
-msgid "Report bugs to Ville Laurikari <vl@iki.fi>.\n"
+msgid "Report bugs to: "
 msgstr ""
 
-#: src/agrep.c:310
+#: src/agrep.c:311
 msgid "Cannot use -B when reading from standard input."
 msgstr ""
 
-#: src/agrep.c:314
+#: src/agrep.c:315
 msgid "(standard input)"
 msgstr ""
 
-#: src/agrep.c:552
+#: src/agrep.c:553
 #, c-format
 msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
 msgstr ""
 
-#: src/agrep.c:553
+#: src/agrep.c:554
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: src/agrep.c:685
+#: src/agrep.c:686
 msgid "Error in search pattern"
 msgstr ""
 
-#: src/agrep.c:696
+#: src/agrep.c:697
 msgid "Error in record delimiter pattern"
 msgstr ""
 
-#: src/agrep.c:703
+#: src/agrep.c:704
 msgid "Record delimiter pattern must not match an empty string"
 msgstr ""

@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(TRE, 0.7.3, [Ville Laurikari <vl@iki.fi>])
+AC_INIT(TRE, 0.7.4, [tre-general@lists.laurikari.net])
 AC_CONFIG_SRCDIR([lib/regcomp.c])
 AC_CONFIG_AUX_DIR(utils)
 AC_CANONICAL_TARGET

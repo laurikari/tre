@@ -157,8 +157,8 @@ or -\fI#\fR is not specified, only exact matches are selected.
 .I PATTERN
 is a POSIX extended regular expression (ERE) with the TRE extensions.
 .SH "REPORTING BUGS"
-Report bugs to Ville Laurikari
-.BR "" < vl@iki.fi >.
+Report bugs to the TRE mailing list
+.BR "" < tre-general@lists.laurikari.net >.
 .SH COPYRIGHT
 Copyright \(co 2002-2004 Ville Laurikari.
 .br

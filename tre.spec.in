@@ -5,7 +5,7 @@ License:	LGPL
 Group:		System Environment/Libraries
 Source0:        http://laurikari.net/tre/tre-@PACKAGE_VERSION@.tar.bz2
 Summary:	POSIX compatible regexp library with approximate matching.
-Packager:	Ville Laurikari <vl@iki.fi>
+Packager:	Ville Laurikari <tre-general@lists.laurikari.net>
 URL:            http://laurikari.net/tre/
 Buildroot:	%{_tmppath}/%{name}-%{version}-%{release}
 
