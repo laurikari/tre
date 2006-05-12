@@ -1026,7 +1026,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	    if (iter->params)
 	      {
 		tre_ast_node_t *tmp_l, *tmp_r, *tmp_node, *node_copy;
-		unsigned int *old_params;
+		int *old_params;
 
 		tmp_l = tre_ast_new_literal(mem, PARAMETER, 0, -1);
 		if (!tmp_l)

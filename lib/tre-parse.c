@@ -867,7 +867,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	 iteration node. */
       if (approx || costs_set || counts_set)
 	{
-	  unsigned int *params;
+	  int *params;
 	  tre_iteration_t *iter = (*result)->obj;
 
 	  if (costs_set || counts_set)

@@ -73,7 +73,7 @@ typedef struct {
   int position;
   union {
     tre_ctype_t class;
-    unsigned int *params;
+    int *params;
   } u;
   tre_ctype_t *neg_classes;
 } tre_literal_t;
@@ -101,7 +101,7 @@ typedef struct {
      matching as many/few repetitions as possible. */
   unsigned int minimal:1;
   /* Approximate matching parameters (or NULL). */
-  unsigned int *params;
+  int *params;
 } tre_iteration_t;
 
 /* An "union" node.  These are created for the "|" operator. */
