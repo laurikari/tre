@@ -57,7 +57,7 @@ regexps of any length, any number of errors, and non-uniform costs.
 %setup -q
 
 %build
-./configure --prefix=/usr --mandir=/usr/share/man --enable-static
+./configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir} --enable-static
 make
 
 %install
@@ -71,14 +71,15 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr (-, root, root)
 %{_datadir}/*
-%{_libdir}/libtre.so.*.*
+%{_libdir}/libtre.so.*
 
 %files devel
 %defattr (-, root, root)
+%{_includedir}/*
 %{_libdir}/libtre.a
+%{_libdir}/libtre.la
 %{_libdir}/libtre.so
 %{_libdir}/pkgconfig/*
-%{_includedir}/*
 
 %files agrep
 %defattr (-, root, root)
@@ -86,6 +87,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/agrep.1.gz
 
 %changelog
+* Fri May 12 2006 Ville Laurikari <vl@iki.fi>
+- fixed to work with recent rpmbuild versions (unpackaged files)
+- handling for multilib environments
+
 * Sun Nov 21 2004 Ville Laurikari <vl@iki.fi>
 - added agrep man page
 
