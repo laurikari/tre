@@ -196,7 +196,7 @@ static char *highlight = "01;31";
    to the length of the record.	 Returns 1 when there are no more records,
    0 otherwise. */
 static inline int
-tre_agrep_get_next_record(int fd)
+tre_agrep_get_next_record(int fd, const char *filename)
 {
   int errcode;
   regmatch_t pmatch[1];
@@ -210,8 +210,24 @@ tre_agrep_get_next_record(int fd)
 	{
 	  int r;
 	  /* Fill the buffer with data from the file. */
-	  r = read(fd, buf + data_len, buf_size - data_len);
-	  /* XXX - check for failure or interruption. */
+	  do
+	    {
+	      r = read(fd, buf + data_len, buf_size - data_len);
+	    }
+	  while (r < 0 && errno == EINTR);
+
+	  if (r < 0)
+	    {
+	      /* GNU grep 2.5.1 doesn't seem to complain about any read errors.
+		 I don't think that's such a good idea (I was confused about
+		 that for quite a while) so here we report any read errors
+		 to stderr. */
+	      char *err = strerror(errno);
+	      fprintf(stderr, "%s: ", program_name);
+	      fprintf(stderr, _("Error reading from %s: %s\n"), filename, err);
+	      return 1;
+	    }
+
 	  if (r == 0)
 	    {
 	      /* End of file.  Return the last record. */
@@ -329,7 +345,7 @@ tre_agrep_handle_file(const char *filename)
   /* Go through all records and output the matching ones, or the non-matching
      ones if `invert_match' is true. */
   at_eof = 0;
-  while (!tre_agrep_get_next_record(fd))
+  while (!tre_agrep_get_next_record(fd, filename))
     {
       int errcode;
       regamatch_t match;
