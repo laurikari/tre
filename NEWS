@@ -1,10 +1,31 @@
+Version 0.7.4
+
+  - TRE now builds cleanly on x86_64 and other 64 bit platforms.
+    There was a large number of (basically harmless) compiler warnings
+    in previous versions.
+
+  - Now builds and works on Cygwin and MinGW.  Libtool was updated to
+    a version which works on these platforms, and the Makefiles and
+    configure scripts were adjusted so that DLLs are now built on
+    these platforms.
+
+  - agrep now handles long command line options on all platforms.
+
+  - Bug report email address is now tre-general@lists.laurikari.net.
+
+  - Many bug fixes, including:
+    - The RPM spec file now works with recent rpmbuild versions
+    - agrep no longer includes record delimiters in records, so for
+      example "echo foo | agrep 'foo$'" works as expected.
+    - agrep help texts and man page updated.
+
 Version 0.7.3
   - The license has been changed from GPL to LGPL.
 
   - New command line option to agrep: --show-position
 
   - New REG_UNGREEDY cflags and 'U' pattern modifier.
- 
+
   - Bug fixes.
 
 Version 0.7.2
