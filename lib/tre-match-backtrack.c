@@ -284,23 +284,32 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   pmatch = alloca(sizeof(*pmatch) * tnfa->num_submatches);
   states_seen = alloca(sizeof(*states_seen) * tnfa->num_states);
 #else /* !TRE_USE_ALLOCA */
-  tags = xmalloc(sizeof(*tags) * tnfa->num_tags);
-  if (!tags)
+  if (tnfa->num_tags)
     {
-      ret = REG_ESPACE;
-      goto error_exit;
+      tags = xmalloc(sizeof(*tags) * tnfa->num_tags);
+      if (!tags)
+	{
+	  ret = REG_ESPACE;
+	  goto error_exit;
+	}
     }
-  pmatch = xmalloc(sizeof(*pmatch) * tnfa->num_submatches);
-  if (!pmatch)
+  if (tnfa->num_submatches)
     {
-      ret = REG_ESPACE;
-      goto error_exit;
+      pmatch = xmalloc(sizeof(*pmatch) * tnfa->num_submatches);
+      if (!pmatch)
+	{
+	  ret = REG_ESPACE;
+	  goto error_exit;
+	}
     }
-  states_seen = xmalloc(sizeof(*states_seen) * tnfa->num_states);
-  if (!states_seen)
+  if (tnfa->num_states)
     {
-      ret = REG_ESPACE;
-      goto error_exit;
+      states_seen = xmalloc(sizeof(*states_seen) * tnfa->num_states);
+      if (!states_seen)
+	{
+	  ret = REG_ESPACE;
+	  goto error_exit;
+	}
     }
 #endif /* !TRE_USE_ALLOCA */
 
