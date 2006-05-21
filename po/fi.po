@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TRE 0.7.4\n"
 "Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
-"POT-Creation-Date: 2006-05-15 12:33+0300\n"
+"POT-Creation-Date: 2006-05-19 10:48+0300\n"
 "PO-Revision-Date: 2002-07-29 23:46+0300\n"
 "Last-Translator: Ville Laurikari <vl@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -64,8 +64,8 @@ msgstr "Virhe {} sisällä"
 msgid "Invalid character range"
 msgstr "Virheellinen merkkialue"
 
-#: lib/regerror.c:55 src/agrep.c:253 src/agrep.c:267 src/agrep.c:312
-#: src/agrep.c:648 src/agrep.c:687
+#: lib/regerror.c:55 src/agrep.c:254 src/agrep.c:268 src/agrep.c:312
+#: src/agrep.c:653 src/agrep.c:692
 msgid "Out of memory"
 msgstr "Muisti loppu"
 
@@ -209,7 +209,7 @@ msgstr ""
 msgid "Report bugs to: "
 msgstr "Raportoi virheistä osoitteeseen: "
 
-#: src/agrep.c:227
+#: src/agrep.c:228
 #, c-format
 msgid "Error reading from %s: %s\n"
 msgstr "Ei voi lukea kohteesta %s: %s\n"
@@ -222,12 +222,12 @@ msgstr "Vakiosyötteestä luettaessa -B ei ole sallittu."
 msgid "(standard input)"
 msgstr "(vakiosyöte)"
 
-#: src/agrep.c:569
+#: src/agrep.c:576
 #, c-format
 msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
 msgstr "Tekijänoikeus © 2002-2006 Ville Laurikari.\n"
 
-#: src/agrep.c:570
+#: src/agrep.c:577
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
@@ -238,14 +238,14 @@ msgstr ""
 "kaupallisesti hyväksyttävästä laadusta tai soveltuvuudesta tiettyyn\n"
 "tarkoitukseen.\n"
 
-#: src/agrep.c:702
+#: src/agrep.c:707
 msgid "Error in search pattern"
 msgstr "Virhe hakulausekkeessa"
 
-#: src/agrep.c:713
+#: src/agrep.c:718
 msgid "Error in record delimiter pattern"
 msgstr "Virhe tietueiden erotinlausekkeessa"
 
-#: src/agrep.c:720
+#: src/agrep.c:725
 msgid "Record delimiter pattern must not match an empty string"
 msgstr "Tietueiden erotinlauseke ei saa sopia tyhjään merkkijonoon"

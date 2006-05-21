@@ -165,9 +165,10 @@ static int buf_size;	   /* Current size of the buffer. */
 static int data_len;	   /* Amount of data in the buffer. */
 static char *record;	   /* Start of current record. */
 static char *next_record;  /* Start of next record. */
-static char *next_search;
 static int record_len;	   /* Length of current record. */
-static int delim_after = 1;
+static int delim_len;      /* Length of delimiter before record. */
+static int next_delim_len; /* Length of delimiter after record. */
+static int delim_after = 1;/* If true, print the delimiter after the record. */
 static int at_eof;
 
 static int invert_match;   /* Show only non-matching records. */
@@ -202,7 +203,7 @@ tre_agrep_get_next_record(int fd, const char *filename)
 
   while (1)
     {
-      if (next_search == NULL)
+      if (next_record == NULL)
 	{
 	  int r;
 	  /* Fill the buffer with data from the file. */
@@ -238,11 +239,11 @@ tre_agrep_get_next_record(int fd, const char *filename)
 		return 0;
 	    }
 	  data_len += r;
-	  next_search = next_record = buf;
+	  next_record = buf;
 	}
 
       /* Find the next record delimiter. */
-      errcode = regnexec(&delim, next_search, data_len - (next_search - buf),
+      errcode = regnexec(&delim, next_record, data_len - (next_record - buf),
 			 1, pmatch, 0);
       if (errcode == REG_ESPACE)
 	{
@@ -252,7 +253,7 @@ tre_agrep_get_next_record(int fd, const char *filename)
       else if (errcode == REG_NOMATCH)
 	{
 	  /* No record delimiter found. */
-	  if (next_search == buf)
+	  if (next_record == buf)
 	    {
 	      /* The buffer is full but we don't yet have a full record.
 		 Grow the buffer. */
@@ -264,14 +265,14 @@ tre_agrep_get_next_record(int fd, const char *filename)
 		  exit(2);
 		}
 	      buf_size *= 2;
-	      next_search = NULL;
+	      next_record = NULL;
 	    }
 	  else
 	    {
 	      /* Move the data to start of the buffer and read more data. */
-	      memmove(buf, next_search, buf + data_len - next_search);
-	      data_len = buf + data_len - next_search;
-	      next_search = NULL;
+	      memmove(buf, next_record, buf + data_len - next_record);
+	      data_len = buf + data_len - next_record;
+	      next_record = NULL;
 	    }
 	}
       else if (errcode == REG_OK)
@@ -279,12 +280,11 @@ tre_agrep_get_next_record(int fd, const char *filename)
 	  /* Record delimiter found, now we know how long the current
 	     record is. */
 	  record = next_record;
-	  if (delim_after)
-	    next_record = next_search + pmatch[0].rm_eo;
-	  else
-	    next_record = next_search + pmatch[0].rm_so;
-	  record_len = next_record - record;
-	  next_search = next_search + pmatch[0].rm_eo;
+	  record_len = pmatch[0].rm_so;
+	  delim_len = next_delim_len;
+
+	  next_delim_len = pmatch[0].rm_eo - pmatch[0].rm_so;
+	  next_record = next_record + pmatch[0].rm_eo;
 	  return 0;
 	}
       else assert(0);
@@ -312,7 +312,7 @@ tre_agrep_handle_file(const char *filename)
     }
 
   /* Reset read buffer state. */
-  next_search = NULL;
+  next_record = NULL;
   data_len = 0;
 
   if (!filename || strcmp(filename, "-") == 0)
@@ -394,9 +394,25 @@ tre_agrep_handle_file(const char *filename)
 	      if (print_cost)
 		printf("%d:", match.cost);
 	      if (print_position)
-		printf("%d-%d:", pmatch[0].rm_so, pmatch[0].rm_eo);
+		printf("%d-%d:",
+		       invert_match ? 0 : (int)pmatch[0].rm_so,
+		       invert_match ? record_len : (int)pmatch[0].rm_eo);
 
-	      if (color_option)
+	      /* Adjust record boundaries so we print the delimiter
+		 before or after the record. */
+	      if (delim_after)
+		{
+		  record_len += next_delim_len;
+		}
+	      else
+		{
+		  record -= delim_len;
+		  record_len += delim_len;
+		  pmatch[0].rm_so += delim_len;
+		  pmatch[0].rm_eo += delim_len;
+		}
+
+	      if (color_option && !invert_match)
 		{
 		  printf("%.*s", pmatch[0].rm_so, record);
 		  printf("\33[%sm", highlight);
