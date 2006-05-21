@@ -201,8 +201,8 @@ check(va_list ap, int ret, char *str, size_t pmatch_len, regmatch_t *pmatch,
 	      printf("	group %d: expected (%d, %d) \"%.*s\", "
 		     "got (%d, %d) \"%.*s\"\n",
 		     i, rm_so, rm_eo, rm_eo - rm_so, str + rm_so,
-		     pmatch[i].rm_so, pmatch[i].rm_eo,
-		     pmatch[i].rm_eo - pmatch[i].rm_so,
+		     (int)pmatch[i].rm_so, (int)pmatch[i].rm_eo,
+		     (int)(pmatch[i].rm_eo - pmatch[i].rm_so),
 		     str + pmatch[i].rm_so);
 	      fail = 1;
 	    }
@@ -224,7 +224,7 @@ check(va_list ap, int ret, char *str, size_t pmatch_len, regmatch_t *pmatch,
 	      printf("Exec error, regex: \"%s\", string: \"%s\"\n",
 		     regex_pattern, str);
 	    printf("  group %d: expected (-1, -1), got (%d, %d)\n",
-		   i, pmatch[i].rm_so, pmatch[i].rm_eo);
+		   i, (int)pmatch[i].rm_so, (int)pmatch[i].rm_eo);
 	    fail = 1;
 	  }
     }

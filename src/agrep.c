@@ -414,12 +414,12 @@ tre_agrep_handle_file(const char *filename)
 
 	      if (color_option && !invert_match)
 		{
-		  printf("%.*s", pmatch[0].rm_so, record);
+		  printf("%.*s", (int)pmatch[0].rm_so, record);
 		  printf("\33[%sm", highlight);
-		  printf("%.*s", pmatch[0].rm_eo - pmatch[0].rm_so,
+		  printf("%.*s", (int)(pmatch[0].rm_eo - pmatch[0].rm_so),
 			 record + pmatch[0].rm_so);
 		  fputs("\33[00m", stdout);
-		  printf("%.*s", record_len - pmatch[0].rm_eo,
+		  printf("%.*s", (int)(record_len - pmatch[0].rm_eo),
 			 record + pmatch[0].rm_eo);
 		}
 	      else

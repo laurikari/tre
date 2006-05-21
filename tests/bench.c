@@ -141,8 +141,8 @@ run_tests(int len, int samples, double *sample_data, int repeats,
   fflush(stdout);
 
   for (i = 0; i < 10; i += 2) {
-    printf("# pmatch[%d].rm_so = %d\n", i/2, pmatch[i/2].rm_so);
-    printf("# pmatch[%d].rm_eo = %d\n", i/2, pmatch[i/2].rm_eo);
+    printf("# pmatch[%d].rm_so = %d\n", i/2, (int)pmatch[i/2].rm_so);
+    printf("# pmatch[%d].rm_eo = %d\n", i/2, (int)pmatch[i/2].rm_eo);
   }
 }
 

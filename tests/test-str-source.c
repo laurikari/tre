@@ -126,7 +126,7 @@ main(int argc, char **argv)
 
   regcomp(&preg, "(foo)\\1", REG_EXTENDED);
   if (reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
-    printf("Match: %d - %d\n", pmatch[0].rm_so, pmatch[0].rm_eo);
+    printf("Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
 
   free_str_source(source);
 
