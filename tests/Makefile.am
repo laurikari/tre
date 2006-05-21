@@ -1,5 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
+SUBDIRS = agrep
+
 check_PROGRAMS = retest bench randtest test-str-source
 LDADD = $(LTLIBINTL)
 

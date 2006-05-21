@@ -521,6 +521,7 @@ m4/Makefile
 po/Makefile.in
 src/Makefile
 tests/Makefile
+tests/agrep/Makefile
 tre.pc
 tre.spec
 utils/Makefile

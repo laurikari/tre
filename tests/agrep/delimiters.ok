@@ -1,0 +1,408 @@
+#### TEST: agrep  ^foobar$ delimiters.in
+foobar
+
+#### TEST: agrep  ^foobar$ < delimiters.in
+foobar
+
+#### TEST: agrep -c ^foobar$ delimiters.in
+1
+
+#### TEST: agrep -c ^foobar$ < delimiters.in
+1
+
+#### TEST: agrep -H ^foobar$ delimiters.in
+delimiters.in:foobar
+
+#### TEST: agrep -H ^foobar$ < delimiters.in
+(standard input):foobar
+
+#### TEST: agrep -l ^foobar$ delimiters.in
+delimiters.in
+
+#### TEST: agrep -l ^foobar$ < delimiters.in
+(standard input)
+
+#### TEST: agrep -n ^foobar$ delimiters.in
+4:foobar
+
+#### TEST: agrep -n ^foobar$ < delimiters.in
+4:foobar
+
+#### TEST: agrep -s ^foobar$ delimiters.in
+0:foobar
+
+#### TEST: agrep -s ^foobar$ < delimiters.in
+0:foobar
+
+#### TEST: agrep -M ^foobar$ delimiters.in
+foobar
+
+#### TEST: agrep -M ^foobar$ < delimiters.in
+foobar
+
+#### TEST: agrep --show-position ^foobar$ delimiters.in
+0-6:foobar
+
+#### TEST: agrep --show-position ^foobar$ < delimiters.in
+0-6:foobar
+
+#### TEST: agrep --color ^foobar$ delimiters.in
+[01;31mfoobar[00m
+
+#### TEST: agrep --color ^foobar$ < delimiters.in
+[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position ^foobar$ delimiters.in
+delimiters.in:4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position ^foobar$ < delimiters.in
+(standard input):4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep  foobar$ delimiters.in
+xfoobar
+foobar
+
+#### TEST: agrep  foobar$ < delimiters.in
+xfoobar
+foobar
+
+#### TEST: agrep -c foobar$ delimiters.in
+2
+
+#### TEST: agrep -c foobar$ < delimiters.in
+2
+
+#### TEST: agrep -H foobar$ delimiters.in
+delimiters.in:xfoobar
+delimiters.in:foobar
+
+#### TEST: agrep -H foobar$ < delimiters.in
+(standard input):xfoobar
+(standard input):foobar
+
+#### TEST: agrep -l foobar$ delimiters.in
+delimiters.in
+
+#### TEST: agrep -l foobar$ < delimiters.in
+(standard input)
+
+#### TEST: agrep -n foobar$ delimiters.in
+2:xfoobar
+4:foobar
+
+#### TEST: agrep -n foobar$ < delimiters.in
+2:xfoobar
+4:foobar
+
+#### TEST: agrep -s foobar$ delimiters.in
+0:xfoobar
+0:foobar
+
+#### TEST: agrep -s foobar$ < delimiters.in
+0:xfoobar
+0:foobar
+
+#### TEST: agrep -M foobar$ delimiters.in
+xfoobar
+foobar
+
+#### TEST: agrep -M foobar$ < delimiters.in
+xfoobar
+foobar
+
+#### TEST: agrep --show-position foobar$ delimiters.in
+1-7:xfoobar
+0-6:foobar
+
+#### TEST: agrep --show-position foobar$ < delimiters.in
+1-7:xfoobar
+0-6:foobar
+
+#### TEST: agrep --color foobar$ delimiters.in
+x[01;31mfoobar[00m
+[01;31mfoobar[00m
+
+#### TEST: agrep --color foobar$ < delimiters.in
+x[01;31mfoobar[00m
+[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position foobar$ delimiters.in
+delimiters.in:2:0:1-7:x[01;31mfoobar[00m
+delimiters.in:4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position foobar$ < delimiters.in
+(standard input):2:0:1-7:x[01;31mfoobar[00m
+(standard input):4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep  ^foobar delimiters.in
+foobarx
+foobar
+
+#### TEST: agrep  ^foobar < delimiters.in
+foobarx
+foobar
+
+#### TEST: agrep -c ^foobar delimiters.in
+2
+
+#### TEST: agrep -c ^foobar < delimiters.in
+2
+
+#### TEST: agrep -H ^foobar delimiters.in
+delimiters.in:foobarx
+delimiters.in:foobar
+
+#### TEST: agrep -H ^foobar < delimiters.in
+(standard input):foobarx
+(standard input):foobar
+
+#### TEST: agrep -l ^foobar delimiters.in
+delimiters.in
+
+#### TEST: agrep -l ^foobar < delimiters.in
+(standard input)
+
+#### TEST: agrep -n ^foobar delimiters.in
+3:foobarx
+4:foobar
+
+#### TEST: agrep -n ^foobar < delimiters.in
+3:foobarx
+4:foobar
+
+#### TEST: agrep -s ^foobar delimiters.in
+0:foobarx
+0:foobar
+
+#### TEST: agrep -s ^foobar < delimiters.in
+0:foobarx
+0:foobar
+
+#### TEST: agrep -M ^foobar delimiters.in
+foobarx
+foobar
+
+#### TEST: agrep -M ^foobar < delimiters.in
+foobarx
+foobar
+
+#### TEST: agrep --show-position ^foobar delimiters.in
+0-6:foobarx
+0-6:foobar
+
+#### TEST: agrep --show-position ^foobar < delimiters.in
+0-6:foobarx
+0-6:foobar
+
+#### TEST: agrep --color ^foobar delimiters.in
+[01;31mfoobar[00mx
+[01;31mfoobar[00m
+
+#### TEST: agrep --color ^foobar < delimiters.in
+[01;31mfoobar[00mx
+[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position ^foobar delimiters.in
+delimiters.in:3:0:0-6:[01;31mfoobar[00mx
+delimiters.in:4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position ^foobar < delimiters.in
+(standard input):3:0:0-6:[01;31mfoobar[00mx
+(standard input):4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep  foobar delimiters.in
+xfoobarx
+xfoobar
+foobarx
+foobar
+
+#### TEST: agrep  foobar < delimiters.in
+xfoobarx
+xfoobar
+foobarx
+foobar
+
+#### TEST: agrep -c foobar delimiters.in
+4
+
+#### TEST: agrep -c foobar < delimiters.in
+4
+
+#### TEST: agrep -H foobar delimiters.in
+delimiters.in:xfoobarx
+delimiters.in:xfoobar
+delimiters.in:foobarx
+delimiters.in:foobar
+
+#### TEST: agrep -H foobar < delimiters.in
+(standard input):xfoobarx
+(standard input):xfoobar
+(standard input):foobarx
+(standard input):foobar
+
+#### TEST: agrep -l foobar delimiters.in
+delimiters.in
+
+#### TEST: agrep -l foobar < delimiters.in
+(standard input)
+
+#### TEST: agrep -n foobar delimiters.in
+1:xfoobarx
+2:xfoobar
+3:foobarx
+4:foobar
+
+#### TEST: agrep -n foobar < delimiters.in
+1:xfoobarx
+2:xfoobar
+3:foobarx
+4:foobar
+
+#### TEST: agrep -s foobar delimiters.in
+0:xfoobarx
+0:xfoobar
+0:foobarx
+0:foobar
+
+#### TEST: agrep -s foobar < delimiters.in
+0:xfoobarx
+0:xfoobar
+0:foobarx
+0:foobar
+
+#### TEST: agrep -M foobar delimiters.in
+xfoobarx
+xfoobar
+foobarx
+foobar
+
+#### TEST: agrep -M foobar < delimiters.in
+xfoobarx
+xfoobar
+foobarx
+foobar
+
+#### TEST: agrep --show-position foobar delimiters.in
+1-7:xfoobarx
+1-7:xfoobar
+0-6:foobarx
+0-6:foobar
+
+#### TEST: agrep --show-position foobar < delimiters.in
+1-7:xfoobarx
+1-7:xfoobar
+0-6:foobarx
+0-6:foobar
+
+#### TEST: agrep --color foobar delimiters.in
+x[01;31mfoobar[00mx
+x[01;31mfoobar[00m
+[01;31mfoobar[00mx
+[01;31mfoobar[00m
+
+#### TEST: agrep --color foobar < delimiters.in
+x[01;31mfoobar[00mx
+x[01;31mfoobar[00m
+[01;31mfoobar[00mx
+[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position foobar delimiters.in
+delimiters.in:1:0:1-7:x[01;31mfoobar[00mx
+delimiters.in:2:0:1-7:x[01;31mfoobar[00m
+delimiters.in:3:0:0-6:[01;31mfoobar[00mx
+delimiters.in:4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep -H -n -s --color --show-position foobar < delimiters.in
+(standard input):1:0:1-7:x[01;31mfoobar[00mx
+(standard input):2:0:1-7:x[01;31mfoobar[00m
+(standard input):3:0:0-6:[01;31mfoobar[00mx
+(standard input):4:0:0-6:[01;31mfoobar[00m
+
+#### TEST: agrep  -d X ^xyzzy$ delimiters.in
+Xxyzzy
+#### TEST: agrep  -d X ^xyzzy$ < delimiters.in
+Xxyzzy
+#### TEST: agrep -c -d X ^xyzzy$ delimiters.in
+1
+
+#### TEST: agrep -c -d X ^xyzzy$ < delimiters.in
+1
+
+#### TEST: agrep -H -d X ^xyzzy$ delimiters.in
+delimiters.in:Xxyzzy
+#### TEST: agrep -H -d X ^xyzzy$ < delimiters.in
+(standard input):Xxyzzy
+#### TEST: agrep -l -d X ^xyzzy$ delimiters.in
+delimiters.in
+
+#### TEST: agrep -l -d X ^xyzzy$ < delimiters.in
+(standard input)
+
+#### TEST: agrep -n -d X ^xyzzy$ delimiters.in
+3:Xxyzzy
+#### TEST: agrep -n -d X ^xyzzy$ < delimiters.in
+3:Xxyzzy
+#### TEST: agrep -s -d X ^xyzzy$ delimiters.in
+0:Xxyzzy
+#### TEST: agrep -s -d X ^xyzzy$ < delimiters.in
+0:Xxyzzy
+#### TEST: agrep -M -d X ^xyzzy$ delimiters.in
+xyzzyX
+#### TEST: agrep -M -d X ^xyzzy$ < delimiters.in
+xyzzyX
+#### TEST: agrep --show-position -d X ^xyzzy$ delimiters.in
+0-5:Xxyzzy
+#### TEST: agrep --show-position -d X ^xyzzy$ < delimiters.in
+0-5:Xxyzzy
+#### TEST: agrep --color -d X ^xyzzy$ delimiters.in
+X[01;31mxyzzy[00m
+#### TEST: agrep --color -d X ^xyzzy$ < delimiters.in
+X[01;31mxyzzy[00m
+#### TEST: agrep -H -n -s --color --show-position -d X ^xyzzy$ delimiters.in
+delimiters.in:3:0:0-5:X[01;31mxyzzy[00m
+#### TEST: agrep -H -n -s --color --show-position -d X ^xyzzy$ < delimiters.in
+(standard input):3:0:0-5:X[01;31mxyzzy[00m
+#### TEST: agrep  -d X -M ^xyzzy$ delimiters.in
+xyzzyX
+#### TEST: agrep  -d X -M ^xyzzy$ < delimiters.in
+xyzzyX
+#### TEST: agrep -c -d X -M ^xyzzy$ delimiters.in
+1
+
+#### TEST: agrep -c -d X -M ^xyzzy$ < delimiters.in
+1
+
+#### TEST: agrep -H -d X -M ^xyzzy$ delimiters.in
+delimiters.in:xyzzyX
+#### TEST: agrep -H -d X -M ^xyzzy$ < delimiters.in
+(standard input):xyzzyX
+#### TEST: agrep -l -d X -M ^xyzzy$ delimiters.in
+delimiters.in
+
+#### TEST: agrep -l -d X -M ^xyzzy$ < delimiters.in
+(standard input)
+
+#### TEST: agrep -n -d X -M ^xyzzy$ delimiters.in
+3:xyzzyX
+#### TEST: agrep -n -d X -M ^xyzzy$ < delimiters.in
+3:xyzzyX
+#### TEST: agrep -s -d X -M ^xyzzy$ delimiters.in
+0:xyzzyX
+#### TEST: agrep -s -d X -M ^xyzzy$ < delimiters.in
+0:xyzzyX
+#### TEST: agrep -M -d X -M ^xyzzy$ delimiters.in
+xyzzyX
+#### TEST: agrep -M -d X -M ^xyzzy$ < delimiters.in
+xyzzyX
+#### TEST: agrep --show-position -d X -M ^xyzzy$ delimiters.in
+0-5:xyzzyX
+#### TEST: agrep --show-position -d X -M ^xyzzy$ < delimiters.in
+0-5:xyzzyX
+#### TEST: agrep --color -d X -M ^xyzzy$ delimiters.in
+[01;31mxyzzy[00mX
+#### TEST: agrep --color -d X -M ^xyzzy$ < delimiters.in
+[01;31mxyzzy[00mX
+#### TEST: agrep -H -n -s --color --show-position -d X -M ^xyzzy$ delimiters.in
+delimiters.in:3:0:0-5:[01;31mxyzzy[00mX
+#### TEST: agrep -H -n -s --color --show-position -d X -M ^xyzzy$ < delimiters.in
+(standard input):3:0:0-5:[01;31mxyzzy[00mX
