@@ -647,7 +647,12 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
       /* Check for end of string. */
       if (len < 0)
 	{
-	  if (next_c == L'\0')
+	  if (type == STR_USER)
+	    {
+	      if (str_user_end)
+		break;
+	    }
+	  else if (next_c == L'\0')
 	    break;
 	}
       else

@@ -521,7 +521,12 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	  /* Check for end of string. */
 	  if (len < 0)
 	    {
-	      if (next_c == L'\0')
+	      if (type == STR_USER)
+		{
+		  if (str_user_end)
+		    goto backtrack;
+		}
+	      else if (next_c == L'\0')
 		goto backtrack;
 	    }
 	  else
