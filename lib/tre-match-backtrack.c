@@ -485,10 +485,10 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	  else if (len - pos < bt_len)
 	    result = 1;
 	  else
+	    /* We can ignore multibyte characters here because the backref
+	       string is already aligned at character boundaries. */
 	    result = memcmp((char*)string + so, str_byte - 1, bt_len);
 
-	  /* We can ignore multibyte characters here because the backref
-	     string is already aligned at character boundaries. */
 	  if (result == 0)
 	    {
 	      /* Back reference matched.  Check for infinite loop. */
@@ -578,7 +578,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		}
 	      else
 		{
-		  /* Second mathing transition.	 We may need to backtrack here
+		  /* Second matching transition.  We may need to backtrack here
 		     to take this transition instead of the first one, so we
 		     push this transition in the backtracking stack so we can
 		     jump back here if needed. */

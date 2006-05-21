@@ -428,7 +428,7 @@ if test "$tre_enable_wchar" != "no"; then
                          wcscpy wcslen wcsncpy],
       [ tre_wchar="yes" ],
       [ tre_wchar_reason="$ac_func not found"
-        tre_wchar="no ($tre_wchar_reason)";
+        tre_wchar="no ($tre_wchar_reason)"
         break ],
       [ $tre_includes ])
   fi
@@ -446,7 +446,7 @@ if test "$tre_wchar" = "yes"; then
   AC_DEFINE(TRE_WCHAR, 1,
     [ Define to enable wide character (wchar_t) support. ])
 
-  dnl We make use of these.
+  dnl We make use of these if they exist.
   AX_CHECK_FUNCS_COMP([wctype iswctype],,,[$tre_includes])
   AX_CHECK_FUNCS_COMP([iswascii iswblank],,,[$tre_includes])
 fi

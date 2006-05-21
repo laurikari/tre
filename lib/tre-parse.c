@@ -1123,10 +1123,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 		if (*ctx->re == CHAR_QUESTIONMARK)
 		  rep_max = 1;
 		tmp_re = ctx->re;
-		
+
 		if (ctx->re + 1 < ctx->re_end
 		    && *(ctx->re + 1) == CHAR_QUESTIONMARK)
-		  { 
+		  {
 		    minimal = !(ctx->cflags & REG_UNGREEDY);
 		    ctx->re++;
 		  }
@@ -1266,7 +1266,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			{
 			  DPRINT(("tre_parse:    comment: '%.*" STRF "\n",
 				  REST(ctx->re)));
-			  /* A comment can contain any character except a 
+			  /* A comment can contain any character except a
 			     right parenthesis */
 			  while (*ctx->re != CHAR_RPAREN
 				 && ctx->re < ctx->re_end)
@@ -1523,7 +1523,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	      break;
 
 	    case CHAR_PERIOD:	 /* the any-symbol */
-	      DPRINT(("tre_parse:	  any: '%.*" STRF "'\n", 
+	      DPRINT(("tre_parse:	  any: '%.*" STRF "'\n",
 		      REST(ctx->re)));
 	      if (ctx->cflags & REG_NEWLINE)
 		{

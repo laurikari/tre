@@ -57,8 +57,8 @@ char *alloca ();
 #endif /* HAVE_MALLOC_H */
 #include <limits.h>
 
-#include "regex.h"
 #include "tre-internal.h"
+#include "regex.h"
 #include "xmalloc.h"
 
 

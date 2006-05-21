@@ -72,7 +72,7 @@ static int exec_errors = 0;
 
 #define END -2
 
-void
+static void
 test_status(char c)
 {
   static int k = 0;
@@ -335,7 +335,7 @@ test_exec(char *str, int eflags, ...)
 }
 
 
-void
+static void
 test_comp(char *re, int flags, int ret)
 {
   int errcode = 0;
@@ -1413,7 +1413,7 @@ main(int argc, char **argv)
   test_exec("abcd", 0, REG_OK, 0, 4, END);
 
   avoid_eflags = 0;
-  
+
 
   /*
    * Error reporting tests.
