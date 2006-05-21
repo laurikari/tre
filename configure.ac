@@ -78,11 +78,15 @@ else
   AM_CONDITIONAL(TRE_APPROX, false)
 fi
 
-AC_ARG_ENABLE(agrep,
-  AC_HELP_STRING([--disable-agrep],
-    [Do not build and install the agrep tool @<:@default=install@:>@]),
-  [ tre_agrep="$enableval" ],
-  [ tre_agrep="yes" ])
+if test "$tre_approx" = "yes"; then
+  AC_ARG_ENABLE(agrep,
+    AC_HELP_STRING([--disable-agrep],
+      [Do not build and install the agrep tool @<:@default=install@:>@]),
+    [ tre_agrep="$enableval" ],
+    [ tre_agrep="yes" ])
+else
+  tre_agrep="no (requires approximate matching)"
+fi
 
 if test "$tre_agrep" = "yes"; then
   AM_CONDITIONAL(TRE_AGREP, true)

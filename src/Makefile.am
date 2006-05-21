@@ -3,7 +3,7 @@
 localedir = $(datadir)/locale
 INCLUDES = -I$(top_srcdir)/lib
 
-if TRE_APPROX
+if TRE_AGREP
 bin_PROGRAMS = agrep
 
 agrep_SOURCES = agrep.c
