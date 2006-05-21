@@ -106,7 +106,7 @@ regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
   ret = tre_compile(preg, wregex, wlen, cflags);
   xfree(wregex);
 #else /* !TRE_WCHAR */
-  ret = tre_compile(preg, regex, n, cflags);
+  ret = tre_compile(preg, (const tre_char_t *)regex, n, cflags);
 #endif /* !TRE_WCHAR */
 
   return ret;

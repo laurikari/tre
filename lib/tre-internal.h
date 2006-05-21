@@ -115,7 +115,7 @@ typedef short tre_cint_t;
 
 #define tre_tolower(c) (tre_cint_t)(tolower(c))
 #define tre_toupper(c) (tre_cint_t)(toupper(c))
-#define tre_strlen  strlen
+#define tre_strlen(s)  (strlen((const char*)s))
 
 #endif /* !TRE_WCHAR */
 

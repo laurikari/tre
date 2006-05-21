@@ -337,7 +337,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 #endif /* defined HAVE_WCSTOMBS */
 		  }
 #else /* !TRE_WCHAR */
-		  strncpy(tmp_str, re + 2, len);
+		  strncpy(tmp_str, (const char*)re + 2, len);
 #endif /* !TRE_WCHAR */
 		  tmp_str[len] = '\0';
 		  DPRINT(("  class name: %s\n", tmp_str));
