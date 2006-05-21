@@ -1,0 +1,53 @@
+                                                         -*- outline -*-
+* Introduction
+
+This document describes how to build TRE from the darcs repository
+sources.  Typical users should use the source code release packages,
+available from the TRE website:
+  http://laurikari.net/tre/
+
+Building from darcs is necessary for example if you want to test some
+of the latest changes before they are offically released.
+
+* Prerequisites
+
+** Unix
+
+You will need the following tools installed on your system:
+
+  - darcs (if you're reading this, you should already have it)
+  - gnulib, see http://www.gnu.org/software/gnulib/.
+  - autoconf 2.57 or newer (2.59 recommended)
+  - automake 1.9.x (newer is usually better)
+  - gettext 0.14.3 or newer
+  - libtool 1.5.22 or newer
+  - zip (Info-Zip 2.3), optional
+
+Out of these tools, gnulib is probably the one you don't already have.
+Remember to add gnulib to path so that the `gnulib-tool' command
+works.
+
+** Windows
+
+On Windows building directly from darcs is not supported.  You will
+need to get a hold of a Unix system and build a source code release
+(see below) and build it on Windows as usual.
+
+* Preparing the tree
+
+Change to the root of the source directory and run
+  ./utils/autogen.sh
+This will regenerate various things using the prerequisite tools so
+that you end up with a buildable tree.
+
+After this, you can run the configure script and build TRE as usual.
+
+* Building a source code package
+
+In a prepared tree, this command creates a source code tarball:
+  ./configure && make dist
+
+Alternatively, you can run
+  ./utils/build-sources.sh
+which builds the source code packages and puts them in the `dist'
+subdirectory.  This script needs a working `zip' command.
