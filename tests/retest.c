@@ -1112,7 +1112,10 @@ main(int argc, char **argv)
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
   test_exec(",.(a23_Nt-öo)", 0, REG_OK, 3, 9, END);
-  test_comp("\\D", REG_EXTENDED, 0);
+  test_comp("\\d+", REG_EXTENDED, 0);
+  test_exec("uR120_4=v4", 0, REG_OK, 2, 5, END);
+  test_comp("\\D+", REG_EXTENDED, 0);
+  test_exec("120d_=vA4s", 0, REG_OK, 3, 8, END);
 
   /* Quoted special characters. */
   test_comp("\\t", REG_EXTENDED, 0);
