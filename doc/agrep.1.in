@@ -20,10 +20,16 @@ Use
 as a regular expression; useful to protect patterns beginning with
 .BR \- .
 .TP
-.BR \-b ", " \-\^\-ignore\-case
+.BR \-i ", " \-\^\-ignore\-case
 Ignore case distinctions (as defined by the current locale) in
 .I PATTERN
 and input files.
+.TP
+.BR \-k ", " \-\^\-literal
+Treat
+.I PATTERN
+as a literal string, that is, a fixed string with no special
+characters.
 .TP
 .BR \-w ", " \-\^\-word\-regexp
 Force
@@ -57,7 +63,7 @@ if the const of a substitution is set to be larger than the sum
 of the costs of deletion and insertion, direct substitutions will
 never be done.
 .TP
-.BI \-S " NUM" "\fR,\fP \-\^\-max\-errors=" NUM
+.BI \-E " NUM" "\fR,\fP \-\^\-max\-errors=" NUM
 Select records that have at most
 .I NUM
 errors.
@@ -86,7 +92,7 @@ Select non-matching records instead of matching records.
 .BR \-V ", " \-\^\-version
 Print version information and exit.
 .TP
-.BR \-y
+.BR \-y ", " \-\^\-nothing
 Does nothing.  This options exists only for compatibility with the
 non-free agrep program.
 .TP
@@ -128,6 +134,12 @@ The number of the first record is 1.
 .TP
 .BR \-s ", " \-\^\-show\-cost
 Print match cost with output.
+.TP
+.BR \-\^\-show\-position
+Prefix each output record with the start and end offset of the first
+match within the record.  The offset of the first character of the
+record is 0.  The end position is given as the offset of the first
+character after the match.
 .TP
 .BR \-M ", " \-\^\-delimiter\-after
 By default, the record delimiter is the newline character and is

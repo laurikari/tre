@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TRE 0.7.4\n"
 "Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
-"POT-Creation-Date: 2006-05-19 10:48+0300\n"
+"POT-Creation-Date: 2006-05-21 22:31+0300\n"
 "PO-Revision-Date: 2002-07-29 23:46+0300\n"
 "Last-Translator: Ville Laurikari <vl@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -77,17 +77,17 @@ msgstr "XXX"
 msgid "Unknown error"
 msgstr "Tuntematon virhe"
 
-#: src/agrep.c:99 src/agrep.c:106
+#: src/agrep.c:95 src/agrep.c:102
 #, c-format
 msgid "Usage: %s [OPTION]... PATTERN [FILE]...\n"
 msgstr "Käyttö: %s [VALITSIN]... HAKULAUSEKE [TIEDOSTO]...\n"
 
-#: src/agrep.c:101
+#: src/agrep.c:97
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Kokeile `%s --help' saadaksesi lisää tietoa.\n"
 
-#: src/agrep.c:107
+#: src/agrep.c:103
 #, c-format
 msgid ""
 "Searches for approximate matches of PATTERN in each FILE or standard input.\n"
@@ -102,7 +102,7 @@ msgstr ""
 "`foo.txt' joihin hakukaava \"lähteä\" sopii enintään kahdella virheellä.\n"
 "Esimerkiksi rivit jotka sisältävät \"lähtee\" tai \"lähtö\" palautetaan.\n"
 
-#: src/agrep.c:113
+#: src/agrep.c:109
 #, c-format
 msgid ""
 "Regexp selection and interpretation:\n"
@@ -123,7 +123,7 @@ msgid ""
 "  -d, --delimiter=PATTERN   set the record delimiter regular expression\n"
 "  -v, --invert-match\t    select non-matching records\n"
 "  -V, --version\t\t    print version information and exit\n"
-"  -y\t\t\t    does nothing (for compatibility with the non-free\n"
+"  -y, --nothing\t\t    does nothing (for compatibility with the non-free\n"
 "\t\t\t    agrep program)\n"
 "      --help\t\t    display this help and exit\n"
 "\n"
@@ -133,14 +133,19 @@ msgid ""
 "  -h, --no-filename\t    suppress the prefixing filename on output\n"
 "  -H, --with-filename\t    print the filename for each match\n"
 "  -l, --files-with-matches  only print FILE names containing matches\n"
+"  -M, --delimiter-after     print record delimiter after record if -d is "
+"used\n"
 "  -n, --record-number\t    print record number with output\n"
+"      --line-number         same as -n\n"
 "  -s, --show-cost\t    print match cost with output\n"
 "      --colour, --color     use markers to distinguish the matching strings\n"
+"      --show-position       prefix each output record with start and end\n"
+"                            position of the first match within the record\n"
 msgstr ""
 "Hakulausekkeen valinta ja tulkinta:\n"
 "  -e, --regexp=HAKULAUSEKE  käytä HAKULAUSEKEtta säännöllisenä lausekkeena\n"
 "  -i, --ignore-case         älä erottele isoja ja pieniä kirjaimia\n"
-"  -k, --literal-string      HAKULAUSEKE on kiinteä merkkijono\n"
+"  -k, --literal             HAKULAUSEKE on kiinteä merkkijono\n"
 "  -w, --word-regexp         anna hakulausekkeen sopia vain kokonaisiin "
 "sanoihin\n"
 "\n"
@@ -158,7 +163,7 @@ msgstr ""
 "  -v, --invert-match        valitse tietueet jotka eivät sovi "
 "hakulausekkeeseen\n"
 "  -V, --version             tulosta versiotieto ja lopeta\n"
-"  -y                        ei tee mitään (yhteensopivuudeksi ei-vapaan\n"
+"  -y, --nothing             ei tee mitään (yhteensopivuudeksi ei-vapaan\n"
 "                            agrep -ohjelman kanssa)\n"
 "      --help                tulosta tämä ohje ja lopeta\n"
 "\n"
@@ -171,10 +176,16 @@ msgstr ""
 "  -l, --files-with-matches  tulosta vain niiden TIEDOSTOjen nimet, joissa "
 "on\n"
 "                            sopivia tietueita\n"
-"  -n, --line-number         tulosta tietuenumerot\n"
+"  -M, --delimiter-after     tulosta erotin tietueen jälkeen jos -d on "
+"käytössä\n"
+"  -n, --record-number       tulosta tietuenumerot\n"
+"      --line-number         sama kuin -n\n"
 "  -s, --show-cost           tulosta virheiden määrä\n"
 "      --colour, --color     korosta tulostetuista tietueista osat jotka\n"
 "                            sopivat hakulausekkeeseen\n"
+"      --show-position       lisää tulostettujen tietueiden alkuun haku-\n"
+"                            lausekkeeseen sopivan osamerkkijonon alku- ja\n"
+"                            loppusijainti tietueessa\n"
 
 #: src/agrep.c:147
 #, c-format

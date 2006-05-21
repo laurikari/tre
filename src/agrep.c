@@ -125,7 +125,7 @@ Miscellaneous:\n\
   -d, --delimiter=PATTERN   set the record delimiter regular expression\n\
   -v, --invert-match	    select non-matching records\n\
   -V, --version		    print version information and exit\n\
-  -y			    does nothing (for compatibility with the non-free\n\
+  -y, --nothing		    does nothing (for compatibility with the non-free\n\
 			    agrep program)\n\
       --help		    display this help and exit\n\
 \n\
@@ -135,10 +135,14 @@ Output control:\n\
   -h, --no-filename	    suppress the prefixing filename on output\n\
   -H, --with-filename	    print the filename for each match\n\
   -l, --files-with-matches  only print FILE names containing matches\n\
+  -M, --delimiter-after     print record delimiter after record if -d is used\n\
   -n, --record-number	    print record number with output\n\
+      --line-number         same as -n\n\
   -s, --show-cost	    print match cost with output\n\
       --colour, --color     use markers to distinguish the matching \
-strings\n"));
+strings\n\
+      --show-position       prefix each output record with start and end\n\
+                            position of the first match within the record\n"));
       printf("\n");
       printf(_("\
 With no FILE, or when FILE is -, reads standard input.	If less than two\n\
