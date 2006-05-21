@@ -5,7 +5,9 @@ TESTS = run-tests.sh
 endif TRE_AGREP
 endif !TRE_DEBUG
 
-TESTS_ENVIRONMENT = top_builddir=$(top_builddir)
+TESTS_ENVIRONMENT = \
+  top_builddir=$(top_builddir) \
+  host_triplet=$(host_triplet)
 EXTRA_DIST = run-tests.sh
 
 dist-hook:

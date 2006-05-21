@@ -61,6 +61,14 @@ EOF
     done
   done
   num_tests=`expr $num_tests + 1`
+  case $host_triplet in
+    *-mingw*)
+      # On MinGW something causes \r\n newlines to be output to $out,
+      # and our reference results don't have them.
+      tr -d '\015' < $out > $out.tmp
+      mv $out.tmp $out
+      ;;
+  esac
   if diff $ok $out; then
     num_ok=`expr $num_ok + 1`
   else

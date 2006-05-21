@@ -434,6 +434,16 @@ if test "$tre_enable_wchar" != "no"; then
   fi
 fi
 
+case $host in
+  *-mingw*)
+    dnl wcsrtombs and wcstombs don't seem to work at all on MinGW.
+    if test "$tre_libutf8" != "yes"; then
+      tre_wchar_reason="Not supported on MinGW"
+      tre_wchar="no ($tre_wchar_reason)"
+    fi
+    ;;
+esac
+
 # Fail if wide character support was specifically requested but is
 # not supported on this system.
 if test "$tre_enable_wchar" = "yes"; then
