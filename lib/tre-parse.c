@@ -64,12 +64,16 @@
 
 
 /* Some macros for expanding \w, \s, etc. */
-static const char *tre_macros[] =
-  { "t", "\t",		   "n", "\n",		  "r", "\r",
-    "f", "\f",		   "a", "\a",		  "e", "\033",
-    "w", "[[:alnum:]_]",   "W", "[^[:alnum:]_]",  "s", "[[:space:]]",
-    "S", "[^[:space:]]",   "d", "[[:digit:]]",	  "D", "[^[:digit:]]",
-   NULL };
+static const struct tre_macro_struct {
+  const char c;
+  const char *expansion;
+} tre_macros[] =
+  { {'t', "\t"},	   {'n', "\n"},		   {'r', "\r"},
+    {'f', "\f"},	   {'a', "\a"},		   {'e', "\033"},
+    {'w', "[[:alnum:]_]"}, {'W', "[^[:alnum:]_]"}, {'s', "[[:space:]]"},
+    {'S', "[^[:space:]]"}, {'d', "[[:digit:]]"},   {'D', "[^[:digit:]]"},
+    { 0, NULL }
+  };
 
 
 /* Expands a macro delimited by `regex' and `regex_end' to `buf', which
@@ -80,39 +84,20 @@ tre_expand_macro(const tre_char_t *regex, const tre_char_t *regex_end,
 		 tre_char_t *buf, size_t buf_len)
 {
   int i;
-  size_t len = regex_end - regex;
 
   buf[0] = 0;
-  for (i = 0; tre_macros[i] != NULL; i += 2)
+  if (regex >= regex_end)
+    return;
+
+  for (i = 0; tre_macros[i].expansion; i++)
     {
-      int match = 0;
-      if (strlen(tre_macros[i]) > len)
-	continue;
-#ifdef TRE_WCHAR
-      {
-	tre_char_t tmp_wcs[64];
-	unsigned int j;
-	for (j = 0; j < strlen(tre_macros[i]) && j < elementsof(tmp_wcs); j++)
-	  tmp_wcs[j] = btowc(tre_macros[i][j]);
-	tmp_wcs[j] = 0;
-	match = wcsncmp(tmp_wcs, regex, strlen(tre_macros[i]));
-      }
-#else /* !TRE_WCHAR */
-      match = strncmp(tre_macros[i], regex, strlen(tre_macros[i]));
-#endif /* !TRE_WCHAR */
-      if (match == 0)
+      if (tre_macros[i].c == *regex)
 	{
 	  unsigned int j;
-	  DPRINT(("Expanding macro '%s' => '%s'\n",
-		  tre_macros[i], tre_macros[i + 1]));
-	  for (j = 0; tre_macros[i + 1][j] != 0 && j < buf_len; j++)
-	    {
-#ifdef TRE_WCHAR
-	      buf[j] = btowc(tre_macros[i + 1][j]);
-#else /* !TRE_WCHAR */
-	      buf[j] = tre_macros[i + 1][j];
-#endif /* !TRE_WCHAR */
-	    }
+	  DPRINT(("Expanding macro '%c' => '%s'\n",
+		  tre_macros[i].c, tre_macros[i].expansion));
+	  for (j = 0; tre_macros[i].expansion[j] && j < buf_len; j++)
+	    buf[j] = tre_macros[i].expansion[j];
 	  buf[j] = 0;
 	  break;
 	}
