@@ -47,7 +47,7 @@ endif TRE_APPROX
   randtest_LDADD = libxtre.la $(LDADD)
 endif !TRE_DEBUG
 
-INCLUDES = -I$(top_srcdir)/lib
+INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/gnulib/lib
 
 EXTRA_DIST = build-tests.sh
 

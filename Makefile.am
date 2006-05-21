@@ -6,7 +6,7 @@ else
 agrep_dirs =
 endif
 
-SUBDIRS = lib $(agrep_dirs) tests utils po m4
+SUBDIRS = gnulib lib $(agrep_dirs) tests utils po m4
 
 EXTRA_DIST = \
 	utils/config.rpath  \
@@ -19,7 +19,7 @@ EXTRA_DIST = \
 	python/setup.py \
 	python/example.py
 
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 -I gnulib/m4
 AC_CONFIG_AUX_DIR = utils
 
 pkgconfigdir = $(libdir)/pkgconfig

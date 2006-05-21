@@ -24,9 +24,6 @@
 #endif /* HAVE_CONFIG_H */
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif /* HAVE_GETOPT_H */
 #include <locale.h>
 #include <string.h>
 #include <sys/types.h>
@@ -34,8 +31,9 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
-#include <unistd.h>
 #include <limits.h>
+#include <unistd.h>
+#include "getopt.h"
 #include "regex.h"
 #include "gettext.h"
 #define _(String) gettext(String)
@@ -52,7 +50,6 @@ static char const short_options[] =
 static int show_help;
 char *program_name;
 
-#ifdef HAVE_GETOPT_LONG
 /* Long options that have no corresponding short equivalents. */
 enum {
   COLOR_OPTION = CHAR_MAX + 1,
@@ -89,7 +86,6 @@ static struct option const long_options[] =
   {"show-position", no_argument, NULL, SHOW_POSITION_OPTION},
   {0, 0, 0, 0}
 };
-#endif /* HAVE_GETOPT_LONG */
 
 static void
 tre_agrep_usage(int status)
@@ -464,19 +460,10 @@ main(int argc, char **argv)
   regaparams_default(&match_params);
   match_params.max_cost = 0;
 
-#ifndef HAVE_GETOPT_LONG
-  if (argc == 2 && strcmp(argv[1], "--help") == 0)
-    tre_agrep_usage(0);
-#endif /* !HAVE_GETOPT_LONG */
-
   /* Parse command line options. */
   while (1)
     {
-#ifdef HAVE_GETOPT_LONG
       c = getopt_long(argc, argv, short_options, long_options, NULL);
-#else /* !HAVE_GETOPT_LONG */
-      c = getopt(argc, argv, short_options);
-#endif /* !HAVE_GETOPT_LONG */
       if (c == -1)
 	break;
 
@@ -578,14 +565,12 @@ PARTICULAR PURPOSE.\n"));
 	case '?':
 	  /* Ambiguous match or extraneous parameter. */
 	  break;
-#ifdef HAVE_GETOPT_LONG
 	case COLOR_OPTION:
 	  color_option = 1;
 	  break;
 	case SHOW_POSITION_OPTION:
 	  print_position = 1;
 	  break;
-#endif /* HAVE_GETOPT_LONG */
 	case 0:
 	  /* Long options without corresponding short options. */
 	  break;

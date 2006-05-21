@@ -9,6 +9,7 @@ AM_GNU_GETTEXT_VERSION(0.14.3)
 
 dnl Checks for programs.
 AC_PROG_CC
+gl_EARLY
 AC_PROG_CPP
 AC_PROG_INSTALL
 
@@ -103,6 +104,10 @@ dnl Checks for headers, functions, types, and macros
 AC_DEFINE(_GNU_SOURCE, 1, [ Define to enable GNU extensions in glibc ])
 AC_HEADER_STDC
 
+gl_INIT
+gl_HEADER_UNISTD
+gl_GETOPT
+
 AC_ARG_WITH(alloca,
   AC_HELP_STRING(
     [--without-alloca],
@@ -119,13 +124,6 @@ if test "$tre_use_alloca" = "yes"; then
         allocating memory needed for regexec operations. ])
   fi
 fi
-AC_CHECK_HEADERS([getopt.h])
-
-AC_CHECK_FUNCS([getopt_long],,
-  [ # FreeBSD has a "gnugetopt" library.
-    AC_CHECK_LIB([gnugetopt], [getopt_long],
-                 [ LIBS="-lgnugetopt $LIBS"
-                   AC_DEFINE([HAVE_GETOPT_LONG]) ]) ])
 
 AC_ARG_ENABLE(system-abi,
   AC_HELP_STRING(
@@ -511,9 +509,22 @@ AC_PROG_LIBTOOL
 
 dnl Output files
 AC_CONFIG_HEADERS([config.h lib/tre-config.h])
-AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile tests/Makefile
-                 po/Makefile.in m4/Makefile utils/Makefile doc/Makefile
-                 tre.pc tre.spec doc/agrep.1])
+AC_CONFIG_FILES([
+Makefile
+doc/Makefile
+doc/agrep.1
+gnulib/Makefile
+gnulib/lib/Makefile
+gnulib/tests/Makefile
+lib/Makefile
+m4/Makefile
+po/Makefile.in
+src/Makefile
+tests/Makefile
+tre.pc
+tre.spec
+utils/Makefile
+])
 AC_OUTPUT
 
 

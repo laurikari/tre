@@ -12,8 +12,7 @@ noinst_HEADERS =		\
 	tre-mem.h		\
 	tre-parse.h		\
 	tre-stack.h		\
-	xmalloc.h		\
-	gettext.h
+	xmalloc.h
 
 libtre_la_SOURCES =		\
 	tre-ast.c		\
@@ -26,6 +25,8 @@ libtre_la_SOURCES =		\
 	regcomp.c		\
 	regexec.c		\
 	regerror.c
+
+INCLUDES = -I$(top_srcdir)/gnulib/lib
 
 if TRE_APPROX
 libtre_la_SOURCES += tre-match-approx.c
