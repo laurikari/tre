@@ -176,3 +176,7 @@
 /* Define as `__inline' if that's what the C compiler calls it, or to nothing
    if it is not supported. */
 #define inline __inline
+
+/* Avoid silly warnings about "insecure" functions. */
+#define _CRT_SECURE_NO_DEPRECATE 1
+
