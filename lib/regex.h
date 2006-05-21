@@ -57,7 +57,9 @@ typedef int reg_errcode_t;
 #endif
 
 /* Extra regcomp() flags. */
+#ifndef REG_BASIC
 #define REG_BASIC	0
+#endif /* !REG_BASIC */
 #define REG_RIGHT_ASSOC (REG_LITERAL << 1)
 #define REG_UNGREEDY    (REG_RIGHT_ASSOC << 1)
 
@@ -124,9 +126,9 @@ typedef enum {
 #endif /* !TRE_USE_SYSTEM_REGEX_H */
 
 /* REG_NOSPEC and REG_LITERAL mean the same thing. */
-#ifdef REG_LITERAL
+#if defined(REG_LITERAL) && !defined(REG_NOSPEC)
 #define REG_NOSPEC	REG_LITERAL
-#elif defined(REG_NOSPEC)
+#elif defined(REG_NOSPEC) && !defined(REG_LITERAL)
 #define REG_LITERAL	REG_NOSPEC
 #endif /* defined(REG_NOSPEC) */
 
