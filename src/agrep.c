@@ -145,8 +145,8 @@ strings\n\
                             position of the first match within the record\n"));
       printf("\n");
       printf(_("\
-With no FILE, or when FILE is -, reads standard input.	If less than two\n\
-FILEs are given, -h is assumed.	 Exit status is 0 if a match is found, 1 for\n\
+With no FILE, or when FILE is -, reads standard input.  If less than two\n\
+FILEs are given, -h is assumed.  Exit status is 0 if a match is found, 1 for\n\
 no match, and 2 if there were errors.  If -E or -# is not specified, only\n\
 exact matches are selected.\n"));
       printf("\n");
