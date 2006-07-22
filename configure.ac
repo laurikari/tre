@@ -42,9 +42,6 @@ if test "$tre_debug" = "yes"; then
     [ Define if you want TRE to print debug messages to stdout. ])
 else
   AM_CONDITIONAL(TRE_DEBUG, false)
-  if test "$tre_profile" != "yes"; then
-    TRE_PROG_CC_OPTIMIZATIONS
-  fi
   AC_DEFINE(NDEBUG, 1, [ Define if you want to disable debug assertions. ])
 fi
 
