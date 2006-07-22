@@ -23,8 +23,6 @@ matching.
 %postun
 /sbin/ldconfig
 
-%doc doc
-
 %package devel
 Requires: tre = @PACKAGE_VERSION@
 Summary: Development files for use with the tre package.
@@ -72,6 +70,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr (-, root, root)
 %{_datadir}/*
 %{_libdir}/libtre.so.*
+%doc doc/*.css
+%doc doc/*.html
 
 %files devel
 %defattr (-, root, root)
@@ -87,6 +87,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/agrep.1.gz
 
 %changelog
+* Sat Jul 22 2006 Ville Laurikari <vl@iki.fi>
+- fixed %doc macro and moved to correct place
+
 * Fri May 12 2006 Ville Laurikari <vl@iki.fi>
 - fixed to work with recent rpmbuild versions (unpackaged files)
 - handling for multilib environments
