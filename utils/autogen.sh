@@ -13,7 +13,8 @@ darcs changes --summary > ChangeLog
 
 # Update gnulib within our source tree.
 gnulib-tool --source-base=gnulib/lib --m4-base=gnulib/m4 \
-            --tests-base=gnulib/tests  --with-tests --lgpl \
+            --tests-base=gnulib/tests --doc-base=gnulib/doc \
+	    --with-tests --lgpl \
             --import getopt
 
 # Set up the standard gettext infrastructure.
