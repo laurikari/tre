@@ -4,7 +4,7 @@
 man_MANS = agrep.1
 
 EXTRA_DIST = \
-	$(man_MANS) \
+	agrep.1.in \
 	tre-api.html \
 	tre-syntax.html \
 	default.css

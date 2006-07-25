@@ -13,4 +13,4 @@ EXTRA_DIST = run-tests.sh
 dist-hook:
 	cp -p $(srcdir)/*.args $(srcdir)/*.ok $(srcdir)/*.input $(distdir)
 
-CLEANFILES = *.in *.out
+CLEANFILES = *.out

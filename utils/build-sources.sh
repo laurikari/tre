@@ -3,12 +3,34 @@
 # Creates the source code distribution packages.
 #
 
+set -e
+
 rm -rf tmp-build
 mkdir tmp-build
 cd tmp-build
 
 ../configure
 make dist
+
+mkdir stage1-tree
+cd stage1-tree
+tar xzvf ../tre-*.tar.gz
+cd ..
+
+mkdir stage2
+cd stage2
+tar xzvf ../tre-*.tar.gz
+cd tre-*
+./configure
+make dist
+cd ../..
+
+mkdir stage2-tree
+cd stage2-tree
+tar xzvf ../stage2/tre-*/tre-*.tar.gz
+cd ..
+
+diff -r -wibu stage1-tree stage2-tree
 
 base=`basename tre-*.tar.gz .tar.gz`
 gunzip -c tre-*.tar.gz | bzip2 -9 -c > $base.tar.bz2
