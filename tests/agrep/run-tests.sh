@@ -46,8 +46,14 @@ EOF
       cat <<EOF
 agrep $extra $arg $input
 EOF
+      set +e
       $agrep $extra $arg $input >> $out
-      echo >> $out
+      status=$?
+      set -e
+      cat >> $out <<EOF
+
+Exit status $status.
+EOF
 
       num_expanded=`expr $num_expanded + 1`
       cat >> $out <<EOF
@@ -56,8 +62,14 @@ EOF
       cat <<EOF
 agrep $extra $arg < $input
 EOF
+      set +e
       $agrep $extra $arg < $input >> $out
-      echo >> $out
+      status=$?
+      set -e
+      cat >> $out <<EOF
+
+Exit status $status.
+EOF
     done
   done
   num_tests=`expr $num_tests + 1`

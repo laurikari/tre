@@ -6,6 +6,7 @@ and regular and after last a default default a a can
 any regular that match
 example, mail messages as a
 Mailbox format
+Exit status 0.
 #### TEST: agrep  -d \s+ a < records.in
  match a starts at a character.  Similarly, at a character. characters are
 alphanumerics (as locale) and
@@ -14,12 +15,15 @@ and regular and after last a default default a a can
 any regular that match
 example, mail messages as a
 Mailbox format
+Exit status 0.
 #### TEST: agrep -c -d \s+ a records.in
 64
 
+Exit status 0.
 #### TEST: agrep -c -d \s+ a < records.in
 64
 
+Exit status 0.
 #### TEST: agrep -H -d \s+ a records.in
 records.in: matchrecords.in: arecords.in: startsrecords.in: atrecords.in: arecords.in: character.records.in:  Similarly,records.in: atrecords.in: arecords.in: character.records.in: charactersrecords.in: arerecords.in:
 alphanumericsrecords.in: (asrecords.in: locale)records.in: andrecords.in:
@@ -28,6 +32,7 @@ andrecords.in: regularrecords.in: andrecords.in: afterrecords.in: lastrecords.in
 anyrecords.in: regularrecords.in: thatrecords.in: matchrecords.in:
 example,records.in: mailrecords.in: messagesrecords.in: asrecords.in: arecords.in:
 Mailboxrecords.in: format
+Exit status 0.
 #### TEST: agrep -H -d \s+ a < records.in
 (standard input): match(standard input): a(standard input): starts(standard input): at(standard input): a(standard input): character.(standard input):  Similarly,(standard input): at(standard input): a(standard input): character.(standard input): characters(standard input): are(standard input):
 alphanumerics(standard input): (as(standard input): locale)(standard input): and(standard input):
@@ -36,12 +41,15 @@ and(standard input): regular(standard input): and(standard input): after(standar
 any(standard input): regular(standard input): that(standard input): match(standard input):
 example,(standard input): mail(standard input): messages(standard input): as(standard input): a(standard input):
 Mailbox(standard input): format
+Exit status 0.
 #### TEST: agrep -l -d \s+ a records.in
 records.in
 
+Exit status 0.
 #### TEST: agrep -l -d \s+ a < records.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -d \s+ a records.in
 4: match12: a16: starts17: at27: a30: character.31:  Similarly,37: at47: a50: character.52: characters53: are54:
 alphanumerics55: (as60: locale)61: and64:
@@ -50,6 +58,7 @@ and153: regular166: and167: after169: last175: a178: default187: default188: a19
 any197: regular199: that202: match207:
 example,213: mail214: messages215: as218: a219:
 Mailbox220: format
+Exit status 0.
 #### TEST: agrep -n -d \s+ a < records.in
 4: match12: a16: starts17: at27: a30: character.31:  Similarly,37: at47: a50: character.52: characters53: are54:
 alphanumerics55: (as60: locale)61: and64:
@@ -58,6 +67,7 @@ and153: regular166: and167: after169: last175: a178: default187: default188: a19
 any197: regular199: that202: match207:
 example,213: mail214: messages215: as218: a219:
 Mailbox220: format
+Exit status 0.
 #### TEST: agrep -s -d \s+ a records.in
 0: match0: a0: starts0: at0: a0: character.0:  Similarly,0: at0: a0: character.0: characters0: are0:
 alphanumerics0: (as0: locale)0: and0:
@@ -66,6 +76,7 @@ and0: regular0: and0: after0: last0: a0: default0: default0: a0: a0: can0:
 any0: regular0: that0: match0:
 example,0: mail0: messages0: as0: a0:
 Mailbox0: format
+Exit status 0.
 #### TEST: agrep -s -d \s+ a < records.in
 0: match0: a0: starts0: at0: a0: character.0:  Similarly,0: at0: a0: character.0: characters0: are0:
 alphanumerics0: (as0: locale)0: and0:
@@ -74,6 +85,7 @@ and0: regular0: and0: after0: last0: a0: default0: default0: a0: a0: can0:
 any0: regular0: that0: match0:
 example,0: mail0: messages0: as0: a0:
 Mailbox0: format
+Exit status 0.
 #### TEST: agrep -M -d \s+ a records.in
 match a
 starts at a character.  Similarly, at a
@@ -84,6 +96,7 @@ and an added a
 larger than and regular and after last
 a default default a a can any regular that match example, mail messages as a
 Mailbox format 
+Exit status 0.
 #### TEST: agrep -M -d \s+ a < records.in
 match a
 starts at a character.  Similarly, at a
@@ -94,6 +107,7 @@ and an added a
 larger than and regular and after last
 a default default a a can any regular that match example, mail messages as a
 Mailbox format 
+Exit status 0.
 #### TEST: agrep --show-position -d \s+ a records.in
 1-2: match0-1: a2-3: starts0-1: at0-1: a2-3: character.5-6:  Similarly,0-1: at0-1: a2-3: character.2-3: characters0-1: are0-1:
 alphanumerics1-2: (as3-4: locale)0-1: and2-3:
@@ -102,6 +116,7 @@ and5-6: regular0-1: and0-1: after1-2: last0-1: a3-4: default3-4: default0-1: a0-
 any5-6: regular2-3: that1-2: match2-3:
 example,1-2: mail4-5: messages0-1: as0-1: a1-2:
 Mailbox4-5: format
+Exit status 0.
 #### TEST: agrep --show-position -d \s+ a < records.in
 1-2: match0-1: a2-3: starts0-1: at0-1: a2-3: character.5-6:  Similarly,0-1: at0-1: a2-3: character.2-3: characters0-1: are0-1:
 alphanumerics1-2: (as3-4: locale)0-1: and2-3:
@@ -110,6 +125,7 @@ and5-6: regular0-1: and0-1: after1-2: last0-1: a3-4: default3-4: default0-1: a0-
 any5-6: regular2-3: that1-2: match2-3:
 example,1-2: mail4-5: messages0-1: as0-1: a1-2:
 Mailbox4-5: format
+Exit status 0.
 #### TEST: agrep --color -d \s+ a records.in
  m[01;31ma[00mtch [01;31ma[00m st[01;31ma[00mrts [01;31ma[00mt [01;31ma[00m ch[01;31ma[00mracter.  Simil[01;31ma[00mrly, [01;31ma[00mt [01;31ma[00m ch[01;31ma[00mracter. ch[01;31ma[00mracters [01;31ma[00mre
 [01;31ma[00mlphanumerics ([01;31ma[00ms loc[01;31ma[00mle) [01;31ma[00mnd
@@ -118,6 +134,7 @@ ch[01;31ma[00mracter. th[01;31ma[00mt ch[01;31ma[00mracters m[01;31ma[00
 [01;31ma[00mny regul[01;31ma[00mr th[01;31ma[00mt m[01;31ma[00mtch
 ex[01;31ma[00mmple, m[01;31ma[00mil mess[01;31ma[00mges [01;31ma[00ms [01;31ma[00m
 M[01;31ma[00milbox form[01;31ma[00mt
+Exit status 0.
 #### TEST: agrep --color -d \s+ a < records.in
  m[01;31ma[00mtch [01;31ma[00m st[01;31ma[00mrts [01;31ma[00mt [01;31ma[00m ch[01;31ma[00mracter.  Simil[01;31ma[00mrly, [01;31ma[00mt [01;31ma[00m ch[01;31ma[00mracter. ch[01;31ma[00mracters [01;31ma[00mre
 [01;31ma[00mlphanumerics ([01;31ma[00ms loc[01;31ma[00mle) [01;31ma[00mnd
@@ -126,6 +143,7 @@ ch[01;31ma[00mracter. th[01;31ma[00mt ch[01;31ma[00mracters m[01;31ma[00
 [01;31ma[00mny regul[01;31ma[00mr th[01;31ma[00mt m[01;31ma[00mtch
 ex[01;31ma[00mmple, m[01;31ma[00mil mess[01;31ma[00mges [01;31ma[00ms [01;31ma[00m
 M[01;31ma[00milbox form[01;31ma[00mt
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \s+ a records.in
 records.in:4:0:1-2: m[01;31ma[00mtchrecords.in:12:0:0-1: [01;31ma[00mrecords.in:16:0:2-3: st[01;31ma[00mrtsrecords.in:17:0:0-1: [01;31ma[00mtrecords.in:27:0:0-1: [01;31ma[00mrecords.in:30:0:2-3: ch[01;31ma[00mracter.records.in:31:0:5-6:  Simil[01;31ma[00mrly,records.in:37:0:0-1: [01;31ma[00mtrecords.in:47:0:0-1: [01;31ma[00mrecords.in:50:0:2-3: ch[01;31ma[00mracter.records.in:52:0:2-3: ch[01;31ma[00mractersrecords.in:53:0:0-1: [01;31ma[00mrerecords.in:54:0:0-1:
 [01;31ma[00mlphanumericsrecords.in:55:0:1-2: ([01;31ma[00msrecords.in:60:0:3-4: loc[01;31ma[00mle)records.in:61:0:0-1: [01;31ma[00mndrecords.in:64:0:2-3:
@@ -134,6 +152,7 @@ ch[01;31ma[00mracter.records.in:66:0:2-3: th[01;31ma[00mtrecords.in:70:0:2-3
 [01;31ma[00mnyrecords.in:197:0:5-6: regul[01;31ma[00mrrecords.in:199:0:2-3: th[01;31ma[00mtrecords.in:202:0:1-2: m[01;31ma[00mtchrecords.in:207:0:2-3:
 ex[01;31ma[00mmple,records.in:213:0:1-2: m[01;31ma[00milrecords.in:214:0:4-5: mess[01;31ma[00mgesrecords.in:215:0:0-1: [01;31ma[00msrecords.in:218:0:0-1: [01;31ma[00mrecords.in:219:0:1-2:
 M[01;31ma[00milboxrecords.in:220:0:4-5: form[01;31ma[00mt
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \s+ a < records.in
 (standard input):4:0:1-2: m[01;31ma[00mtch(standard input):12:0:0-1: [01;31ma[00m(standard input):16:0:2-3: st[01;31ma[00mrts(standard input):17:0:0-1: [01;31ma[00mt(standard input):27:0:0-1: [01;31ma[00m(standard input):30:0:2-3: ch[01;31ma[00mracter.(standard input):31:0:5-6:  Simil[01;31ma[00mrly,(standard input):37:0:0-1: [01;31ma[00mt(standard input):47:0:0-1: [01;31ma[00m(standard input):50:0:2-3: ch[01;31ma[00mracter.(standard input):52:0:2-3: ch[01;31ma[00mracters(standard input):53:0:0-1: [01;31ma[00mre(standard input):54:0:0-1:
 [01;31ma[00mlphanumerics(standard input):55:0:1-2: ([01;31ma[00ms(standard input):60:0:3-4: loc[01;31ma[00mle)(standard input):61:0:0-1: [01;31ma[00mnd(standard input):64:0:2-3:
@@ -142,6 +161,7 @@ ch[01;31ma[00mracter.(standard input):66:0:2-3: th[01;31ma[00mt(standard inp
 [01;31ma[00mny(standard input):197:0:5-6: regul[01;31ma[00mr(standard input):199:0:2-3: th[01;31ma[00mt(standard input):202:0:1-2: m[01;31ma[00mtch(standard input):207:0:2-3:
 ex[01;31ma[00mmple,(standard input):213:0:1-2: m[01;31ma[00mil(standard input):214:0:4-5: mess[01;31ma[00mges(standard input):215:0:0-1: [01;31ma[00ms(standard input):218:0:0-1: [01;31ma[00m(standard input):219:0:1-2:
 M[01;31ma[00milbox(standard input):220:0:4-5: form[01;31ma[00mt
+Exit status 0.
 #### TEST: agrep  -d \s+ [A-Z] records.in
 Force PATTERN  A  Similarly,  Word-constituent  Note
 
@@ -149,6 +169,7 @@ Set NUM.  Note  Thus,
 
 Set PATTERN.  The  The  PATTERN  For "^From
 Mailbox
+Exit status 0.
 #### TEST: agrep  -d \s+ [A-Z] < records.in
 Force PATTERN  A  Similarly,  Word-constituent  Note
 
@@ -156,12 +177,15 @@ Set NUM.  Note  Thus,
 
 Set PATTERN.  The  The  PATTERN  For "^From
 Mailbox
+Exit status 0.
 #### TEST: agrep -c -d \s+ [A-Z] records.in
 18
 
+Exit status 0.
 #### TEST: agrep -c -d \s+ [A-Z] < records.in
 18
 
+Exit status 0.
 #### TEST: agrep -H -d \s+ [A-Z] records.in
 records.in:Forcerecords.in: PATTERNrecords.in:  Arecords.in:  Similarly,records.in:  Word-constituentrecords.in:  Noterecords.in:
 
@@ -169,6 +193,7 @@ Setrecords.in: NUM.records.in:  Noterecords.in:  Thus,records.in:
 
 Setrecords.in: PATTERN.records.in:  Therecords.in:  Therecords.in:  PATTERNrecords.in:  Forrecords.in: "^Fromrecords.in:
 Mailbox
+Exit status 0.
 #### TEST: agrep -H -d \s+ [A-Z] < records.in
 (standard input):Force(standard input): PATTERN(standard input):  A(standard input):  Similarly,(standard input):  Word-constituent(standard input):  Note(standard input):
 
@@ -176,12 +201,15 @@ Set(standard input): NUM.(standard input):  Note(standard input):  Thus,(standar
 
 Set(standard input): PATTERN.(standard input):  The(standard input):  The(standard input):  PATTERN(standard input):  For(standard input): "^From(standard input):
 Mailbox
+Exit status 0.
 #### TEST: agrep -l -d \s+ [A-Z] records.in
 records.in
 
+Exit status 0.
 #### TEST: agrep -l -d \s+ [A-Z] < records.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -d \s+ [A-Z] records.in
 1:Force2: PATTERN8:  A31:  Similarly,51:  Word-constituent65:  Note81:
 
@@ -189,6 +217,7 @@ Set87: NUM.88:  Note121:  Thus,149:
 
 Set156: PATTERN.157:  The177:  The193:  PATTERN206:  For210: "^From219:
 Mailbox
+Exit status 0.
 #### TEST: agrep -n -d \s+ [A-Z] < records.in
 1:Force2: PATTERN8:  A31:  Similarly,51:  Word-constituent65:  Note81:
 
@@ -196,6 +225,7 @@ Set87: NUM.88:  Note121:  Thus,149:
 
 Set156: PATTERN.157:  The177:  The193:  PATTERN206:  For210: "^From219:
 Mailbox
+Exit status 0.
 #### TEST: agrep -s -d \s+ [A-Z] records.in
 0:Force0: PATTERN0:  A0:  Similarly,0:  Word-constituent0:  Note0:
 
@@ -203,6 +233,7 @@ Set0: NUM.0:  Note0:  Thus,0:
 
 Set0: PATTERN.0:  The0:  The0:  PATTERN0:  For0: "^From0:
 Mailbox
+Exit status 0.
 #### TEST: agrep -s -d \s+ [A-Z] < records.in
 0:Force0: PATTERN0:  A0:  Similarly,0:  Word-constituent0:  Note0:
 
@@ -210,12 +241,15 @@ Set0: NUM.0:  Note0:  Thus,0:
 
 Set0: PATTERN.0:  The0:  The0:  PATTERN0:  For0: "^From0:
 Mailbox
+Exit status 0.
 #### TEST: agrep -M -d \s+ [A-Z] records.in
 Force PATTERN A Similarly, Word-constituent Note Set NUM.  Note Thus, Set PATTERN.  The The PATTERN For
 "^From Mailbox 
+Exit status 0.
 #### TEST: agrep -M -d \s+ [A-Z] < records.in
 Force PATTERN A Similarly, Word-constituent Note Set NUM.  Note Thus, Set PATTERN.  The The PATTERN For
 "^From Mailbox 
+Exit status 0.
 #### TEST: agrep --show-position -d \s+ [A-Z] records.in
 0-1:Force0-1: PATTERN0-1:  A0-1:  Similarly,0-1:  Word-constituent0-1:  Note0-1:
 
@@ -223,6 +257,7 @@ Set0-1: NUM.0-1:  Note0-1:  Thus,0-1:
 
 Set0-1: PATTERN.0-1:  The0-1:  The0-1:  PATTERN0-1:  For2-3: "^From0-1:
 Mailbox
+Exit status 0.
 #### TEST: agrep --show-position -d \s+ [A-Z] < records.in
 0-1:Force0-1: PATTERN0-1:  A0-1:  Similarly,0-1:  Word-constituent0-1:  Note0-1:
 
@@ -230,6 +265,7 @@ Set0-1: NUM.0-1:  Note0-1:  Thus,0-1:
 
 Set0-1: PATTERN.0-1:  The0-1:  The0-1:  PATTERN0-1:  For2-3: "^From0-1:
 Mailbox
+Exit status 0.
 #### TEST: agrep --color -d \s+ [A-Z] records.in
 [01;31mF[00morce [01;31mP[00mATTERN  [01;31mA[00m  [01;31mS[00mimilarly,  [01;31mW[00mord-constituent  [01;31mN[00mote
 
@@ -237,6 +273,7 @@ Mailbox
 
 [01;31mS[00met [01;31mP[00mATTERN.  [01;31mT[00mhe  [01;31mT[00mhe  [01;31mP[00mATTERN  [01;31mF[00mor "^[01;31mF[00mrom
 [01;31mM[00mailbox
+Exit status 0.
 #### TEST: agrep --color -d \s+ [A-Z] < records.in
 [01;31mF[00morce [01;31mP[00mATTERN  [01;31mA[00m  [01;31mS[00mimilarly,  [01;31mW[00mord-constituent  [01;31mN[00mote
 
@@ -244,6 +281,7 @@ Mailbox
 
 [01;31mS[00met [01;31mP[00mATTERN.  [01;31mT[00mhe  [01;31mT[00mhe  [01;31mP[00mATTERN  [01;31mF[00mor "^[01;31mF[00mrom
 [01;31mM[00mailbox
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \s+ [A-Z] records.in
 records.in:1:0:0-1:[01;31mF[00morcerecords.in:2:0:0-1: [01;31mP[00mATTERNrecords.in:8:0:0-1:  [01;31mA[00mrecords.in:31:0:0-1:  [01;31mS[00mimilarly,records.in:51:0:0-1:  [01;31mW[00mord-constituentrecords.in:65:0:0-1:  [01;31mN[00moterecords.in:81:0:0-1:
 
@@ -251,6 +289,7 @@ records.in:1:0:0-1:[01;31mF[00morcerecords.in:2:0:0-1: [01;31mP[00mATTERNrec
 
 [01;31mS[00metrecords.in:156:0:0-1: [01;31mP[00mATTERN.records.in:157:0:0-1:  [01;31mT[00mherecords.in:177:0:0-1:  [01;31mT[00mherecords.in:193:0:0-1:  [01;31mP[00mATTERNrecords.in:206:0:0-1:  [01;31mF[00morrecords.in:210:0:2-3: "^[01;31mF[00mromrecords.in:219:0:0-1:
 [01;31mM[00mailbox
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \s+ [A-Z] < records.in
 (standard input):1:0:0-1:[01;31mF[00morce(standard input):2:0:0-1: [01;31mP[00mATTERN(standard input):8:0:0-1:  [01;31mA[00m(standard input):31:0:0-1:  [01;31mS[00mimilarly,(standard input):51:0:0-1:  [01;31mW[00mord-constituent(standard input):65:0:0-1:  [01;31mN[00mote(standard input):81:0:0-1:
 
@@ -258,158 +297,199 @@ records.in:1:0:0-1:[01;31mF[00morcerecords.in:2:0:0-1: [01;31mP[00mATTERNrec
 
 [01;31mS[00met(standard input):156:0:0-1: [01;31mP[00mATTERN.(standard input):157:0:0-1:  [01;31mT[00mhe(standard input):177:0:0-1:  [01;31mT[00mhe(standard input):193:0:0-1:  [01;31mP[00mATTERN(standard input):206:0:0-1:  [01;31mF[00mor(standard input):210:0:2-3: "^[01;31mF[00mrom(standard input):219:0:0-1:
 [01;31mM[00mailbox
+Exit status 0.
 #### TEST: agrep  -d \.\s+ -M error records.in
 Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep  -d \.\s+ -M error < records.in
 Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -c -d \.\s+ -M error records.in
 1
 
+Exit status 0.
 #### TEST: agrep -c -d \.\s+ -M error < records.in
 1
 
+Exit status 0.
 #### TEST: agrep -H -d \.\s+ -M error records.in
 records.in:Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -H -d \.\s+ -M error < records.in
 (standard input):Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -l -d \.\s+ -M error records.in
 records.in
 
+Exit status 0.
 #### TEST: agrep -l -d \.\s+ -M error < records.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -d \.\s+ -M error records.in
 5:Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -n -d \.\s+ -M error < records.in
 5:Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -s -d \.\s+ -M error records.in
 0:Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -s -d \.\s+ -M error < records.in
 0:Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -M -d \.\s+ -M error records.in
 Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep -M -d \.\s+ -M error < records.in
 Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep --show-position -d \.\s+ -M error records.in
 97-102:Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep --show-position -d \.\s+ -M error < records.in
 97-102:Note that the non-word constituent characters must
 surround the match; they cannot be counted as errors.
 
 
+Exit status 0.
 #### TEST: agrep --color -d \.\s+ -M error records.in
 Note that the non-word constituent characters must
 surround the match; they cannot be counted as [01;31merror[00ms.
 
 
+Exit status 0.
 #### TEST: agrep --color -d \.\s+ -M error < records.in
 Note that the non-word constituent characters must
 surround the match; they cannot be counted as [01;31merror[00ms.
 
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \.\s+ -M error records.in
 records.in:5:0:97-102:Note that the non-word constituent characters must
 surround the match; they cannot be counted as [01;31merror[00ms.
 
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \.\s+ -M error < records.in
 (standard input):5:0:97-102:Note that the non-word constituent characters must
 surround the match; they cannot be counted as [01;31merror[00ms.
 
 
+Exit status 0.
 #### TEST: agrep  -d \.\s+ -M default records.in
 The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep  -d \.\s+ -M default < records.in
 The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -c -d \.\s+ -M default records.in
 1
 
+Exit status 0.
 #### TEST: agrep -c -d \.\s+ -M default < records.in
 1
 
+Exit status 0.
 #### TEST: agrep -H -d \.\s+ -M default records.in
 records.in:The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -H -d \.\s+ -M default < records.in
 (standard input):The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -l -d \.\s+ -M default records.in
 records.in
 
+Exit status 0.
 #### TEST: agrep -l -d \.\s+ -M default < records.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -d \.\s+ -M default records.in
 11:The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -n -d \.\s+ -M default < records.in
 11:The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -s -d \.\s+ -M default records.in
 0:The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -s -d \.\s+ -M default < records.in
 0:The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -M -d \.\s+ -M default records.in
 The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -M -d \.\s+ -M default < records.in
 The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep --show-position -d \.\s+ -M default records.in
 4-11:The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep --show-position -d \.\s+ -M default < records.in
 4-11:The default record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep --color -d \.\s+ -M default records.in
 The [01;31mdefault[00m record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep --color -d \.\s+ -M default < records.in
 The [01;31mdefault[00m record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \.\s+ -M default records.in
 records.in:11:0:4-11:The [01;31mdefault[00m record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \.\s+ -M default < records.in
 (standard input):11:0:4-11:The [01;31mdefault[00m record delimiter
 is the regexp "\n", so by default a record is a line.  
+Exit status 0.
 #### TEST: agrep  -d \n\n -M PATTERN records.in
 Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -428,6 +508,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep  -d \n\n -M PATTERN < records.in
 Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -446,12 +527,15 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -c -d \n\n -M PATTERN records.in
 2
 
+Exit status 0.
 #### TEST: agrep -c -d \n\n -M PATTERN < records.in
 2
 
+Exit status 0.
 #### TEST: agrep -H -d \n\n -M PATTERN records.in
 records.in:Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -470,6 +554,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -H -d \n\n -M PATTERN < records.in
 (standard input):Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -488,12 +573,15 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -l -d \n\n -M PATTERN records.in
 records.in
 
+Exit status 0.
 #### TEST: agrep -l -d \n\n -M PATTERN < records.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -d \n\n -M PATTERN records.in
 1:Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -512,6 +600,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -n -d \n\n -M PATTERN < records.in
 1:Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -530,6 +619,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -s -d \n\n -M PATTERN records.in
 0:Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -548,6 +638,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -s -d \n\n -M PATTERN < records.in
 0:Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -566,6 +657,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -M -d \n\n -M PATTERN records.in
 Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -584,6 +676,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -M -d \n\n -M PATTERN < records.in
 Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -602,6 +695,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep --show-position -d \n\n -M PATTERN records.in
 6-13:Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -620,6 +714,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep --show-position -d \n\n -M PATTERN < records.in
 6-13:Force PATTERN to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -638,6 +733,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep --color -d \n\n -M PATTERN records.in
 Force [01;31mPATTERN[00m to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -656,6 +752,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep --color -d \n\n -M PATTERN < records.in
 Force [01;31mPATTERN[00m to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -674,6 +771,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \n\n -M PATTERN records.in
 records.in:1:0:6-13:Force [01;31mPATTERN[00m to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -692,6 +790,7 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -d \n\n -M PATTERN < records.in
 (standard input):1:0:6-13:Force [01;31mPATTERN[00m to match only whole words.  A "whole word" is a
 substring which either starts at the beginning or the record or is
@@ -710,3 +809,4 @@ any regular expression that does not match the empty string.  For
 example, using -d "^From " defines mail messages as records in a
 Mailbox format file.
  c
+Exit status 0.

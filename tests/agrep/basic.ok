@@ -1,63 +1,83 @@
 #### TEST: agrep  random basic.in
 Some random text here.
 
+Exit status 0.
 #### TEST: agrep  random < basic.in
 Some random text here.
 
+Exit status 0.
 #### TEST: agrep -c random basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -c random < basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -H random basic.in
 basic.in:Some random text here.
 
+Exit status 0.
 #### TEST: agrep -H random < basic.in
 (standard input):Some random text here.
 
+Exit status 0.
 #### TEST: agrep -l random basic.in
 basic.in
 
+Exit status 0.
 #### TEST: agrep -l random < basic.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n random basic.in
 1:Some random text here.
 
+Exit status 0.
 #### TEST: agrep -n random < basic.in
 1:Some random text here.
 
+Exit status 0.
 #### TEST: agrep -s random basic.in
 0:Some random text here.
 
+Exit status 0.
 #### TEST: agrep -s random < basic.in
 0:Some random text here.
 
+Exit status 0.
 #### TEST: agrep -M random basic.in
 Some random text here.
 
+Exit status 0.
 #### TEST: agrep -M random < basic.in
 Some random text here.
 
+Exit status 0.
 #### TEST: agrep --show-position random basic.in
 5-11:Some random text here.
 
+Exit status 0.
 #### TEST: agrep --show-position random < basic.in
 5-11:Some random text here.
 
+Exit status 0.
 #### TEST: agrep --color random basic.in
 Some [01;31mrandom[00m text here.
 
+Exit status 0.
 #### TEST: agrep --color random < basic.in
 Some [01;31mrandom[00m text here.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position random basic.in
 basic.in:1:0:5-11:Some [01;31mrandom[00m text here.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position random < basic.in
 (standard input):1:0:5-11:Some [01;31mrandom[00m text here.
 
+Exit status 0.
 #### TEST: agrep  -v random basic.in
 Foo bar quux.
 Let's hear an example of correct microphone placing.
@@ -67,6 +87,7 @@ Take California.
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep  -v random < basic.in
 Foo bar quux.
 Let's hear an example of correct microphone placing.
@@ -76,12 +97,15 @@ Take California.
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -c -v random basic.in
 7
 
+Exit status 0.
 #### TEST: agrep -c -v random < basic.in
 7
 
+Exit status 0.
 #### TEST: agrep -H -v random basic.in
 basic.in:Foo bar quux.
 basic.in:Let's hear an example of correct microphone placing.
@@ -91,6 +115,7 @@ basic.in:Take California.
 basic.in:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 basic.in:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -H -v random < basic.in
 (standard input):Foo bar quux.
 (standard input):Let's hear an example of correct microphone placing.
@@ -100,12 +125,15 @@ basic.in:They are micro, mega, mini, mono, and multi.
 (standard input):A-ding-ing-ng-WROOOOM-ding-ding-boing!
 (standard input):They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -l -v random basic.in
 basic.in
 
+Exit status 0.
 #### TEST: agrep -l -v random < basic.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -v random basic.in
 2:Foo bar quux.
 3:Let's hear an example of correct microphone placing.
@@ -115,6 +143,7 @@ basic.in
 7:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 8:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -n -v random < basic.in
 2:Foo bar quux.
 3:Let's hear an example of correct microphone placing.
@@ -124,6 +153,7 @@ basic.in
 7:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 8:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -s -v random basic.in
 0:Foo bar quux.
 0:Let's hear an example of correct microphone placing.
@@ -133,6 +163,7 @@ basic.in
 0:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 0:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -s -v random < basic.in
 0:Foo bar quux.
 0:Let's hear an example of correct microphone placing.
@@ -142,6 +173,7 @@ basic.in
 0:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 0:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -M -v random basic.in
 Foo bar quux.
 Let's hear an example of correct microphone placing.
@@ -151,6 +183,7 @@ Take California.
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -M -v random < basic.in
 Foo bar quux.
 Let's hear an example of correct microphone placing.
@@ -160,6 +193,7 @@ Take California.
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --show-position -v random basic.in
 0-13:Foo bar quux.
 0-52:Let's hear an example of correct microphone placing.
@@ -169,6 +203,7 @@ They are micro, mega, mini, mono, and multi.
 0-38:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 0-44:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --show-position -v random < basic.in
 0-13:Foo bar quux.
 0-52:Let's hear an example of correct microphone placing.
@@ -178,6 +213,7 @@ They are micro, mega, mini, mono, and multi.
 0-38:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 0-44:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --color -v random basic.in
 Foo bar quux.
 Let's hear an example of correct microphone placing.
@@ -187,6 +223,7 @@ Take California.
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --color -v random < basic.in
 Foo bar quux.
 Let's hear an example of correct microphone placing.
@@ -196,6 +233,7 @@ Take California.
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -v random basic.in
 basic.in:2:0:0-13:Foo bar quux.
 basic.in:3:0:0-52:Let's hear an example of correct microphone placing.
@@ -205,6 +243,7 @@ basic.in:6:0:0-16:Take California.
 basic.in:7:0:0-38:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 basic.in:8:0:0-44:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -v random < basic.in
 (standard input):2:0:0-13:Foo bar quux.
 (standard input):3:0:0-52:Let's hear an example of correct microphone placing.
@@ -214,183 +253,244 @@ basic.in:8:0:0-44:They are micro, mega, mini, mono, and multi.
 (standard input):7:0:0-38:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 (standard input):8:0:0-44:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep  -i extra basic.in
 Extraordinary.
 
+Exit status 0.
 #### TEST: agrep  -i extra < basic.in
 Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -c -i extra basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -c -i extra < basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -H -i extra basic.in
 basic.in:Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -H -i extra < basic.in
 (standard input):Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -l -i extra basic.in
 basic.in
 
+Exit status 0.
 #### TEST: agrep -l -i extra < basic.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -i extra basic.in
 5:Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -n -i extra < basic.in
 5:Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -s -i extra basic.in
 0:Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -s -i extra < basic.in
 0:Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -M -i extra basic.in
 Extraordinary.
 
+Exit status 0.
 #### TEST: agrep -M -i extra < basic.in
 Extraordinary.
 
+Exit status 0.
 #### TEST: agrep --show-position -i extra basic.in
 0-5:Extraordinary.
 
+Exit status 0.
 #### TEST: agrep --show-position -i extra < basic.in
 0-5:Extraordinary.
 
+Exit status 0.
 #### TEST: agrep --color -i extra basic.in
 [01;31mExtra[00mordinary.
 
+Exit status 0.
 #### TEST: agrep --color -i extra < basic.in
 [01;31mExtra[00mordinary.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -i extra basic.in
 basic.in:5:0:0-5:[01;31mExtra[00mordinary.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -i extra < basic.in
 (standard input):5:0:0-5:[01;31mExtra[00mordinary.
 
+Exit status 0.
 #### TEST: agrep  -e -ding basic.in
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep  -e -ding < basic.in
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -c -e -ding basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -c -e -ding < basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -H -e -ding basic.in
 basic.in:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -H -e -ding < basic.in
 (standard input):A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -l -e -ding basic.in
 basic.in
 
+Exit status 0.
 #### TEST: agrep -l -e -ding < basic.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -e -ding basic.in
 7:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -n -e -ding < basic.in
 7:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -s -e -ding basic.in
 0:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -s -e -ding < basic.in
 0:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -M -e -ding basic.in
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -M -e -ding < basic.in
 A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep --show-position -e -ding basic.in
 1-6:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep --show-position -e -ding < basic.in
 1-6:A-ding-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep --color -e -ding basic.in
 A[01;31m-ding[00m-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep --color -e -ding < basic.in
 A[01;31m-ding[00m-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -e -ding basic.in
 basic.in:7:0:1-6:A[01;31m-ding[00m-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -e -ding < basic.in
 (standard input):7:0:1-6:A[01;31m-ding[00m-ing-ng-WROOOOM-ding-ding-boing!
 
+Exit status 0.
 #### TEST: agrep  -w micro basic.in
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep  -w micro < basic.in
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -c -w micro basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -c -w micro < basic.in
 1
 
+Exit status 0.
 #### TEST: agrep -H -w micro basic.in
 basic.in:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -H -w micro < basic.in
 (standard input):They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -l -w micro basic.in
 basic.in
 
+Exit status 0.
 #### TEST: agrep -l -w micro < basic.in
 (standard input)
 
+Exit status 0.
 #### TEST: agrep -n -w micro basic.in
 8:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -n -w micro < basic.in
 8:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -s -w micro basic.in
 0:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -s -w micro < basic.in
 0:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -M -w micro basic.in
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -M -w micro < basic.in
 They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --show-position -w micro basic.in
 9-14:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --show-position -w micro < basic.in
 9-14:They are micro, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --color -w micro basic.in
 They are [01;31mmicro[00m, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep --color -w micro < basic.in
 They are [01;31mmicro[00m, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -w micro basic.in
 basic.in:8:0:9-14:They are [01;31mmicro[00m, mega, mini, mono, and multi.
 
+Exit status 0.
 #### TEST: agrep -H -n -s --color --show-position -w micro < basic.in
 (standard input):8:0:9-14:They are [01;31mmicro[00m, mega, mini, mono, and multi.
 
+Exit status 0.

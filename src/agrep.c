@@ -174,6 +174,7 @@ static int delim_len;      /* Length of delimiter before record. */
 static int next_delim_len; /* Length of delimiter after record. */
 static int delim_after = 1;/* If true, print the delimiter after the record. */
 static int at_eof;
+static int have_matches;   /* If true, matches have been found. */
 
 static int invert_match;   /* Show only non-matching records. */
 static int print_filename; /* Output filename. */
@@ -370,6 +371,7 @@ tre_agrep_handle_file(const char *filename)
 	  || (invert_match && errcode == REG_NOMATCH))
 	{
 	  count++;
+	  have_matches = 1;
 	  if (best_match)
 	    {
 	      if (best_match == 1)
@@ -777,5 +779,5 @@ PARTICULAR PURPOSE.\n"));
 	tre_agrep_handle_file(argv[optind++]);
     }
 
-  return 0;
+  return have_matches == 0;
 }
