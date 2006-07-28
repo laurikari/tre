@@ -946,7 +946,6 @@ tre_parse(tre_parse_ctx_t *ctx)
 
   if (!ctx->nofirstsub)
     {
-      STACK_PUSH(stack, voidptr, (void*)ctx->re);
       STACK_PUSH(stack, int, ctx->submatch_id);
       STACK_PUSH(stack, int, PARSE_MARK_FOR_SUBMATCH);
       ctx->submatch_id++;
@@ -1708,6 +1707,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 	case PARSE_RESTORE_CFLAGS:
 	  ctx->cflags = tre_stack_pop_int(stack);
+	  break;
+
+	default:
+	  assert(0);
 	  break;
 	}
     }

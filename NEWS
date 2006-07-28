@@ -5,6 +5,9 @@ Version 0.7.5
 
   - Bug fixes:
     - agrep now correctly returns exit code 1 when no matches found.
+    - Fixed regexp parser bug affecting big-endian 64 bit
+      architectures (sparc, ppc).  The bug caused all regexps to match
+      an empty string and nothing else.
 
 Version 0.7.4
 
