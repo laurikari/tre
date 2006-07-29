@@ -2,7 +2,7 @@
 
 <p>
 This document describes the POSIX 1003.2 extended RE (ERE) syntax and
-the basic RE (BRE) syntax as implented by TRE, and the TRE extensions
+the basic RE (BRE) syntax as implemented by TRE, and the TRE extensions
 to the ERE syntax.  A simple Extended Backus-Naur Form (EBNF) style
 notation is used to describe the grammar.
 </p>
@@ -70,8 +70,9 @@ expression controlling approximate matching parameters for the <i>atom</i>.
      |   <a href="#assertion"><i>assertion</i></a>
      |   <a href="#literal"><i>literal</i></a>
      |   <a href="#backref"><i>back-reference</i></a>
-     |   <b>"(?"</b> [<b>"i" "n" "r"</b>]* (<b>"-"</b> [<b>"i" "n" "r"</b>]*)? <b>")"</b> <i>extended-regexp</i>
-     |   <b>"(?"</b> [<b>"i" "n" "r"</b>]* (<b>"-"</b> [<b>"i" "n" "r"</b>]*)? <b>":"</b> <i>extended-regexp</i> <b>")"</b>
+     |   <b>"(?#"</b> <i>comment-text</i> <b>")"</b>
+     |   <b>"(?"</b> <a href="#options"><i>options</i></a> <b>")"</b> <i>extended-regexp</i>
+     |   <b>"(?"</b> <a href="#options"><i>options</i></a> <b>":"</b> <i>extended-regexp</i> <b>")"</b>
 </pre>
 </td></tr>
 </table>
@@ -87,7 +88,10 @@ href="api.html">API manual</a>) is specified, the newline
 character is not matched.
 </p>
 
-
+<p>
+<tt>Comment-text</tt> can contain any characters except for a closing parenthesis <tt>)</tt>. The text in the comment is
+completely ignored by the regex parser and it used solely for readability purposes.
+</p>
 
 <h3>Repeat operators</h3>
 <a name="repeat-operator"></a>
@@ -332,7 +336,7 @@ An assertion-character can be any of the following:
 <p>
 A literal is either an ordinary character (a character that has no
 other significance in the context), an 8 bit hexadecimal encoded
-character (e.g. <tt>\x1B</tt>9, a wide hexadecimal encoded character
+character (e.g. <tt>\x1B</tt>), a wide hexadecimal encoded character
 (e.g. <tt>\x{263a}</tt>), or an escaped character.  An escaped
 character is a <tt>\</tt> followed by any character, and matches that
 character.  Escaping can be used to match characters which have a
@@ -380,6 +384,29 @@ but many matchers, including TRE, implement back references for both
 EREs and BREs.
 </p>
 
+<h3>Options</h3>
+<a name="options"></a>
+<table bgcolor="#e0e0f0" cellpadding="10">
+<tr><td>
+<pre>
+<i>options</i> ::= [<b>"i" "n" "r" "U"</b>]* (<b>"-"</b> [<b>"i" "n" "r" "U"</b>]*)?
+</pre>
+</td></tr>
+</table>
+
+Options allow compile time options to be turned on/off for particular parts of the 
+regular expression. The options equate to several compile time options specified to
+the regcomp API function. If the option is specified in the first section, it is
+turned on. If it is specified in the second section (after the <tt>-</tt>), it is
+turned off.
+<ul>
+<li>i - Case insensitive.
+<li>n - Forces special handling of the new line character. See the REG_NEWLINE flag in 
+the <a href="tre-api.html">API Manual</a>.
+<li>r - Causes the regex to be matched in a right associative manner rather than the normal
+left associative manner.
+<li>U - Forces repetition operators to be non-greedy unless a <tt>?</tt> is appended.
+</ul>
 <h2>BRE Syntax</h2>
 
 <p>

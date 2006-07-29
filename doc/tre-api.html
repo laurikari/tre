@@ -110,11 +110,11 @@ argument as a literal string, that is, all characters will be
 considered ordinary.  This is a nonstandard extension, compatible with
 but not specified by POSIX.</dd>
 
-<dt><tt>REG_NOSPEC</tt><dt>
+<dt><tt>REG_NOSPEC</tt></dt>
 <dd>Same as <tt>REG_LITERAL</tt>.  This flag is provided for
 compatibility with BSD.</dd>
 
-<dt><tt>REG_RIGHT_ASSOC</tt><dt>
+<dt><tt>REG_RIGHT_ASSOC</tt></dt>
 <dd>By default, concatenation is left associative in TRE, as per
 the grammar given in the <a
 href="http://www.opengroup.org/onlinepubs/007904975/basedefs/xbd_chap09.html">base
@@ -122,6 +122,12 @@ specifications on regular expressions</a> of Std 1003.1-2001 (POSIX).
 This flag flips associativity of concatenation to right associative.
 Associativity can have an effect on how a match is divided into
 submatches, but does not change what is matched by the entire regexp.
+</dd>
+
+<dt><tt>REG_UNGREEDY</tt></dt>
+<dd>By default, repetition operators are greedy in TRE as per Std 1003.1-2001 (POSIX) and
+can be forced to be non-greedy by appending a <tt>?</tt> character. This flag reverses this behavior
+by making the operators non-greedy by default and greedy when a <tt>?</tt> is specified.</dd>
 </dl>
 </blockquote>
 

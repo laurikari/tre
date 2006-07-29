@@ -3,6 +3,8 @@ Version 0.7.5
 
   - Makefile and source code distribution problems fixed.
 
+  - Documentation updates.
+
   - Bug fixes:
     - agrep now correctly returns exit code 1 when no matches found.
     - Fixed regexp parser bug affecting big-endian 64 bit
