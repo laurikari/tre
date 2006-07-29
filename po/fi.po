@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TRE 0.7.4\n"
 "Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
-"POT-Creation-Date: 2006-05-24 19:04+0300\n"
+"POT-Creation-Date: 2006-07-29 11:41+0300\n"
 "PO-Revision-Date: 2002-07-29 23:46+0300\n"
 "Last-Translator: Ville Laurikari <vl@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -70,8 +70,8 @@ msgid "Out of memory"
 msgstr "Muisti loppu"
 
 #: lib/regerror.c:56
-msgid "XXX"
-msgstr "XXX"
+msgid "Invalid use of repetition operators"
+msgstr "Virheellinen toisto-operaattorin käyttö"
 
 #: lib/regerror.c:69
 msgid "Unknown error"

@@ -727,6 +727,14 @@ main(int argc, char **argv)
   test_comp("(Ab|cD)*", REG_EXTENDED | REG_ICASE, 0);
   test_exec("aBcD", 0, REG_OK, 0, 4, 2, 4, END);
 
+  test_comp("a**", REG_EXTENDED, REG_BADRPT);
+  test_comp("a*+", REG_EXTENDED, REG_BADRPT);
+  test_comp("a+*", REG_EXTENDED, REG_BADRPT);
+  test_comp("a++", REG_EXTENDED, REG_BADRPT);
+  test_comp("a?+", REG_EXTENDED, REG_BADRPT);
+  test_comp("a?*", REG_EXTENDED, REG_BADRPT);
+  test_comp("a{1,2}*", REG_EXTENDED, REG_BADRPT);
+  test_comp("a{1,2}+", REG_EXTENDED, REG_BADRPT);
 
   /*
    * Many of the following tests were mostly inspired by (or copied from) the

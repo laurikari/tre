@@ -5,6 +5,18 @@ Version 0.7.5
 
   - Documentation updates.
 
+  - Adding a "+" or "*" after another repetition operator is now an
+    error instead of an application of that operator and gives the
+    REG_BADRPT error.  Adding a "?" means matching as few characters
+    as possible and is still allowed.
+
+    This change was made to avoid confusion with "possessive"
+    (non-backtracking) quantifiers.  In Java (and .NET?) adding a "+"
+    means that the matcher doesn't backtrack over that point.  In
+    previous versions of TRE adding a "+" or "*" caused the
+    backtracking matcher to backtrack a lot more instead of less.  In
+    some cases this caused very slow execution.
+
   - Bug fixes:
     - agrep now correctly returns exit code 1 when no matches found.
     - Fixed regexp parser bug affecting big-endian 64 bit

@@ -40,20 +40,20 @@
 /* Error message strings for error codes listed in `regex.h'.  This list
    needs to be in sync with the codes listed there, naturally. */
 static const char *tre_error_messages[] =
-  { gettext_noop("No error"),			   /* REG_OK */
-    gettext_noop("No match"),			   /* REG_NOMATCH */
-    gettext_noop("Invalid regexp"),		   /* REG_BADPAT */
-    gettext_noop("Unknown collating element"),	   /* REG_ECOLLATE */
-    gettext_noop("Unknown character class name"),  /* REG_ECTYPE */
-    gettext_noop("Trailing backslash"),		   /* REG_EESCAPE */
-    gettext_noop("Invalid back reference"),	   /* REG_ESUBREG */
-    gettext_noop("Missing ']'"),		   /* REG_EBRACK */
-    gettext_noop("Missing ')'"),		   /* REG_EPAREN */
-    gettext_noop("Missing '}'"),		   /* REG_EBRACE */
-    gettext_noop("Invalid contents of {}"),	   /* REG_BADBR */
-    gettext_noop("Invalid character range"),	   /* REG_ERANGE */
-    gettext_noop("Out of memory"),		   /* REG_ESPACE */
-    gettext_noop("XXX")				   /* REG_BADRPT */
+  { gettext_noop("No error"),				 /* REG_OK */
+    gettext_noop("No match"),				 /* REG_NOMATCH */
+    gettext_noop("Invalid regexp"),			 /* REG_BADPAT */
+    gettext_noop("Unknown collating element"),		 /* REG_ECOLLATE */
+    gettext_noop("Unknown character class name"),	 /* REG_ECTYPE */
+    gettext_noop("Trailing backslash"),			 /* REG_EESCAPE */
+    gettext_noop("Invalid back reference"),		 /* REG_ESUBREG */
+    gettext_noop("Missing ']'"),			 /* REG_EBRACK */
+    gettext_noop("Missing ')'"),			 /* REG_EPAREN */
+    gettext_noop("Missing '}'"),			 /* REG_EBRACE */
+    gettext_noop("Invalid contents of {}"),		 /* REG_BADBR */
+    gettext_noop("Invalid character range"),		 /* REG_ERANGE */
+    gettext_noop("Out of memory"),			 /* REG_ESPACE */
+    gettext_noop("Invalid use of repetition operators")	 /* REG_BADRPT */
   };
 
 size_t

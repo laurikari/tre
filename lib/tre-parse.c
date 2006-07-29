@@ -825,10 +825,18 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 
 
   /* Parse trailing '?' marking minimal repetition. */
-  if (r < ctx->re_end && *r == CHAR_QUESTIONMARK)
+  if (r < ctx->re_end)
     {
-      minimal = !(ctx->cflags & REG_UNGREEDY);
-      r++;
+      if (*r == CHAR_QUESTIONMARK)
+	{
+	  minimal = !(ctx->cflags & REG_UNGREEDY);
+	  r++;
+	}
+      else if (*r == CHAR_STAR || *r == CHAR_PLUS)
+	{
+	  /* These are reserved for future extensions. */
+	  return REG_BADRPT;
+	}
     }
 
   /* Create the AST node(s). */
@@ -1125,11 +1133,19 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  rep_max = 1;
 		tmp_re = ctx->re;
 
-		if (ctx->re + 1 < ctx->re_end
-		    && *(ctx->re + 1) == CHAR_QUESTIONMARK)
+		if (ctx->re + 1 < ctx->re_end)
 		  {
-		    minimal = !(ctx->cflags & REG_UNGREEDY);
-		    ctx->re++;
+		    if (*(ctx->re + 1) == CHAR_QUESTIONMARK)
+		      {
+			minimal = !(ctx->cflags & REG_UNGREEDY);
+			ctx->re++;
+		      }
+		    else if (*(ctx->re + 1) == CHAR_STAR
+			     || *(ctx->re + 1) == CHAR_PLUS)
+		      {
+			/* These are reserved for future extensions. */
+			return REG_BADRPT;
+		      }
 		  }
 
 		DPRINT(("tre_parse: %s star: '%.*" STRF "'\n",

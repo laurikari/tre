@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tre\n"
 "Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
-"POT-Creation-Date: 2006-05-24 19:04+0300\n"
+"POT-Creation-Date: 2006-07-29 11:41+0300\n"
 "PO-Revision-Date: 2006-05-23 21:27+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -69,8 +69,8 @@ msgid "Out of memory"
 msgstr "Slut på minne"
 
 #: lib/regerror.c:56
-msgid "XXX"
-msgstr "XXX"
+msgid "Invalid use of repetition operators"
+msgstr ""
 
 #: lib/regerror.c:69
 msgid "Unknown error"
