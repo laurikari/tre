@@ -63,8 +63,8 @@ msgstr "Ogiltigt innehåll i {}"
 msgid "Invalid character range"
 msgstr "Ogiltigt teckenomfång"
 
-#: lib/regerror.c:55 src/agrep.c:254 src/agrep.c:268 src/agrep.c:312
-#: src/agrep.c:653 src/agrep.c:692
+#: lib/regerror.c:55 src/agrep.c:255 src/agrep.c:269 src/agrep.c:313
+#: src/agrep.c:655 src/agrep.c:694
 msgid "Out of memory"
 msgstr "Slut på minne"
 
@@ -208,25 +208,25 @@ msgstr ""
 msgid "Report bugs to: "
 msgstr "Rapportera fel till: "
 
-#: src/agrep.c:228
+#: src/agrep.c:229
 #, c-format
 msgid "Error reading from %s: %s\n"
 msgstr "Fel vid läsning från %s: %s\n"
 
-#: src/agrep.c:327
+#: src/agrep.c:328
 msgid "Cannot use -B when reading from standard input."
 msgstr "Kan inte använda -B vid inläsning från standard in."
 
-#: src/agrep.c:331
+#: src/agrep.c:332
 msgid "(standard input)"
 msgstr "(standard in)"
 
-#: src/agrep.c:576
+#: src/agrep.c:578
 #, c-format
 msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
 msgstr "Copyright © 2002-2006 Ville Laurikari.\n"
 
-#: src/agrep.c:577
+#: src/agrep.c:579
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
@@ -237,14 +237,14 @@ msgstr ""
 "garanti; inte ens för SÄLJBARHET eller LÄMPLIGHET FÖR ETT SPECIFIKT "
 "ÄNDAMÅL.\n"
 
-#: src/agrep.c:707
+#: src/agrep.c:709
 msgid "Error in search pattern"
 msgstr "Fel i sökmönster"
 
-#: src/agrep.c:718
+#: src/agrep.c:720
 msgid "Error in record delimiter pattern"
 msgstr "Fel i postavgränsande mönster"
 
-#: src/agrep.c:725
+#: src/agrep.c:727
 msgid "Record delimiter pattern must not match an empty string"
 msgstr "Postavgränsande mönster får inte matcha en tom sträng"

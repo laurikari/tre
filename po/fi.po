@@ -64,8 +64,8 @@ msgstr "Virhe {} sisällä"
 msgid "Invalid character range"
 msgstr "Virheellinen merkkialue"
 
-#: lib/regerror.c:55 src/agrep.c:254 src/agrep.c:268 src/agrep.c:312
-#: src/agrep.c:653 src/agrep.c:692
+#: lib/regerror.c:55 src/agrep.c:255 src/agrep.c:269 src/agrep.c:313
+#: src/agrep.c:655 src/agrep.c:694
 msgid "Out of memory"
 msgstr "Muisti loppu"
 
@@ -220,25 +220,25 @@ msgstr ""
 msgid "Report bugs to: "
 msgstr "Raportoi virheistä osoitteeseen: "
 
-#: src/agrep.c:228
+#: src/agrep.c:229
 #, c-format
 msgid "Error reading from %s: %s\n"
 msgstr "Ei voi lukea kohteesta %s: %s\n"
 
-#: src/agrep.c:327
+#: src/agrep.c:328
 msgid "Cannot use -B when reading from standard input."
 msgstr "Vakiosyötteestä luettaessa -B ei ole sallittu."
 
-#: src/agrep.c:331
+#: src/agrep.c:332
 msgid "(standard input)"
 msgstr "(vakiosyöte)"
 
-#: src/agrep.c:576
+#: src/agrep.c:578
 #, c-format
 msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
 msgstr "Tekijänoikeus © 2002-2006 Ville Laurikari.\n"
 
-#: src/agrep.c:577
+#: src/agrep.c:579
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
@@ -249,14 +249,14 @@ msgstr ""
 "kaupallisesti hyväksyttävästä laadusta tai soveltuvuudesta tiettyyn\n"
 "tarkoitukseen.\n"
 
-#: src/agrep.c:707
+#: src/agrep.c:709
 msgid "Error in search pattern"
 msgstr "Virhe hakulausekkeessa"
 
-#: src/agrep.c:718
+#: src/agrep.c:720
 msgid "Error in record delimiter pattern"
 msgstr "Virhe tietueiden erotinlausekkeessa"
 
-#: src/agrep.c:725
+#: src/agrep.c:727
 msgid "Record delimiter pattern must not match an empty string"
 msgstr "Tietueiden erotinlauseke ei saa sopia tyhjään merkkijonoon"
