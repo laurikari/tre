@@ -1107,9 +1107,11 @@ tre_parse(tre_parse_ctx_t *ctx)
 #endif /* REG_LITERAL */
 	  switch (*ctx->re)
 	    {
-	    case CHAR_STAR:
 	    case CHAR_PLUS:
 	    case CHAR_QUESTIONMARK:
+	      if (!(ctx->cflags & REG_EXTENDED))
+		break;
+	    case CHAR_STAR:
 	      {
 		tre_ast_node_t *tmp_node;
 		int minimal = (ctx->cflags & REG_UNGREEDY) ? 1 : 0;

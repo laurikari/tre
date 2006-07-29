@@ -769,6 +769,11 @@ main(int argc, char **argv)
   test_exec("a", 0, REG_OK, 0, 1, END);
   test_exec("\n", 0, REG_OK, 0, 1, END);
 
+  test_comp("(+|?)", 0, 0);
+  test_exec("(+|?)", 0, REG_OK, 0, 5, END);
+  test_exec("+|?", 0, REG_NOMATCH);
+  test_exec("(+)", 0, REG_NOMATCH);
+  test_exec("+", 0, REG_NOMATCH);
 
 
   /*
