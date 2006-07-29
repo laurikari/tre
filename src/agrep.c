@@ -45,7 +45,7 @@
 
 /* Short options. */
 static char const short_options[] =
-"cd:Me:fhHiklnsvwBD:E:I:S:yV0123456789";
+"cd:e:hiklnsvwyBD:E:HI:MS:V0123456789";
 
 static int show_help;
 char *program_name;
@@ -59,31 +59,31 @@ enum {
 /* Long option equivalences. */
 static struct option const long_options[] =
 {
+  {"best-match", no_argument, NULL, 'B'},
+  {"color", no_argument, NULL, COLOR_OPTION},
+  {"colour", no_argument, NULL, COLOR_OPTION},
   {"count", no_argument, NULL, 'c'},
+  {"delete-cost", required_argument, NULL, 'D'},
   {"delimiter", no_argument, NULL, 'd'},
   {"delimiter-after", no_argument, NULL, 'M'},
-  {"regexp", required_argument, NULL, 'e'},
-  {"no-filename", no_argument, NULL, 'h'},
-  {"with-filename", no_argument, NULL, 'H'},
-  {"ignore-case", no_argument, NULL, 'i'},
-  {"literal", no_argument, NULL, 'k'},
   {"files-with-matches", no_argument, NULL, 'l'},
-  {"record-number", no_argument, NULL, 'n'},
-  {"line-number", no_argument, NULL, 'n'},
-  {"show-cost", no_argument, NULL, 's'},
-  {"invert-match", no_argument, NULL, 'v'},
-  {"word-regexp", no_argument, NULL, 'w'},
-  {"best-match", no_argument, NULL, 'B'},
-  {"delete-cost", required_argument, NULL, 'D'},
-  {"max-errors", required_argument, NULL, 'E'},
-  {"insert-cost", required_argument, NULL, 'I'},
-  {"substitute-cost", required_argument, NULL, 'S'},
-  {"nothing", no_argument, NULL, 'y'},
-  {"version", no_argument, NULL, 'V'},
   {"help", no_argument, &show_help, 1},
-  {"colour", no_argument, NULL, COLOR_OPTION},
-  {"color", no_argument, NULL, COLOR_OPTION},
+  {"ignore-case", no_argument, NULL, 'i'},
+  {"insert-cost", required_argument, NULL, 'I'},
+  {"invert-match", no_argument, NULL, 'v'},
+  {"line-number", no_argument, NULL, 'n'},
+  {"literal", no_argument, NULL, 'k'},
+  {"max-errors", required_argument, NULL, 'E'},
+  {"no-filename", no_argument, NULL, 'h'},
+  {"nothing", no_argument, NULL, 'y'},
+  {"record-number", no_argument, NULL, 'n'},
+  {"regexp", required_argument, NULL, 'e'},
+  {"show-cost", no_argument, NULL, 's'},
   {"show-position", no_argument, NULL, SHOW_POSITION_OPTION},
+  {"substitute-cost", required_argument, NULL, 'S'},
+  {"version", no_argument, NULL, 'V'},
+  {"with-filename", no_argument, NULL, 'H'},
+  {"word-regexp", no_argument, NULL, 'w'},
   {0, 0, 0, 0}
 };
 
@@ -501,29 +501,21 @@ main(int argc, char **argv)
 	  if (delim_after == 1)
 	    delim_after = 0;
 	  break;
-	case 'M':
-	  /* Print delimiters after matches instead of before. */
-	  delim_after = 2;
-	  break;
 	case 'e':
 	  /* Regexp to use. */
 	  regexp = optarg;
-	  break;
-	case 'k':
-	  /* The pattern is a literal string. */
-	  literal_string = 1;
 	  break;
 	case 'h':
 	  /* Don't prefix filename on output if there are multiple files. */
 	  print_filename = 0;
 	  break;
-	case 'H':
-	  /* Always print filename prefix on output. */
-	  print_filename = 1;
-	  break;
 	case 'i':
 	  /* Ignore case. */
 	  comp_flags |= REG_ICASE;
+	  break;
+	case 'k':
+	  /* The pattern is a literal string. */
+	  literal_string = 1;
 	  break;
 	case 'l':
 	  /* Only print files that contain matches. */
@@ -561,9 +553,17 @@ main(int argc, char **argv)
 	  match_params.max_cost = atoi(optarg);
 	  max_cost_set = 1;
 	  break;
+	case 'H':
+	  /* Always print filename prefix on output. */
+	  print_filename = 1;
+	  break;
 	case 'I':
 	  /* Set the cost of an insertion. */
 	  match_params.cost_ins = atoi(optarg);
+	  break;
+	case 'M':
+	  /* Print delimiters after matches instead of before. */
+	  delim_after = 2;
 	  break;
 	case 'S':
 	  /* Set the cost of a substitution. */
