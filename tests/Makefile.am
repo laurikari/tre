@@ -2,8 +2,9 @@
 
 SUBDIRS = agrep
 
-check_PROGRAMS = retest bench randtest test-str-source
-LDADD = $(LTLIBINTL)
+check_PROGRAMS = retest randtest test-str-source
+EXTRA_PROGRAMS = bench
+LDADD = ../gnulib/lib/libgnu.la $(LTLIBINTL)
 
 retest_SOURCES = retest.c
 retest_LDFLAGS = -static
@@ -12,11 +13,11 @@ randtest_SOURCES = randtest.c
 randtest_LDFLAGS = -static
 
 bench_SOURCES = bench.c
-bench_LDADD = ../lib/libtre.la -lm $(LDADD)
+bench_LDADD = ../lib/libtre.la $(LDADD) -lm
 bench_LDFLAGS = -static
 
 test_str_source_SOURCES = test-str-source.c
-test_str_source_LDADD = ../lib/libtre.la -lm $(LDADD)
+test_str_source_LDADD = ../lib/libtre.la $(LDADD) -lm
 
 if TRE_DEBUG
   retest_LDADD = ../lib/libtre.la $(LDADD)
