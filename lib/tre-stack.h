@@ -78,10 +78,10 @@ declare_popf(int, int);
 
 #define STACK_PUSHR(s, typetag, value)					      \
   {									      \
-    reg_errcode_t status;						      \
-    status = tre_stack_push_ ## typetag(s, value);			      \
-    if (status != REG_OK)						      \
-      return status;							      \
+    reg_errcode_t _status;						      \
+    _status = tre_stack_push_ ## typetag(s, value);			      \
+    if (_status != REG_OK)						      \
+      return _status;							      \
   }
 
 #endif /* TRE_STACK_H */

@@ -192,7 +192,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
       if (status != REG_OK)
 	break;
 
-      symbol = tre_stack_pop_int(stack);
+      symbol = (tre_addtags_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
 	{
 
@@ -719,7 +719,7 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
       if (status != REG_OK)
 	break;
 
-      symbol = tre_stack_pop_int(stack);
+      symbol = (tre_copyast_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
 	{
 	case COPY_SET_RESULT_PTR:
@@ -767,18 +767,18 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	    case UNION:
 	      {
 		tre_union_t *uni = node->obj;
-		tre_union_t *copy;
+		tre_union_t *tmp;
 		*result = tre_ast_new_union(mem, uni->left, uni->right);
 		if (*result == NULL)
 		  {
 		    status = REG_ESPACE;
 		    break;
 		  }
-		copy = (*result)->obj;
-		result = &copy->left;
+		tmp = (*result)->obj;
+		result = &tmp->left;
 		STACK_PUSHX(stack, voidptr, uni->right);
 		STACK_PUSHX(stack, int, COPY_RECURSE);
-		STACK_PUSHX(stack, voidptr, &copy->right);
+		STACK_PUSHX(stack, voidptr, &tmp->right);
 		STACK_PUSHX(stack, int, COPY_SET_RESULT_PTR);
 		STACK_PUSHX(stack, voidptr, uni->left);
 		STACK_PUSHX(stack, int, COPY_RECURSE);
@@ -787,21 +787,21 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	    case CATENATION:
 	      {
 		tre_catenation_t *cat = node->obj;
-		tre_catenation_t *copy;
+		tre_catenation_t *tmp;
 		*result = tre_ast_new_catenation(mem, cat->left, cat->right);
 		if (*result == NULL)
 		  {
 		    status = REG_ESPACE;
 		    break;
 		  }
-		copy = (*result)->obj;
-		copy->left = NULL;
-		copy->right = NULL;
-		result = &copy->left;
+		tmp = (*result)->obj;
+		tmp->left = NULL;
+		tmp->right = NULL;
+		result = &tmp->left;
 
 		STACK_PUSHX(stack, voidptr, cat->right);
 		STACK_PUSHX(stack, int, COPY_RECURSE);
-		STACK_PUSHX(stack, voidptr, &copy->right);
+		STACK_PUSHX(stack, voidptr, &tmp->right);
 		STACK_PUSHX(stack, int, COPY_SET_RESULT_PTR);
 		STACK_PUSHX(stack, voidptr, cat->left);
 		STACK_PUSHX(stack, int, COPY_RECURSE);
@@ -873,7 +873,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 
       DPRINT(("pos_add %d\n", pos_add));
 
-      symbol = tre_stack_pop_int(stack);
+      symbol = (tre_expand_ast_symbol_t)tre_stack_pop_int(stack);
       node = tre_stack_pop_voidptr(stack);
       switch (symbol)
 	{
@@ -1372,7 +1372,7 @@ tre_compute_nfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree)
       tre_nfl_stack_symbol_t symbol;
       tre_ast_node_t *node;
 
-      symbol = tre_stack_pop_int(stack);
+      symbol = (tre_nfl_stack_symbol_t)tre_stack_pop_int(stack);
       node = tre_stack_pop_voidptr(stack);
       switch (symbol)
 	{
