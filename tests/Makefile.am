@@ -7,14 +7,11 @@ EXTRA_PROGRAMS = bench
 LDADD = ../gnulib/lib/libgnu.la $(LTLIBINTL)
 
 retest_SOURCES = retest.c
-retest_LDFLAGS = -static
 
 randtest_SOURCES = randtest.c
-randtest_LDFLAGS = -static
 
 bench_SOURCES = bench.c
 bench_LDADD = ../lib/libtre.la $(LDADD) -lm
-bench_LDFLAGS = -static
 
 test_str_source_SOURCES = test-str-source.c
 test_str_source_LDADD = ../lib/libtre.la $(LDADD) -lm
