@@ -45,7 +45,7 @@
 
 /* Short options. */
 static char const short_options[] =
-"cd:e:hiklnsvwyBD:E:HI:MS:V0123456789";
+"cd:e:hiklnqsvwyBD:E:HI:MS:V0123456789";
 
 static int show_help;
 char *program_name;
@@ -76,10 +76,12 @@ static struct option const long_options[] =
   {"max-errors", required_argument, NULL, 'E'},
   {"no-filename", no_argument, NULL, 'h'},
   {"nothing", no_argument, NULL, 'y'},
+  {"quiet", no_argument, NULL, 'q'},
   {"record-number", no_argument, NULL, 'n'},
   {"regexp", required_argument, NULL, 'e'},
   {"show-cost", no_argument, NULL, 's'},
   {"show-position", no_argument, NULL, SHOW_POSITION_OPTION},
+  {"silent", no_argument, NULL, 'q'},
   {"substitute-cost", required_argument, NULL, 'S'},
   {"version", no_argument, NULL, 'V'},
   {"with-filename", no_argument, NULL, 'H'},
@@ -138,6 +140,7 @@ Output control:\n\
   -M, --delimiter-after     print record delimiter after record if -d is used\n\
   -n, --record-number	    print record number with output\n\
       --line-number         same as -n\n\
+  -q, --quiet, --silent	    suppress all normal output\n\
   -s, --show-cost	    print match cost with output\n\
       --colour, --color     use markers to distinguish the matching \
 strings\n\
@@ -187,6 +190,7 @@ static int print_position;  /* Show start and end offsets for matches. */
 
 static int best_match;	     /* Output only best matches. */
 static int best_cost;	     /* Best match cost found so far. */
+static int be_silent;	     /* Never output anything */
 
 static regaparams_t match_params;
 
@@ -378,6 +382,9 @@ tre_agrep_handle_file(const char *filename)
       if ((!invert_match && errcode == REG_OK)
 	  || (invert_match && errcode == REG_NOMATCH))
 	{
+	  if (be_silent)
+	    exit(0);
+
 	  count++;
 	  have_matches = 1;
 	  if (best_match)
@@ -444,7 +451,7 @@ tre_agrep_handle_file(const char *filename)
 	}
     }
 
-  if (count_matches && !best_match)
+  if (count_matches && !best_match && !be_silent)
     {
       if (print_filename)
 	printf("%s:", filename);
@@ -487,6 +494,7 @@ main(int argc, char **argv)
   /* Defaults. */
   print_filename = -1;
   print_cost = 0;
+  be_silent = 0;
   regaparams_default(&match_params);
   match_params.max_cost = 0;
 
@@ -532,6 +540,9 @@ main(int argc, char **argv)
 	case 'n':
 	  /* Print record number of matching record. */
 	  print_recnum = 1;
+	  break;
+	case 'q':
+	  be_silent = 1;
 	  break;
 	case 's':
 	  /* Print match cost of matching record. */

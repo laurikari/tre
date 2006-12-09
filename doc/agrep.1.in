@@ -132,6 +132,10 @@ stop on the first match.
 Prefix each output record with its sequence number in the input file.
 The number of the first record is 1.
 .TP
+.BR \-q ", " \-\^\-quiet ", " \-\^\-silent
+Do not write anything to standard output.  Exit immediately with zero
+exit status if a match is found.
+.TP
 .BR \-s ", " \-\^\-show\-cost
 Print match cost with output.
 .TP
