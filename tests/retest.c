@@ -1468,7 +1468,7 @@ main(int argc, char **argv)
   test_comp("機+", REG_EXTENDED, 0);
   test_exec("この賞は、機・利便性・セキ", 0, REG_OK, 10, 13, END);
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__OpenBSD__)
   if (setlocale(LC_CTYPE, "fi_FI.ISO-8859-1") != NULL)
     {
       printf("\nTesting LC_CTYPE fi_FI.ISO-8859-1\n");
@@ -1492,7 +1492,7 @@ main(int argc, char **argv)
       test_exec("abc", 0, REG_OK, 2, 3, END);
     }
 #endif /* TRE_MULTIBYTE */
-#endif /* !WIN32 */
+#endif
 
   regfree(&reobj);
 
