@@ -200,31 +200,43 @@ static char *highlight = "01;31";
 static inline int
 tre_agrep_get_next_record(int fd, const char *filename)
 {
-  int errcode;
-  regmatch_t pmatch[1];
-
   if (at_eof)
     return 1;
 
   while (1)
     {
+      int errcode;
+      regmatch_t pmatch[1];
+
       if (next_record == NULL)
 	{
 	  int r;
-	  /* Fill the buffer with data from the file. */
-	  do
-	    {
-	      r = read(fd, buf + data_len, buf_size - data_len);
-	    }
-	  while (r < 0 && errno == EINTR);
+	  int read_size = buf_size - data_len;
 
+	  if (read_size <= 0)
+	    {
+	      /* The buffer is full and no record delimiter found yet,
+		 we need to grow the buffer.  We double the size to
+		 avoid rescanning the data too many times when the
+		 records are very large. */
+	      buf_size *= 2;
+	      buf = realloc(buf, buf_size);
+	      if (buf == NULL)
+		{
+		  fprintf(stderr, "%s: %s\n", program_name, _("Out of memory"));
+		  exit(2);
+		}
+	      read_size = buf_size - data_len;
+	    }
+
+	  r = read(fd, buf + data_len, read_size);
 	  if (r < 0)
 	    {
-	      /* GNU grep 2.5.1 doesn't seem to complain about any read errors.
-		 I don't think that's such a good idea (I was confused about
-		 that for quite a while) so here we report any read errors
-		 to stderr. */
-	      char *err = strerror(errno);
+	      /* Read error. */
+	      char *err;
+	      if (errno == EINTR)
+		continue;
+	      err = strerror(errno);
 	      fprintf(stderr, "%s: ", program_name);
 	      fprintf(stderr, _("Error reading from %s: %s\n"), filename, err);
 	      return 1;
@@ -240,8 +252,7 @@ tre_agrep_get_next_record(int fd, const char *filename)
 		 to be a record. */
 	      if (record_len == 0)
 		return 1;
-	      else
-		return 0;
+	      return 0;
 	    }
 	  data_len += r;
 	  next_record = buf;
@@ -250,38 +261,11 @@ tre_agrep_get_next_record(int fd, const char *filename)
       /* Find the next record delimiter. */
       errcode = regnexec(&delim, next_record, data_len - (next_record - buf),
 			 1, pmatch, 0);
-      if (errcode == REG_ESPACE)
+
+
+      switch (errcode)
 	{
-	  fprintf(stderr, "%s: %s\n", program_name, _("Out of memory"));
-	  exit(2);
-	}
-      else if (errcode == REG_NOMATCH)
-	{
-	  /* No record delimiter found. */
-	  if (next_record == buf)
-	    {
-	      /* The buffer is full but we don't yet have a full record.
-		 Grow the buffer. */
-	      buf = realloc(buf, buf_size * 2);
-	      if (!buf)
-		{
-		  fprintf(stderr, "%s: %s\n", program_name,
-			  _("Out of memory"));
-		  exit(2);
-		}
-	      buf_size *= 2;
-	      next_record = NULL;
-	    }
-	  else
-	    {
-	      /* Move the data to start of the buffer and read more data. */
-	      memmove(buf, next_record, buf + data_len - next_record);
-	      data_len = buf + data_len - next_record;
-	      next_record = NULL;
-	    }
-	}
-      else if (errcode == REG_OK)
-	{
+	case REG_OK:
 	  /* Record delimiter found, now we know how long the current
 	     record is. */
 	  record = next_record;
@@ -291,8 +275,32 @@ tre_agrep_get_next_record(int fd, const char *filename)
 	  next_delim_len = pmatch[0].rm_eo - pmatch[0].rm_so;
 	  next_record = next_record + pmatch[0].rm_eo;
 	  return 0;
+	  break;
+
+	case REG_NOMATCH:
+	  if (next_record == buf)
+	    {
+	      next_record = NULL;
+	      continue;
+	    }
+
+	  /* Move the data to start of the buffer and read more
+	     data. */
+	  memmove(buf, next_record, buf + data_len - next_record);
+	  data_len = buf + data_len - next_record;
+	  next_record = NULL;
+	  continue;
+	  break;
+
+	case REG_ESPACE:
+	  fprintf(stderr, "%s: %s\n", program_name, _("Out of memory"));
+	  exit(2);
+	  break;
+
+	default:
+	  assert(0);
+	  break;
 	}
-      else assert(0);
     }
 }
 
