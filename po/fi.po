@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TRE 0.7.4\n"
 "Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
-"POT-Creation-Date: 2006-07-29 11:41+0300\n"
+"POT-Creation-Date: 2006-12-09 22:48+0200\n"
 "PO-Revision-Date: 2002-07-29 23:46+0300\n"
 "Last-Translator: Ville Laurikari <vl@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -64,8 +64,8 @@ msgstr "Virhe {} sisällä"
 msgid "Invalid character range"
 msgstr "Virheellinen merkkialue"
 
-#: lib/regerror.c:55 src/agrep.c:255 src/agrep.c:269 src/agrep.c:313
-#: src/agrep.c:655 src/agrep.c:694
+#: lib/regerror.c:55 src/agrep.c:230 src/agrep.c:300 src/agrep.c:325
+#: src/agrep.c:674 src/agrep.c:713
 msgid "Out of memory"
 msgstr "Muisti loppu"
 
@@ -77,17 +77,17 @@ msgstr "Virheellinen toisto-operaattorin käyttö"
 msgid "Unknown error"
 msgstr "Tuntematon virhe"
 
-#: src/agrep.c:95 src/agrep.c:102
+#: src/agrep.c:97 src/agrep.c:104
 #, c-format
 msgid "Usage: %s [OPTION]... PATTERN [FILE]...\n"
 msgstr "Käyttö: %s [VALITSIN]... HAKULAUSEKE [TIEDOSTO]...\n"
 
-#: src/agrep.c:97
+#: src/agrep.c:99
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Kokeile `%s --help' saadaksesi lisää tietoa.\n"
 
-#: src/agrep.c:103
+#: src/agrep.c:105
 #, c-format
 msgid ""
 "Searches for approximate matches of PATTERN in each FILE or standard input.\n"
@@ -102,7 +102,7 @@ msgstr ""
 "`foo.txt' joihin hakukaava \"lähteä\" sopii enintään kahdella virheellä.\n"
 "Esimerkiksi rivit jotka sisältävät \"lähtee\" tai \"lähtö\" palautetaan.\n"
 
-#: src/agrep.c:109
+#: src/agrep.c:111
 #, c-format
 msgid ""
 "Regexp selection and interpretation:\n"
@@ -137,6 +137,7 @@ msgid ""
 "used\n"
 "  -n, --record-number\t    print record number with output\n"
 "      --line-number         same as -n\n"
+"  -q, --quiet, --silent\t    suppress all normal output\n"
 "  -s, --show-cost\t    print match cost with output\n"
 "      --colour, --color     use markers to distinguish the matching strings\n"
 "      --show-position       prefix each output record with start and end\n"
@@ -180,6 +181,7 @@ msgstr ""
 "käytössä\n"
 "  -n, --record-number       tulosta tietuenumerot\n"
 "      --line-number         sama kuin -n\n"
+"  -q, --quiet, --silent     älä tulosta mitään\n"
 "  -s, --show-cost           tulosta virheiden määrä\n"
 "      --colour, --color     korosta tulostetuista tietueista osat jotka\n"
 "                            sopivat hakulausekkeeseen\n"
@@ -187,7 +189,7 @@ msgstr ""
 "                            lausekkeeseen sopivan osamerkkijonon alku- ja\n"
 "                            loppusijainti tietueessa\n"
 
-#: src/agrep.c:147
+#: src/agrep.c:150
 #, c-format
 msgid ""
 "With no FILE, or when FILE is -, reads standard input.  If less than two\n"
@@ -203,7 +205,7 @@ msgstr ""
 "niitä ei löytynyt ja 2 jos tapahtui virhe.  Jos -E tai -# ei ole annettu,\n"
 "vain tietueet jotka sopivat tarkasti hakulausekkeeseen valitaan.\n"
 
-#: src/agrep.c:153
+#: src/agrep.c:156
 #, c-format
 msgid ""
 "PATTERN is a POSIX extended regular expression (ERE) with the TRE "
@@ -215,30 +217,30 @@ msgstr ""
 "extended regular expression).  Lisäksi voidaan käyttää TRE:n laajennuksia.\n"
 "Hakulausekkeiden täysimittainen kuvaus on tre(7):ssä.\n"
 
-#: src/agrep.c:157
+#: src/agrep.c:160
 #, c-format
 msgid "Report bugs to: "
 msgstr "Raportoi virheistä osoitteeseen: "
 
-#: src/agrep.c:229
+#: src/agrep.c:245
 #, c-format
 msgid "Error reading from %s: %s\n"
 msgstr "Ei voi lukea kohteesta %s: %s\n"
 
-#: src/agrep.c:328
+#: src/agrep.c:340
 msgid "Cannot use -B when reading from standard input."
 msgstr "Vakiosyötteestä luettaessa -B ei ole sallittu."
 
-#: src/agrep.c:332
+#: src/agrep.c:344
 msgid "(standard input)"
 msgstr "(vakiosyöte)"
 
-#: src/agrep.c:578
+#: src/agrep.c:597
 #, c-format
 msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
 msgstr "Tekijänoikeus © 2002-2006 Ville Laurikari.\n"
 
-#: src/agrep.c:579
+#: src/agrep.c:598
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
@@ -249,14 +251,14 @@ msgstr ""
 "kaupallisesti hyväksyttävästä laadusta tai soveltuvuudesta tiettyyn\n"
 "tarkoitukseen.\n"
 
-#: src/agrep.c:709
+#: src/agrep.c:728
 msgid "Error in search pattern"
 msgstr "Virhe hakulausekkeessa"
 
-#: src/agrep.c:720
+#: src/agrep.c:739
 msgid "Error in record delimiter pattern"
 msgstr "Virhe tietueiden erotinlausekkeessa"
 
-#: src/agrep.c:727
+#: src/agrep.c:746
 msgid "Record delimiter pattern must not match an empty string"
 msgstr "Tietueiden erotinlauseke ei saa sopia tyhjään merkkijonoon"

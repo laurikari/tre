@@ -2,25 +2,24 @@ Introduction
 
    TRE is a lightweight, robust, and efficient POSIX compliant regexp
    matching library with some exciting features such as approximate
-   matching.
+   (fuzzy) matching.
 
-   At the core of TRE is a new algorithm for regular expression
-   matching with submatch addressing. The algorithm uses linear
-   worst-case time in the length of the text being searched, and
-   quadratic worst-case time in the length of the used regular
-   expression. In other words, the time complexity of the algorithm is
-   O(M2N), where M is the length of the regular expression and N is
-   the length of the text. The used space is also quadratic on the
-   length of the regex, but does not depend on the searched
-   string. This quadratic behaviour occurs only on pathological cases
-   which are probably very rare in practice.
+   The matching algorithm used in TRE uses linear worst-case time in
+   the length of the text being searched, and quadratic worst-case
+   time in the length of the used regular expression. In other words,
+   the time complexity of the algorithm is O(M^2N), where M is the
+   length of the regular expression and N is the length of the
+   text. The used space is also quadratic on the length of the regex,
+   but does not depend on the searched string. This quadratic
+   behaviour occurs only on pathological cases which are probably very
+   rare in practice.
 
 Features
 
    TRE is not just yet another regexp matcher. TRE has some features
-   which are not there in most free POSIX compatible implementations.
-   Most of these features are not present in non-free implementations
-   either, for that matter.
+   which are not there in most free POSIX compatible
+   implementations. Most of these features are not present in non-free
+   implementations either, for that matter.
 
 Approximate matching
 
@@ -34,39 +33,39 @@ Approximate matching
    which have a cost lower than some given threshold value. TRE can
    also be used to search for matches with the lowest cost.
 
-   TRE includes a version of the agrep command line tool for
-   approximate regexp matching in the style of grep.  Unlike other
-   agrep implementations (like the one by Sun Wu and Udi Manber from
-   University of Arizona available) TRE agrep allows full regexps of
-   any length, any number of errors, and non-uniform costs for
-   insertion, deletion and substitution.
+   TRE includes a version of the agrep (approximate grep) command line
+   tool for approximate regexp matching in the style of grep. Unlike
+   other agrep implementations (like the one by Sun Wu and Udi Manber
+   from University of Arizona available here) TRE agrep allows full
+   regexps of any length, any number of errors, and non-uniform costs
+   for insertion, deletion and substitution.
 
 Strict standard conformance
 
-   POSIX defines the behaviour of regexp functions precisely.  TRE
+   POSIX defines the behaviour of regexp functions precisely. TRE
    attempts to conform to these specifications as strictly as
-   possible.  TRE always returns the correct matches for subpatterns,
-   for example.  Very few other implementations do this correctly. In
+   possible. TRE always returns the correct matches for subpatterns,
+   for example. Very few other implementations do this correctly. In
    fact, the only other implementations besides TRE that I am aware of
    (free or not) that get it right are Rx by Tom Lord, Regex++ by John
    Maddock, and the AT&T ast regex by Glenn Fowler and Doug McIlroy.
 
    The standard TRE tries to conform to is the IEEE Std 1003.1-2001,
    or Open Group Base Specifications Issue 6, commonly referred to as
-   "POSIX".  The relevant parts are the base specifications on regular
-   expressions (and the rationale) and the description of the
-   regcomp() API.
+   "POSIX".  It can be found online here. The relevant parts are the
+   base specifications on regular expressions (and the rationale) and
+   the description of the regcomp() API.
 
    For an excellent survey on POSIX regexp matchers, see the testregex
    pages by Glenn Fowler of AT&T Labs Research.
 
 Predictable matching speed
 
-   Because of the novel matching algorithm used in TRE, the maximum
-   time consumed by any regexec() call is always directly proportional
-   to the length of the searched string.  There is one exception: if
-   back references are used, the matching may take time that grows
-   exponentially with the length of the string.  This is because
+   Because of the matching algorithm used in TRE, the maximum time
+   consumed by any regexec() call is always directly proportional to
+   the length of the searched string. There is one exception: if back
+   references are used, the matching may take time that grows
+   exponentially with the length of the string. This is because
    matching back references is an NP complete problem, and almost
    certainly requires exponential time to match in the worst case.
 
@@ -96,15 +95,15 @@ Binary pattern and data support
    TRE provides APIs which allow binary zero characters both in
    regexps and searched strings. The standard API cannot be easily
    used to, for example, search for printable words from binary data
-   (although it is possible with some hacking).  Searching for
-   patterns which contain binary zeroes embedded is not possible at
-   all with the standard API.
+   (although it is possible with some hacking). Searching for patterns
+   which contain binary zeroes embedded is not possible at all with
+   the standard API.
 
 Completely thread safe
 
-   TRE is completely thread safe.  All the exported functions are
+   TRE is completely thread safe. All the exported functions are
    re-entrant, and a single compiled regexp object can be used
-   simultaneously in multiple contexts; e.g.  in main() and a signal
+   simultaneously in multiple contexts; e.g. in main() and a signal
    handler, or in many threads of a multithreaded application.
 
 Portable
@@ -113,31 +112,36 @@ Portable
    platforms and compilers that have been successfully used to compile
    and run TRE:
 
-     Platform(s)                       | Compiler(s)
-     ----------------------------------+------------
-     Various GNU/Linux systems         | GCC 2.95.3, GCC 3.2.1
-     Solaris 2.8 sparc                 | GCC 3.2.1, Sun Workshop 6 compilers
-     Solaris 2.8 x86                   | Sun Workshop 6 compilers
-     AIX 4.3.2                         | C for AIX compiler version 5, GCC 3.2.1
-     Windows 2000, Windows 98          | Microsoft Visual C++ 6.0
-     Cygwin 1.3.20-1 (under Windows 98)| GCC 3.2.1
-     Compaq Tru64 UNIX V5.1A           | Compaq C V6.4-014
-     Compaq Tru64 UNIX V5.1B           | Compaq C V6.5-011
-     Digital UNIX V4.0                 | DEC C V5.9-005
-     HP-UX 10.20                       | HP C Compiler A.10.32.30
-     HP-UX 11                          | HP C Compiler A.11.00.00
-     IRIX 6.5                          | MIPSpro Compilers 7.3.1.3m, GCC 3.0.4
-     NetBSD 1.5.2                      | egcs-1.1.2
+      Platform(s)                       | Compiler(s)
+      ----------------------------------+------------
+      AIX 4.3.2 - 5.3.0                 | GCC, C for AIX compiler version 5
+      Compaq Tru64 UNIX V5.1A/B         | Compaq C V6.4-014 - V6.5-011
+      Cygwin 1.3 - 1.5                  | GCC
+      Digital UNIX V4.0                 | DEC C V5.9-005
+      FreeBSD 4 and above               | GCC
+      GNU/Linux systems on x86, x86_64, | GCC
+      ppc64, s390			|
+      HP-UX 10.20- 11.00                | GCC, HP C Compiler
+      IRIX 6.5                          | GCC, MIPSpro Compilers 7.3.1.3m
+      Max OS X				|
+      NetBSD 1.5 and above              | GCC, egcs
+      OpenBSD 3.3 and above             | GCC
+      Solaris 2.7-10 sparc/x86          | GCC, Sun Workshop 6 compilers
+      Windows 98 - XP                   | Microsoft Visual C++ 6.0
 
-   TRE 0.5.3 should compile without changes on all of the above
-   platforms.  Tell me if you are using TRE on a platform that is
-   not listed above, and I'll add it to the list.
+   TRE 0.7.5 should compile without changes on all of the above
+   platforms.  Tell me if you are using TRE on a platform that is not
+   listed above, and I'll add it to the list. Also let me know if TRE
+   does not work on a listed platform.
 
-Free
+   Depending on the platform, you may need to install libutf8 to get
+   wide character and multibyte character set support.
+
+ Free
 
    TRE is free; you can redistribute it and/or modify it under the
    terms of the GNU Lesser General Public License as published by the
-   Free Software Foundation.  See the file COPYING, included in the
+   Free Software Foundation. See the file COPYING, included in the
    distribution packages, for the complete license.
 
    If you cannot accept the GNU LGPL, it may be possible that you can
@@ -163,64 +167,74 @@ Roadmap
        element.
 
    Note that other portable regexp implementations don't support
-   collating elements either.  The single exception is Regex++, which
+   collating elements either. The single exception is Regex++, which
    comes with its own database for collating elements for different
-   locales.
+   locales. Support for collating elements and equivalence classes has
+   not been widely requested and is not very high on the TODO list at
+   the moment.
 
-   These are other features I'm planning to implement:
+   These are other features I'm planning to implement real soon now:
 
      * All the missing GNU extensions enabled in GNU regex, such as
-       [[: and [[:>:]]
-
-     * New syntax for approximate matching to control the approximate
-       matching parameters (deletion/insertion/substitution costs,
-       maximum cost) in different parts of the regexp.
+       [[:<:]] and [[:>:]]
 
      * A REG_SHORTEST regexec() flag for returning the shortest match
        instead of the longest match.
 
-     * A REG_NONGREEDY regcomp() flag for forcing all repetition
-       operators to be non-greedy regardless of whether a ? is
-       present.
-
      * Perl-compatible syntax
 
-        [:^]class:]
-                Matches anything but the characters in class
+            [:^class:]
+               Matches anything but the characters in class. Note that
+               [^[:class:]] works already, this would be just a
+               convenience shorthand.
 
-        \A
-                Match only at beginning of string
+            \A
+               Match only at beginning of string
 
-        \Z
-                Match only at end of string, or before newline at the end
+            \Z
+               Match only at end of string, or before newline at the end
 
-        \z
-                Match only at end of string
+            \z
+               Match only at end of string
 
-        \l
-                Lowercase next char (think vi)
+            \l
+               Lowercase next char (think vi)
 
-        \u
-                Uppercase next char (think vi)
+            \u
+               Uppercase next char (think vi)
 
-        \L
-                Lowercase till \E (think vi)
+            \L
+               Lowercase till \E (think vi)
 
-        \U
-                Uppercase till \E (think vi)
+            \U
+               Uppercase till \E (think vi)
 
-        \E
-                End case modification (think vi)
+            (?=pattern)
+               Zero-width positive look-ahead assertions.
 
-        \Q
-                Quote (disable) pattern metacharacters till \E
+            (?!pattern)
+               Zero-width negative look-ahead assertions.
 
-     * The REG_NOSPEC regcomp() flag (also known as REG_LITERAL) which
-       forces all characters to be considered as ordinary. Useful for
-       matching literal strings.
+            (?<=pattern)
+               Zero-width positive look-behind assertions.
+
+            (?<!pattern)
+               Zero-width negative look-behind assertions.
 
    Documentation especially for the nonstandard features of TRE, such
-   as approximate matching, is a work in progress.
+   as approximate matching, is a work in progress (with "progress"
+   loosely defined...)
 
+   Mailing lists
 
- Ville Laurikari <vl@iki.fi>
+   tre-general@lists.laurikari.net
+      This list is for any discussion on the TRE software, including
+      reporting bugs, feature requests, requests for help, and other
+      things.
+
+   tre-announce@lists.laurikari.net
+      Subscribe to this list to get announcements of new releases of
+      TRE.  Alternatively, you can subscribe to the freshmeat.net
+      project and get similar announcements that way, if you prefer.
+
+Ville Laurikari    <vl@iki.fi>

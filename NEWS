@@ -17,11 +17,14 @@ Version 0.7.5
     backtracking matcher to backtrack a lot more instead of less.  In
     some cases this caused very slow execution.
 
+  - New agrep command line option -q (--quiet, --silent).
+
   - Bug fixes:
     - agrep now correctly returns exit code 1 when no matches found.
     - Fixed regexp parser bug affecting big-endian 64 bit
       architectures (sparc, ppc).  The bug caused all regexps to match
       an empty string and nothing else.
+    - Fixed agrep memory usage problems when reading from pipes.
 
 Version 0.7.4
 

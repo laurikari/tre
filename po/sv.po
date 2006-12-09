@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tre\n"
 "Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
-"POT-Creation-Date: 2006-07-29 11:41+0300\n"
+"POT-Creation-Date: 2006-12-09 22:48+0200\n"
 "PO-Revision-Date: 2006-05-23 21:27+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -63,8 +63,8 @@ msgstr "Ogiltigt innehåll i {}"
 msgid "Invalid character range"
 msgstr "Ogiltigt teckenomfång"
 
-#: lib/regerror.c:55 src/agrep.c:255 src/agrep.c:269 src/agrep.c:313
-#: src/agrep.c:655 src/agrep.c:694
+#: lib/regerror.c:55 src/agrep.c:230 src/agrep.c:300 src/agrep.c:325
+#: src/agrep.c:674 src/agrep.c:713
 msgid "Out of memory"
 msgstr "Slut på minne"
 
@@ -76,17 +76,17 @@ msgstr ""
 msgid "Unknown error"
 msgstr "Okänt fel"
 
-#: src/agrep.c:95 src/agrep.c:102
+#: src/agrep.c:97 src/agrep.c:104
 #, c-format
 msgid "Usage: %s [OPTION]... PATTERN [FILE]...\n"
 msgstr "Användning: %s [FLAGGA]... MÖNSTER [FIL]...\n"
 
-#: src/agrep.c:97
+#: src/agrep.c:99
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Prova \"%s --help\" för mer information.\n"
 
-#: src/agrep.c:103
+#: src/agrep.c:105
 #, c-format
 msgid ""
 "Searches for approximate matches of PATTERN in each FILE or standard input.\n"
@@ -101,7 +101,7 @@ msgstr ""
 "som matchar \"optimera\" med maximalt två fel.  T.ex. rader som innehåller\n"
 "\"optimera\", \"optmera\", and \"opitmera\" är alla sökträffar.\n"
 
-#: src/agrep.c:109
+#: src/agrep.c:111
 #, c-format
 msgid ""
 "Regexp selection and interpretation:\n"
@@ -136,6 +136,7 @@ msgid ""
 "used\n"
 "  -n, --record-number\t    print record number with output\n"
 "      --line-number         same as -n\n"
+"  -q, --quiet, --silent\t    suppress all normal output\n"
 "  -s, --show-cost\t    print match cost with output\n"
 "      --colour, --color     use markers to distinguish the matching strings\n"
 "      --show-position       prefix each output record with start and end\n"
@@ -173,13 +174,14 @@ msgstr ""
 "används\n"
 "  -n, --record-number\t    skriv ut postnummer med utdata\n"
 "      --line-number         samma som -n\n"
+"  -q, --quiet, --silent\t    undvik all normal utskrift\n"
 "  -s, --show-cost\t    skriv ut kostnad för matchning med utdata\n"
 "      --colour, --color     använd markörer för att urskilja matchande "
 "strängar\n"
 "      --show-position       skriv ut start- och slutposition för varje\n"
 "\t\t\t    utskriven post för den första träffen inom posten\n"
 
-#: src/agrep.c:147
+#: src/agrep.c:150
 #, c-format
 msgid ""
 "With no FILE, or when FILE is -, reads standard input.  If less than two\n"
@@ -193,7 +195,7 @@ msgstr ""
 "hittas och 2 om fel inträffar.  Om varken -E eller -# anges så väljs endast\n"
 "exakta träffar.\n"
 
-#: src/agrep.c:153
+#: src/agrep.c:156
 #, c-format
 msgid ""
 "PATTERN is a POSIX extended regular expression (ERE) with the TRE "
@@ -203,30 +205,30 @@ msgstr ""
 "MÖNSTER är ett POSIX-utökat reguljärt uttryck (ERE) med TRE-utökningar.\n"
 "Se tre(7) för en komplett beskrivning.\n"
 
-#: src/agrep.c:157
+#: src/agrep.c:160
 #, c-format
 msgid "Report bugs to: "
 msgstr "Rapportera fel till: "
 
-#: src/agrep.c:229
+#: src/agrep.c:245
 #, c-format
 msgid "Error reading from %s: %s\n"
 msgstr "Fel vid läsning från %s: %s\n"
 
-#: src/agrep.c:328
+#: src/agrep.c:340
 msgid "Cannot use -B when reading from standard input."
 msgstr "Kan inte använda -B vid inläsning från standard in."
 
-#: src/agrep.c:332
+#: src/agrep.c:344
 msgid "(standard input)"
 msgstr "(standard in)"
 
-#: src/agrep.c:578
+#: src/agrep.c:597
 #, c-format
 msgid "Copyright (c) 2002-2006 Ville Laurikari.\n"
 msgstr "Copyright © 2002-2006 Ville Laurikari.\n"
 
-#: src/agrep.c:579
+#: src/agrep.c:598
 #, c-format
 msgid ""
 "This is free software; see the source for copying conditions. There is NO\n"
@@ -237,14 +239,14 @@ msgstr ""
 "garanti; inte ens för SÄLJBARHET eller LÄMPLIGHET FÖR ETT SPECIFIKT "
 "ÄNDAMÅL.\n"
 
-#: src/agrep.c:709
+#: src/agrep.c:728
 msgid "Error in search pattern"
 msgstr "Fel i sökmönster"
 
-#: src/agrep.c:720
+#: src/agrep.c:739
 msgid "Error in record delimiter pattern"
 msgstr "Fel i postavgränsande mönster"
 
-#: src/agrep.c:727
+#: src/agrep.c:746
 msgid "Record delimiter pattern must not match an empty string"
 msgstr "Postavgränsande mönster får inte matcha en tom sträng"
