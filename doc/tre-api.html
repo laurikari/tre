@@ -323,22 +323,21 @@ at least the following fields:
 <dl>
 <dt><tt><font class="type">regoff_t</font> <font
 class="arg">rm_so</font></tt></dt>
-<dd>Byte offset from start of <tt><font class="arg">string</font></tt>
-to start of substring.  </dd>
+<dd>Offset from start of <tt><font class="arg">string</font></tt> to start of
+substring.  </dd>
 <dt><tt><font class="type">regoff_t</font> <font
 class="arg">rm_eo</font></tt></dt>
-<dd>Byte offset from start of <tt><font class="arg">string</font></tt>
-to the first character after the substring.  </dd>
+<dd>Offset from start of <tt><font class="arg">string</font></tt> to the first
+character after the substring.  </dd>
 </dl>
 </blockquote>
 
 <p>
-The length of a submatch in bytes can be computed by subtracting
-<code>rm_eo</code> and <code>rm_so</code>.
-If a parenthesized subexpression did not participate in a match, the
-<code>rm_so</code> and <code>rm_eo</code> fields for the corresponding
-<code>pmatch</code> element are set to <code>-1</code>.
-When a multibyte character set is in effect, the submatch offsets are
+The length of a submatch can be computed by subtracting <code>rm_eo</code> and
+<code>rm_so</code>.  If a parenthesized subexpression did not participate in a
+match, the <code>rm_so</code> and <code>rm_eo</code> fields for the
+corresponding <code>pmatch</code> element are set to <code>-1</code>.  Note
+that when a multibyte character set is in effect, the submatch offsets are
 given as byte offsets, not character offsets.
 </p>
 
