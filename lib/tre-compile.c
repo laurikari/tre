@@ -1,7 +1,7 @@
 /*
   tre-compile.c - TRE regex compiler
 
-  Copyright (c) 2001-2006 Ville Laurikari <vl@iki.fi>
+  Copyright (c) 2001-2007 Ville Laurikari <vl@iki.fi>
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -126,6 +126,30 @@ typedef struct {
   int tag;
   int next_tag;
 } tre_tag_states_t;
+
+
+/* Go through `regset' and set submatch data for submatches that are
+   using this tag. */
+static void
+tre_purge_regset(int *regset, tre_tnfa_t *tnfa, int tag)
+{
+  int i;
+
+  for (i = 0; regset[i] >= 0; i++)
+    {
+      int id = regset[i] / 2;
+      int start = !(regset[i] % 2);
+      DPRINT(("  Using tag %d for %s offset of "
+	      "submatch %d\n", tag,
+	      start ? "start" : "end", id));
+      if (start)
+	tnfa->submatch_data[id].so_tag = tag;
+      else
+	tnfa->submatch_data[id].eo_tag = tag;
+    }
+  regset[0] = -1;
+}
+
 
 /* Adds tags to appropriate locations in the parse tree in `tree', so that
    subexpressions marked for submatch addressing can be traced. */
@@ -281,20 +305,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 				minimal_tag = -1;
 				num_minimals++;
 			      }
-			    /* Go through the regset and set submatch data for
-			       submatches that are using this tag. */
-			    for (i = 0; regset[i] >= 0; i++)
-			      {
-				int id = regset[i] / 2;
-				int start = !(regset[i] % 2);
-				DPRINT(("  Using tag %d for %s offset of "
-					"submatch %d\n", tag,
-					start ? "start" : "end", id));
-				if (start)
-				  tnfa->submatch_data[id].so_tag = tag;
-				else
-				  tnfa->submatch_data[id].eo_tag = tag;
-			      }
+			    tre_purge_regset(regset, tnfa, tag);
 			  }
 			else
 			  {
@@ -394,20 +405,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 			    minimal_tag = -1;
 			    num_minimals++;
 			  }
-			/* Go through the regset and set submatch data for
-			   submatches that are using this tag. */
-			for (i = 0; regset[i] >= 0; i++)
-			  {
-			    int id = regset[i] / 2;
-			    int start = !(regset[i] % 2);
-			    DPRINT(("  Using tag %d for %s offset of "
-				    "submatch %d\n", tag,
-				    start ? "start" : "end", id));
-			    if (start)
-			      tnfa->submatch_data[id].so_tag = tag;
-			    else
-			      tnfa->submatch_data[id].eo_tag = tag;
-			  }
+			tre_purge_regset(regset, tnfa, tag);
 		      }
 
 		    DPRINT(("  num_tags++\n"));
@@ -479,20 +477,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 			    minimal_tag = -1;
 			    num_minimals++;
 			  }
-			/* Go through the regset and set submatch data for
-			   submatches that are using this tag. */
-			for (i = 0; regset[i] >= 0; i++)
-			  {
-			    int id = regset[i] / 2;
-			    int start = !(regset[i] % 2);
-			    DPRINT(("  Using tag %d for %s offset of "
-				    "submatch %d\n", tag,
-				    start ? "start" : "end", id));
-			    if (start)
-			      tnfa->submatch_data[id].so_tag = tag;
-			    else
-			      tnfa->submatch_data[id].eo_tag = tag;
-			  }
+			tre_purge_regset(regset, tnfa, tag);
 		      }
 
 		    DPRINT(("  num_tags++\n"));
@@ -640,23 +625,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
     } /* end while(tre_stack_num_objects(stack) > bottom) */
 
   if (!first_pass)
-    {
-      int i;
-      /* Go through the regset and set submatch data for
-	 submatches that are using this tag. */
-      for (i = 0; regset[i] >= 0; i++)
-	{
-	  int id = regset[i] / 2;
-	  int start = !(regset[i] % 2);
-	  DPRINT(("  Using tag %d for %s offset of "
-		  "submatch %d\n", num_tags,
-		  start ? "start" : "end", id));
-	  if (start)
-	    tnfa->submatch_data[id].so_tag = num_tags;
-	  else
-	    tnfa->submatch_data[id].eo_tag = num_tags;
-	}
-    }
+    tre_purge_regset(regset, tnfa, tag);
 
   if (!first_pass && minimal_tag >= 0)
     {
