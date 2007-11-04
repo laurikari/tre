@@ -1121,6 +1121,8 @@ main(int argc, char **argv)
   test_exec("aax xxa", 0, REG_OK, 2, 3, END);
   test_comp("\\Bx\\b", REG_EXTENDED, 0);
   test_exec("aax xxx", 0, REG_OK, 2, 3, END);
+  test_comp("\\<.", REG_EXTENDED, 0);
+  test_exec(";xaa", 0, REG_OK, 1, 2, END);
 
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);

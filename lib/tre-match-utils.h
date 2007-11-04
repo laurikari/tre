@@ -161,7 +161,7 @@
        && (next_c != L'\0' || reg_noteol)				      \
        && (next_c != L'\n' || !reg_newline))				      \
    || ((assertions & ASSERT_AT_BOW)					      \
-       && (pos > 0 && (IS_WORD_CHAR(prev_c) || !IS_WORD_CHAR(next_c))))	      \
+       && (IS_WORD_CHAR(prev_c) || !IS_WORD_CHAR(next_c)))		      \
    || ((assertions & ASSERT_AT_EOW)					      \
        && (!IS_WORD_CHAR(prev_c) || IS_WORD_CHAR(next_c)))		      \
    || ((assertions & ASSERT_AT_WB)					      \
