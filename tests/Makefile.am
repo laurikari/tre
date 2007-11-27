@@ -7,6 +7,11 @@ EXTRA_PROGRAMS = bench
 LDADD = ../gnulib/lib/libgnu.la $(LTLIBINTL)
 
 retest_SOURCES = retest.c
+if TRE_MULTIBYTE
+check_PROGRAMS += wretest
+wretest_SOURCES = retest.c
+wretest_CPPFLAGS = -DWRETEST $(AM_CPPFLAGS)
+endif TRE_MULTIBYTE
 
 randtest_SOURCES = randtest.c
 
@@ -18,6 +23,9 @@ test_str_source_LDADD = ../lib/libtre.la $(LDADD) -lm
 
 if TRE_DEBUG
   retest_LDADD = ../lib/libtre.la $(LDADD)
+if TRE_MULTIBYTE
+  wretest_LDADD = ../lib/libtre.la $(LDADD)
+endif TRE_MULTIBYTE
   randtest_LDADD = ../lib/libtre.la $(LDADD)
 else !TRE_DEBUG
   ## Debugging is not turned on.  Make a malloc-debugging version of the
@@ -43,6 +51,10 @@ endif TRE_APPROX
 
   retest_CFLAGS = -DMALLOC_DEBUGGING
   retest_LDADD = libxtre.la $(LDADD)
+if TRE_MULTIBYTE
+  wretest_CFLAGS = -DMALLOC_DEBUGGING
+  wretest_LDADD = libxtre.la $(LDADD)
+endif TRE_MULTIBYTE
   randtest_CFLAGS = -DMALLOC_DEBUGGING
   randtest_LDADD = libxtre.la $(LDADD)
 endif !TRE_DEBUG
@@ -52,3 +64,6 @@ INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/gnulib/lib
 EXTRA_DIST = build-tests.sh
 
 TESTS = test-str-source retest
+if TRE_MULTIBYTE
+TESTS += wretest
+endif TRE_MULTIBYTE

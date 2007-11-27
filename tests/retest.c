@@ -50,12 +50,74 @@
 #define xfree free
 #endif /* !TRE_VERSION */
 
+#ifdef WRETEST
+#include <wchar.h>
+#define CHAR_T wchar_t
+#define L(x) (L ## x)
+
+#define MAXSTRSIZE 1024
+static wchar_t wstr[MAXSTRSIZE];
+static wchar_t wregex[MAXSTRSIZE];
+static int woffs[MAXSTRSIZE];
+
+#define regexec regwexec
+#define regnexec regwnexec
+#define regcomp regwcomp
+#define regncomp regwncomp
+
+/* Iterate mbrtowc over the multi-byte sequence STR of length LEN,
+   store the result in BUF and memoize the successive byte offsets
+   in OFF.  */
+
+static int
+mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
+{
+  mbstate_t cst;
+  int n, wlen;
+
+  if (len >= MAXSTRSIZE)
+    {
+      fprintf(stderr, "Increase MAXSTRSIZE to %d or more and recompile!\n",
+	len + 1);
+      exit(EXIT_FAILURE);
+    }
+
+  memset(&cst, 0, sizeof(cst));
+  if (off)
+    {
+      memset(off + 1, -1, len * sizeof(int));
+      *off = 0;
+    }
+
+  wlen = 0;
+  while (len > 0)
+    {
+      n = mbrtowc(buf ? buf++ : NULL, str, len, &cst);
+      if (n < 0)
+	return n;
+      if (n == 0)
+	n = 1;
+      str += n;
+      len -= n;
+      wlen += 1;
+      if (off)
+	*(off += n) = wlen;
+    }
+
+  return(wlen);
+}
+
+#else /* !WRETEST */
+#define CHAR_T char
+#define L(x) (x)
+#endif /* !WRETEST */
+
 #define elementsof(x)	(sizeof(x)/sizeof(x[0]))
 
 static int valid_reobj = 0;
 static regex_t reobj;
 static regmatch_t pmatch[32];
-static char *regex_pattern;
+static CHAR_T *regex_pattern;
 static int cflags;
 static int use_regnexec = 0;
 static int use_regncomp = 0;
@@ -84,10 +146,10 @@ test_status(char c)
 
 
 static int
-wrap_regexec(const char *data, size_t len,
+wrap_regexec(const CHAR_T *data, size_t len,
 	     size_t pmatch_len, regmatch_t *pmatch, int eflags)
 {
-  char *buf = NULL;
+  CHAR_T *buf = NULL;
   int result;
 
   if (len == 0 && use_regnexec)
@@ -100,10 +162,10 @@ wrap_regexec(const char *data, size_t len,
     {
       /* Copy the data to a separate buffer to make a better test for
 	 regexec() and regnexec(). */
-      buf = xmalloc(len + !use_regnexec);
+      buf = xmalloc((len + !use_regnexec) * sizeof(CHAR_T));
       if (!buf)
 	return REG_ESPACE;
-      memcpy(buf, data, len);
+      memcpy(buf, data, len * sizeof(CHAR_T));
       test_status('#');
     }
 
@@ -118,7 +180,7 @@ wrap_regexec(const char *data, size_t len,
   else
 #endif /* HAVE_REGNEXEC */
     {
-      buf[len] = '\0';
+      buf[len] = L('\0');
       result = regexec(&reobj, buf, pmatch_len, pmatch, eflags);
     }
 
@@ -127,7 +189,7 @@ wrap_regexec(const char *data, size_t len,
 }
 
 static int
-wrap_regcomp(regex_t *preg, const char *data, size_t len, int cflags)
+wrap_regcomp(regex_t *preg, const CHAR_T *data, size_t len, int cflags)
 {
 #ifdef HAVE_REGNCOMP
   if (use_regncomp)
@@ -141,7 +203,7 @@ wrap_regcomp(regex_t *preg, const char *data, size_t len, int cflags)
 }
 
 static int
-execute(char *data, int len, size_t pmatch_len, regmatch_t *pmatch, int eflags)
+execute(CHAR_T *data, int len, size_t pmatch_len, regmatch_t *pmatch, int eflags)
 {
 #ifdef MALLOC_DEBUGGING
   int i = 0;
@@ -168,16 +230,22 @@ execute(char *data, int len, size_t pmatch_len, regmatch_t *pmatch, int eflags)
 }
 
 static int
-check(va_list ap, int ret, char *str, size_t pmatch_len, regmatch_t *pmatch,
+check(va_list ap, int ret, CHAR_T *str, size_t pmatch_len, regmatch_t *pmatch,
       int eflags)
 {
   int fail = 0;
 
   if (ret != va_arg(ap, int))
     {
+#ifndef WRETEST
       printf("Exec error, regex: \"%s\", cflags %d, "
 	     "string: \"%s\", eflags %d\n", regex_pattern, cflags,
 	     str, eflags);
+#else /* WRETEST */
+      printf("Exec error, regex: \"%ls\", cflags %d, "
+	     "string: \"%ls\", eflags %d\n", regex_pattern, cflags,
+	     str, eflags);
+#endif /* WRETEST */
       printf("	got %smatch (regexec returned %d)\n", ret ? "no " : "", ret);
       return 1;
     }
@@ -193,13 +261,34 @@ check(va_list ap, int ret, char *str, size_t pmatch_len, regmatch_t *pmatch,
 	  if (rm_so == END)
 	    break;
 	  rm_eo = va_arg(ap, int);
+#ifdef WRETEST
+	  if (rm_so >= 0)
+	    {
+	      int n = rm_so;
+
+	      if ((rm_so = woffs[rm_so]) < 0 ||
+		  (n = rm_eo, rm_eo = woffs[rm_eo]) < 0)
+		{
+		  printf("Invalid or incomplete multi-byte sequence "
+			 "in string %ls before byte offset %d\n", str, n);
+		  return 1;
+		}
+	    }
+#endif /* WRETEST */
 	  if (pmatch[i].rm_so != rm_so
 	      || pmatch[i].rm_eo != rm_eo)
 	    {
+#ifndef WRETEST
 	      printf("Exec error, regex: \"%s\", string: \"%s\"\n",
 		     regex_pattern, str);
 	      printf("	group %d: expected (%d, %d) \"%.*s\", "
 		     "got (%d, %d) \"%.*s\"\n",
+#else /* WRETEST */
+	      printf("Exec error, regex: \"%ls\", string: \"%ls\"\n",
+		     regex_pattern, str);
+	      printf("	group %d: expected (%d, %d) \"%.*ls\", "
+		     "got (%d, %d) \"%.*ls\"\n",
+#endif /* WRETEST */
 		     i, rm_so, rm_eo, rm_eo - rm_so, str + rm_so,
 		     (int)pmatch[i].rm_so, (int)pmatch[i].rm_eo,
 		     (int)(pmatch[i].rm_eo - pmatch[i].rm_so),
@@ -211,7 +300,11 @@ check(va_list ap, int ret, char *str, size_t pmatch_len, regmatch_t *pmatch,
       if (!(cflags & REG_NOSUB) && reobj.re_nsub != i - 1
 	  && reobj.re_nsub <= pmatch_len && pmatch)
 	{
+#ifndef WRETEST
 	  printf("Comp error, regex: \"%s\"\n", regex_pattern);
+#else /* WRETEST */
+	  printf("Comp error, regex: \"%ls\"\n", regex_pattern);
+#endif /* WRETEST */
 	  printf("  re_nsub is %d, should be %d\n", (int)reobj.re_nsub, i - 1);
 	  fail = 1;
 	}
@@ -221,8 +314,13 @@ check(va_list ap, int ret, char *str, size_t pmatch_len, regmatch_t *pmatch,
 	if (pmatch[i].rm_so != -1 || pmatch[i].rm_eo != -1)
 	  {
 	    if (!fail)
+#ifndef WRETEST
 	      printf("Exec error, regex: \"%s\", string: \"%s\"\n",
 		     regex_pattern, str);
+#else /* WRETEST */
+	      printf("Exec error, regex: \"%ls\", string: \"%ls\"\n",
+		     regex_pattern, str);
+#endif /* WRETEST */
 	    printf("  group %d: expected (-1, -1), got (%d, %d)\n",
 		   i, (int)pmatch[i].rm_so, (int)pmatch[i].rm_eo);
 	    fail = 1;
@@ -247,6 +345,21 @@ test_nexec(char *data, size_t len, int eflags, ...)
       exec_errors++;
       return;
     }
+
+#ifdef WRETEST
+      {
+	int wlen = mbntowc(wstr, data, len, woffs);
+	if (wlen < 0)
+	  {
+	    exec_errors++;
+	    printf("Invalid or incomplete multi-byte sequence in %s\n", data);
+	    return;
+	  }
+	wstr[wlen] = L'\0';
+	len = wlen;
+      }
+#define data wstr
+#endif /* WRETEST */
 
   use_regnexec = 1;
 
@@ -276,6 +389,10 @@ test_nexec(char *data, size_t len, int eflags, ...)
       va_end(ap);
     }
 
+#ifdef WRETEST
+#undef data
+#endif /* WRETEST */
+
   if (fail)
     exec_errors++;
 }
@@ -300,6 +417,21 @@ test_exec(char *str, int eflags, ...)
       exec_errors++;
       return;
     }
+
+#ifdef WRETEST
+      {
+	int wlen = mbntowc(wstr, str, len, woffs);
+	if (wlen < 0)
+	  {
+	    exec_errors++;
+	    printf("Invalid or incomplete multi-byte sequence in %s\n", str);
+	    return;
+	  }
+	wstr[wlen] = L'\0';
+	len = wlen;
+      }
+#define str wstr
+#endif /* WRETEST */
 
   for (use_regnexec = 0; use_regnexec < 2; use_regnexec++)
     {
@@ -330,6 +462,10 @@ test_exec(char *str, int eflags, ...)
 	}
     }
 
+#ifdef WRETEST
+#undef str
+#endif /* WRETEST */
+
   if (fail)
     exec_errors++;
 }
@@ -340,16 +476,32 @@ test_comp(char *re, int flags, int ret)
 {
   int errcode = 0;
   int len = strlen(re);
-  regex_pattern = re;
-  cflags = flags;
-
-  comp_tests++;
 
   if (valid_reobj)
     {
       regfree(&reobj);
       valid_reobj = 0;
     }
+
+  comp_tests++;
+
+#ifdef WRETEST
+  {
+    int wlen = mbntowc(wregex, re, len, NULL);
+
+    if (wlen < 0)
+      {
+	comp_errors++;
+	printf("Invalid or incomplete multi-byte sequence in %s\n", re);
+	return;
+      }
+    wregex[wlen] = L'\0';
+    len = wlen;
+  }
+#define re wregex
+#endif /* WRETEST */
+  regex_pattern = re;
+  cflags = flags;
 
 #ifdef MALLOC_DEBUGGING
   {
@@ -377,9 +529,17 @@ test_comp(char *re, int flags, int ret)
   errcode = wrap_regcomp(&reobj, re, len, flags);
 #endif /* !MALLOC_DEBUGGING */
 
+#ifdef WRETEST
+#undef re
+#endif /* WRETEST */
+
   if (errcode != ret)
     {
+#ifndef WRETEST
       printf("Comp error, regex: \"%s\"\n", regex_pattern);
+#else /* WRETEST */
+      printf("Comp error, regex: \"%ls\"\n", regex_pattern);
+#endif /* WRETEST */
       printf("	expected return code %d, got %d.\n",
 	     ret, errcode);
       comp_errors++;
@@ -394,6 +554,13 @@ int
 main(int argc, char **argv)
 {
 
+#ifdef WRETEST
+  /* Need an 8-bit locale.  Or move the two tests with non-ascii
+     characters to the localized internationalization tests.  */
+  if (setlocale(LC_CTYPE, "fi_FI.ISO-8859-1") == NULL)
+    fprintf(stderr, "Could not set locale fi_FI.ISO-8859-1.  Expect some\n"
+		    "`Invalid or incomplete multi-byte sequence' errors.\n");
+#endif /* WRETEST */
   /* Large number of macros in one regexp. */
   test_comp("[A-Z]\\d\\s?\\d[A-Z]{2}|[A-Z]\\d{2}\\s?\\d[A-Z]{2}|[A-Z]{2}\\d"
 	    "\\s?\\d[A-Z]{2}|[A-Z]{2}\\d{2}\\s?\\d[A-Z]{2}|[A-Z]\\d[A-Z]\\s?"

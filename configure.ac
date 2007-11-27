@@ -502,8 +502,11 @@ $tre_mbs_reason])
 fi
 
 if test "$tre_multibyte" = "yes"; then
+  AM_CONDITIONAL(TRE_MULTIBYTE, true)
   AC_DEFINE(TRE_MULTIBYTE, 1,
     [ Define to enable multibyte character set support. ])
+else
+  AM_CONDITIONAL(TRE_MULTIBYTE, false)
 fi
 
 AC_SYS_LARGEFILE
