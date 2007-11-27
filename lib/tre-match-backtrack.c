@@ -107,11 +107,11 @@ typedef struct tre_backtrack_struct {
   struct tre_backtrack_struct *next;
 } *tre_backtrack_t;
 
-#ifdef TRE_WHAR
-#define BT_STACK_WIDE_IN     stack->item.str_wide = (_str_wide)
-#define BT_STACK_WIDE_OUT    (_str_wide) = stack->item.str_wide
+#ifdef TRE_WCHAR
+#define BT_STACK_WIDE_IN(_str_wide)	stack->item.str_wide = (_str_wide)
+#define BT_STACK_WIDE_OUT		(str_wide) = stack->item.str_wide
 #else /* !TRE_WCHAR */
-#define BT_STACK_WIDE_IN
+#define BT_STACK_WIDE_IN(_str_wide)
 #define BT_STACK_WIDE_OUT
 #endif /* !TRE_WCHAR */
 
@@ -176,7 +176,7 @@ typedef struct tre_backtrack_struct {
 	stack = stack->next;						      \
       stack->item.pos = (_pos);						      \
       stack->item.str_byte = (_str_byte);				      \
-      BT_STACK_WIDE_IN;							      \
+      BT_STACK_WIDE_IN(_str_wide);					      \
       stack->item.state = (_state);					      \
       stack->item.state_id = (_state_id);				      \
       stack->item.next_c = (_next_c);					      \
@@ -484,9 +484,11 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	    }
 	  else if (len - pos < bt_len)
 	    result = 1;
+#ifdef TRE_WCHAR
+	  else if (type == STR_WIDE)
+	    result = wmemcmp((wchar_t*)string + so, str_wide - 1, bt_len);
+#endif /* TRE_WCHAR */
 	  else
-	    /* We can ignore multibyte characters here because the backref
-	       string is already aligned at character boundaries. */
 	    result = memcmp((char*)string + so, str_byte - 1, bt_len);
 
 	  if (result == 0)
@@ -506,6 +508,9 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		 and pos. */
 	      DPRINT(("	 back reference matched\n"));
 	      str_byte += bt_len - 1;
+#ifdef TRE_WCHAR
+	      str_wide += bt_len - 1;
+#endif /* TRE_WCHAR */
 	      pos += bt_len - 1;
 	      GET_NEXT_WCHAR();
 	      DPRINT(("	 pos now %d\n", pos));
