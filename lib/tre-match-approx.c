@@ -687,20 +687,7 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 
 	      if (trans->assertions
 		  && (CHECK_ASSERTIONS(trans->assertions)
-		      /* Handle character class transitions. */
-		      || ((trans->assertions & ASSERT_CHAR_CLASS)
-			  && !(cflags & REG_ICASE)
-			  && !tre_isctype((tre_cint_t)prev_c, trans->u.class))
-		      || ((trans->assertions & ASSERT_CHAR_CLASS)
-			  && (cflags & REG_ICASE)
-			  && (!tre_isctype(tre_tolower((tre_cint_t)prev_c),
-					   trans->u.class)
-			      && !tre_isctype(tre_toupper((tre_cint_t)prev_c),
-					      trans->u.class)))
-		      || ((trans->assertions & ASSERT_CHAR_CLASS_NEG)
-			  && tre_neg_char_classes_match(trans->neg_classes,
-							(tre_cint_t)prev_c,
-							cflags & REG_ICASE))))
+		      || CHECK_CHAR_CLASSES(trans, tnfa, eflags)))
 		{
 		  DPRINT(("  exact,  from %d: assert failed\n", id));
 		  continue;

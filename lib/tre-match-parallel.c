@@ -430,21 +430,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 		{
 		  if (trans_i->assertions
 		      && (CHECK_ASSERTIONS(trans_i->assertions)
-			  /* Handle character class transitions. */
-			  || ((trans_i->assertions & ASSERT_CHAR_CLASS)
-			      && !(tnfa->cflags & REG_ICASE)
-			      && !tre_isctype((tre_cint_t)prev_c,
-					      trans_i->u.class))
-			  || ((trans_i->assertions & ASSERT_CHAR_CLASS)
-			      && (tnfa->cflags & REG_ICASE)
-			      && (!tre_isctype(tre_tolower((tre_cint_t)prev_c),
-					       trans_i->u.class)
-				  && !tre_isctype(tre_toupper((tre_cint_t)prev_c),
-						  trans_i->u.class)))
-			  || ((trans_i->assertions & ASSERT_CHAR_CLASS_NEG)
-			      && tre_neg_char_classes_match(trans_i->neg_classes,
-							    (tre_cint_t)prev_c,
-							    tnfa->cflags & REG_ICASE))))
+			  || CHECK_CHAR_CLASSES(trans_i, tnfa, eflags)))
 		    {
 		      DPRINT(("assertion failed\n"));
 		      continue;
