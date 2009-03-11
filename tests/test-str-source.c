@@ -115,22 +115,34 @@ free_str_source(tre_str_source *s)
   free(s);
 }
 
-int
-main(int argc, char **argv)
+/* Run one test with reguexec */
+static void
+test_reguexec(const char *str, const char *regex)
 {
   regex_t preg;
   tre_str_source *source;
   regmatch_t pmatch[5];
 
-  source = make_str_source("xfoofofoofoo");
+  source = make_str_source(str);
   if (!source)
     return 1;
 
-  regcomp(&preg, "(foo)\\1", REG_EXTENDED);
+  regcomp(&preg, regex, REG_EXTENDED);
   if (reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
     printf("Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
 
   free_str_source(source);
+  regfree(&preg);
+}
+
+int
+main(int argc, char **argv)
+{
+  test_reguexec("xfoofofoofoo","(foo)\\1");
+  test_reguexec("catcat","(cat|dog)\\1");
+  test_reguexec("catdog","(cat|dog)\\1");
+  test_reguexec("dogdog","(cat|dog)\\1");
+  test_reguexec("dogcat","(cat|dog)\\1");
 
   return 0;
 }

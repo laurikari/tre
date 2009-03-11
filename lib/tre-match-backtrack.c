@@ -192,6 +192,8 @@ typedef struct tre_backtrack_struct {
       int i;								      \
       assert(stack->prev);						      \
       pos = stack->item.pos;						      \
+      if (type == STR_USER)                                                   \
+        str_source->rewind(pos + pos_add_next, str_source->context);          \
       str_byte = stack->item.str_byte;					      \
       BT_STACK_WIDE_OUT;						      \
       state = stack->item.state;					      \
