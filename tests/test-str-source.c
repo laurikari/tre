@@ -53,7 +53,7 @@ str_handler_get_next(tre_char_t *c, unsigned int *pos_add, void *context)
     ctx->pos++;
   *pos_add = 1;
 
-  return c == '\0';
+  return ch == '\0';
 }
 
 /* The rewind() handler.  Resets the current position in the input string. */

@@ -409,8 +409,10 @@ contains the following fields:
 <dl>
 <dt><tt>get_next_char</tt></dt>
 <dd>This function must retrieve the next available character.  If a
-character is not available, this must return a nonzero value.  If a
-character is available, it must be stored to the space pointed to by
+character is not available, the space pointed to by 
+<tt><font class="arg">c</font></tt> must be set to zero and it must return 
+a nonzero value.  If a character is available, it must be stored 
+to the space pointed to by
 <tt><font class="arg">c</font></tt>, and the integer pointer to by
 <tt><font class="arg">pos_add</font></tt> must be set to the
 number of units advanced in the input (the value must be
