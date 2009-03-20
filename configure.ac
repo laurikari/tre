@@ -12,6 +12,7 @@ AC_PROG_CC
 gl_EARLY
 AC_PROG_CPP
 AC_PROG_INSTALL
+AM_PROG_CC_C_O
 
 tre_version_1=`echo $PACKAGE_VERSION | cut -d . -f 1`
 tre_version_2=`echo $PACKAGE_VERSION | cut -d . -f 2`
