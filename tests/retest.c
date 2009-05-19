@@ -557,8 +557,8 @@ main(int argc, char **argv)
 #ifdef WRETEST
   /* Need an 8-bit locale.  Or move the two tests with non-ascii
      characters to the localized internationalization tests.  */
-  if (setlocale(LC_CTYPE, "fi_FI.ISO-8859-1") == NULL)
-    fprintf(stderr, "Could not set locale fi_FI.ISO-8859-1.  Expect some\n"
+  if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") == NULL)
+    fprintf(stderr, "Could not set locale en_US.ISO-8859-1.  Expect some\n"
 		    "`Invalid or incomplete multi-byte sequence' errors.\n");
 #endif /* WRETEST */
   /* Large number of macros in one regexp. */
@@ -1638,9 +1638,9 @@ main(int argc, char **argv)
   test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠", 0, REG_OK, 10, 13, END);
 
 #if !defined(WIN32) && !defined(__OpenBSD__)
-  if (setlocale(LC_CTYPE, "fi_FI.ISO-8859-1") != NULL)
+  if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") != NULL)
     {
-      printf("\nTesting LC_CTYPE fi_FI.ISO-8859-1\n");
+      printf("\nTesting LC_CTYPE en_US.ISO-8859-1\n");
       test_comp("aBCdeFghiJKlmnoPQRstuvWXyZÂ‰ˆ", REG_ICASE, 0);
       test_exec("abCDefGhiJKlmNoPqRStuVwXyz≈ƒ÷", 0, REG_OK, 0, 29, END);
     }
