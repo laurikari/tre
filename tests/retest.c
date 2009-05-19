@@ -550,6 +550,10 @@ test_comp(char *re, int flags, int ret)
 }
 
 
+
+/* To enable tests for known bugs, set this to 1. */
+#define KNOWN_BUG 0
+
 int
 main(int argc, char **argv)
 {
@@ -574,7 +578,7 @@ main(int argc, char **argv)
   test_comp("^!pfast [0-9]{1,15} ([0-9]{1,3}\\.){3}[0-9]{1,3}[0-9]{1,5}$",
 	    REG_EXTENDED, 0);
 
-#if 0
+#if KNOWN_BUG
   /* Should these match or not? */
   test_comp("(a)*-\\1b", REG_EXTENDED, 0);
   test_exec("aaa-b", 0, REG_NOMATCH);
@@ -713,11 +717,12 @@ main(int argc, char **argv)
   test_comp("(a*)+", REG_EXTENDED, 0);
   test_exec("-", 0, REG_OK, 0, 0, 0, 0, END);
 
-#if 0
+  /* This test blows up the backtracking matcher. */
+  avoid_eflags = REG_BACKTRACKING_MATCHER;
   test_comp("((a*)*b)*b", REG_EXTENDED, 0);
   test_exec("aaaaaaaaaaaaaaaaaaaaaaaaab", 0, REG_OK,
 	    25, 26, -1, -1, -1, -1, END);
-#endif
+  avoid_eflags = 0;
 
   test_comp("", 0, 0);
   test_exec("", 0, REG_OK, 0, 0, END);
@@ -785,7 +790,7 @@ main(int argc, char **argv)
   test_exec("foozot", 0, REG_OK, 0, 6, 3, 3, -1, -1, END);
   test_exec("foobarzot", 0, REG_OK, 0, 9, 3, 6, 3, 6, END);
   test_exec("foobarbarzot", 0, REG_OK, 0, 12, 3, 9, 6, 9, END);
-#if 0
+
   test_comp("foo((zup)*|(bar)*|(zap)*)*zot", REG_EXTENDED, 0);
   test_exec("foobarzapzot", 0, REG_OK,
 	    0, 12, 6, 9, -1, -1, -1, -1, 6, 9, END);
@@ -799,7 +804,6 @@ main(int argc, char **argv)
 	    0, 9, 3, 6, -1, -1, -1, -1, 3, 6, END);
   test_exec("foozot", 0, REG_OK,
 	    0, 6, 3, 3, -1, -1, -1, -1, -1, -1, END);
-#endif
 
 
   /* Test case where, e.g., Perl and Python regexp functions, and many
@@ -1526,8 +1530,7 @@ main(int argc, char **argv)
 
   test_comp("\\(a*\\)*\\(x\\)\\(\\1\\)", 0, 0);
   test_exec("x", 0, REG_OK, 0, 1, 0, 0, 0, 1, 1, 1, END);
-#if 0
-  /* This test fails currently. */
+#if KNOWN_BUG
   test_exec("ax", 0, REG_OK, 0, 2, 1, 1, 1, 2, 2, 2, END);
 #endif
 
@@ -1537,9 +1540,9 @@ main(int argc, char **argv)
   test_comp("((.*)\\1)+", REG_EXTENDED, 0);
   test_exec("aa", 0, REG_OK, 0, 2, 0, 2, 0, 1, END);
 
-#if 0
+#if KNOWN_BUG
   test_comp("()(\\1\\1)*", REG_EXTENDED, 0);
-  test_exec("", 0, REG_OK, 0, 0, 0, 0, -1, -1, END);
+  test_exec("", 0, REG_OK, 0, 0, 0, 0, 0, 0, END);
 #endif
 
   /* Check that back references work with REG_NOSUB. */
