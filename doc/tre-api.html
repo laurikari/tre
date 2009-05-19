@@ -37,6 +37,10 @@ class="arg">regex</font>, <font class="type">size_t</font>
 <font class="arg">len</font>, <font class="type">int</font>
 <font class="arg">cflags</font>);
 <br>
+<font class="type">void</font> <font
+class="func">regfree</font>(<font class="type">regex_t</font>
+*<font class="arg">preg</font>);
+<br>
 </code>
 </div>
 
@@ -75,7 +79,7 @@ considered obsolete.</dd>
 
 <dt><tt>REG_ICASE</tt></dt>
 <dd>Ignore case.  Subsequent searches with the <a
-href="#regexec"<tt>regexec</tt></a> family of functions using this
+href="#regexec"><tt>regexec</tt></a> family of functions using this
 pattern buffer will be case insensitive.</dd>
 
 <dt><tt>REG_NOSUB</tt></dt>
@@ -132,6 +136,15 @@ by making the operators non-greedy by default and greedy when a <tt>?</tt> is sp
 </blockquote>
 
 <p>
+After a successful call to <tt><font class="func">regcomp</font></tt> it is
+possible to use the <tt><font class="arg">preg</font></tt> pattern buffer for
+searching for matches in strings (see below).  Once the pattern buffer is no
+longer needed, it should be freed with <tt><font
+class="func">regfree</font></tt> to free the memory allocated for it.
+</p>
+
+
+<p>
 The <tt><font class="type">regex_t</font></tt> structure has the
 following fields that the application can read:
 </p>
@@ -181,8 +194,8 @@ first larger than second, or number too large.
 <dt><tt>REG_ERANGE</tt></dt>
 <dd>Invalid character range, e.g. ending point is earlier in the
 collating order than the starting point.</dd>
-<dt><tt>REG_ERANGE</tt></dt>
-<dd>Out of memory.</dd>
+<dt><tt>REG_ESPACE</tt></dt>
+<dd>Out of memory, or an internal limit exceeded.</dd>
 <dt><tt>REG_BADRPT</tt></dt>
 <dd>Invalid use of repetition operators: two or more repetition operators have
 been chained in an undefined way.</dd>
@@ -409,9 +422,9 @@ contains the following fields:
 <dl>
 <dt><tt>get_next_char</tt></dt>
 <dd>This function must retrieve the next available character.  If a
-character is not available, the space pointed to by 
-<tt><font class="arg">c</font></tt> must be set to zero and it must return 
-a nonzero value.  If a character is available, it must be stored 
+character is not available, the space pointed to by
+<tt><font class="arg">c</font></tt> must be set to zero and it must return
+a nonzero value.  If a character is available, it must be stored
 to the space pointed to by
 <tt><font class="arg">c</font></tt>, and the integer pointer to by
 <tt><font class="arg">pos_add</font></tt> must be set to the
@@ -687,6 +700,7 @@ matching, respectively, and 0 if not.
 
 <h2>Checking build time options</h2>
 
+<a name="tre_config"></a>
 <div class="code">
 <code>
 #include &lt;tre/regex.h&gt;
