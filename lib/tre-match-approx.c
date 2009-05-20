@@ -238,9 +238,6 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 
   int prev_pos;
 
-  /* Compilation flags for this regexp. */
-  int cflags = tnfa->cflags;
-
   /* Number of tags. */
   int num_tags;
   /* The reach tables. */

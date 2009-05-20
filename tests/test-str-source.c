@@ -125,7 +125,7 @@ test_reguexec(const char *str, const char *regex)
 
   source = make_str_source(str);
   if (!source)
-    return 1;
+    return;
 
   regcomp(&preg, regex, REG_EXTENDED);
   if (reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)

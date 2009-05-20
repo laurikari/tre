@@ -77,8 +77,8 @@ mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
 
   if (len >= MAXSTRSIZE)
     {
-      fprintf(stderr, "Increase MAXSTRSIZE to %d or more and recompile!\n",
-	len + 1);
+      fprintf(stderr, "Increase MAXSTRSIZE to %ld or more and recompile!\n",
+	      (long)len + 1);
       exit(EXIT_FAILURE);
     }
 

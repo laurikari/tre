@@ -242,9 +242,6 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   mbstate_t mbstate_start;
 #endif /* TRE_MBSTATE */
 
-  /* Compilation flags for this regexp. */
-  int cflags = tnfa->cflags;
-
   /* End offset of best match so far, or -1 if no match found yet. */
   int match_eo = -1;
   /* Tag arrays. */
