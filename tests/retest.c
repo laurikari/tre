@@ -49,6 +49,7 @@
 #define xmalloc malloc
 #define xfree free
 #endif /* !TRE_VERSION */
+#include "tre-internal.h"
 
 #ifdef WRETEST
 #include <wchar.h>
@@ -72,8 +73,11 @@ static int woffs[MAXSTRSIZE];
 static int
 mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
 {
-  mbstate_t cst;
   int n, wlen;
+#ifdef HAVE_MBSTATE_T
+  mbstate_t cst;
+  memset(&cst, 0, sizeof(cst));
+#endif
 
   if (len >= MAXSTRSIZE)
     {
@@ -82,7 +86,6 @@ mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
       exit(EXIT_FAILURE);
     }
 
-  memset(&cst, 0, sizeof(cst));
   if (off)
     {
       memset(off + 1, -1, len * sizeof(int));
@@ -92,7 +95,7 @@ mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
   wlen = 0;
   while (len > 0)
     {
-      n = mbrtowc(buf ? buf++ : NULL, str, len, &cst);
+      n = tre_mbrtowc(buf ? buf++ : NULL, str, len, &cst);
       if (n < 0)
 	return n;
       if (n == 0)
@@ -111,8 +114,6 @@ mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
 #define CHAR_T char
 #define L(x) (x)
 #endif /* !WRETEST */
-
-#define elementsof(x)	(sizeof(x)/sizeof(x[0]))
 
 static int valid_reobj = 0;
 static regex_t reobj;

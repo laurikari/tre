@@ -27,8 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "regex.h"
-
-#define elementsof(x)	( sizeof(x) / sizeof(x[0]) )
+#include "tre-internal.h"
 
 /* Context structure for the tre_str_source wrappers.  */
 typedef struct {
