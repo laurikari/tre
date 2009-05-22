@@ -11,13 +11,6 @@ darcs changes --summary > ChangeLog
 # Replace variables here and there to get a consistent tree.
 ./utils/replace-vars.sh
 
-# Update gnulib within our source tree.
-gnulib-tool --source-base=gnulib/lib --m4-base=gnulib/m4 \
-            --tests-base=gnulib/tests --doc-base=gnulib/doc \
-	    --with-tests --lgpl \
-            --symlink \
-            --import getopt
-
 # Set up the standard gettext infrastructure.
 autopoint
 
@@ -25,7 +18,7 @@ autopoint
 libtoolize --automake
 
 # Update aclocal.m4, using the macros from the m4 directories.
-aclocal -I m4 -I gnulib/m4
+aclocal -I m4
 
 # Run autoheader to generate config.h.in.
 autoheader

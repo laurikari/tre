@@ -33,9 +33,19 @@
 #include <assert.h>
 #include <limits.h>
 #include <unistd.h>
-#include "getopt.h"
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif /* HAVE_GETOPT_H */
 #include "regex.h"
-#include "gettext.h"
+
+#ifdef HAVE_GETTEXT
+#include <libintl.h>
+#else
+#define gettext(s) s
+#define bindtextdomain(p, d)
+#define textdomain(p)
+#endif
+
 #define _(String) gettext(String)
 
 #undef MAX
@@ -45,11 +55,12 @@
 
 /* Short options. */
 static char const short_options[] =
-"cd:e:hiklnqsvwyBD:E:HI:MS:V0123456789";
+"cd:e:hiklnqsvwyBD:E:HI:MS:V0123456789-:";
 
 static int show_help;
 char *program_name;
 
+#ifdef HAVE_GETOPT_LONG
 /* Long options that have no corresponding short equivalents. */
 enum {
   COLOR_OPTION = CHAR_MAX + 1,
@@ -88,6 +99,7 @@ static struct option const long_options[] =
   {"word-regexp", no_argument, NULL, 'w'},
   {0, 0, 0, 0}
 };
+#endif /* HAVE_GETOPT_LONG */
 
 static void
 tre_agrep_usage(int status)
@@ -97,7 +109,7 @@ tre_agrep_usage(int status)
       fprintf(stderr, _("Usage: %s [OPTION]... PATTERN [FILE]...\n"),
 	      program_name);
       fprintf(stderr, _("Try `%s --help' for more information.\n"),
-	      program_name);
+              program_name);
     }
   else
     {
@@ -501,7 +513,11 @@ main(int argc, char **argv)
   /* Parse command line options. */
   while (1)
     {
+#ifdef HAVE_GETOPT_LONG
       c = getopt_long(argc, argv, short_options, long_options, NULL);
+#else /* !HAVE_GETOPT_LONG */
+      c = getopt(argc, argv, short_options);
+#endif /* !HAVE_GETOPT_LONG */
       if (c == -1)
 	break;
 
@@ -606,12 +622,33 @@ PARTICULAR PURPOSE.\n"));
 	case '?':
 	  /* Ambiguous match or extraneous parameter. */
 	  break;
+
+	case '-':
+	  /* Emulate some long options on systems which don't
+	     have getopt_long. */
+	  if (strcmp(optarg, "color") == 0
+	      || strcmp(optarg, "colour") == 0)
+	    color_option = 1;
+	  else if (strcmp(optarg, "show-position") == 0)
+	    print_position = 1;
+	  else if (strcmp(optarg, "help") == 0)
+	    show_help = 1;
+	  else
+	    {
+	      fprintf(stderr, _("%s: invalid option --%s\n"),
+		      program_name, optarg);
+	      exit(2);
+	    }
+	  break;
+
+#ifdef HAVE_GETOPT_LONG
 	case COLOR_OPTION:
 	  color_option = 1;
 	  break;
 	case SHOW_POSITION_OPTION:
 	  print_position = 1;
 	  break;
+#endif /* HAVE_GETOPT_LONG */
 	case 0:
 	  /* Long options without corresponding short options. */
 	  break;

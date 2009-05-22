@@ -16,16 +16,11 @@ of the latest changes before they are offically released.
 You will need the following tools installed on your system:
 
   - darcs (if you're reading this, you should already have it)
-  - gnulib, see http://www.gnu.org/software/gnulib/.
   - autoconf 2.59 or newer
   - automake 1.9.x (newer is usually better)
   - gettext 0.14.3 or newer
   - libtool 1.5.22 or newer
   - zip (Info-Zip 2.3), optional
-
-Out of these tools, gnulib is probably the one you don't already have.
-Remember to add gnulib to path so that the `gnulib-tool' command
-works.
 
 ** Windows
 

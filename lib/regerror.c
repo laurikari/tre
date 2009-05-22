@@ -33,7 +33,14 @@
 
 #include "tre-internal.h"
 #include "regex.h"
-#include "gettext.h"
+
+#ifdef HAVE_GETTEXT
+#include <libintl.h>
+#else
+#define dgettext(p, s) s
+#define gettext(s) s
+#endif
+
 #define _(String) dgettext(PACKAGE, String)
 #define gettext_noop(String) String
 

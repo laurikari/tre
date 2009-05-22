@@ -26,8 +26,6 @@ libtre_la_SOURCES =		\
 	regexec.c		\
 	regerror.c
 
-INCLUDES = -I$(top_srcdir)/gnulib/lib
-
 if TRE_APPROX
 libtre_la_SOURCES += tre-match-approx.c
 endif TRE_APPROX

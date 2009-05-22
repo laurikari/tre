@@ -4,7 +4,7 @@ SUBDIRS = agrep
 
 check_PROGRAMS = retest randtest test-str-source
 EXTRA_PROGRAMS = bench
-LDADD = ../gnulib/lib/libgnu.la $(LTLIBINTL)
+LDADD = $(LTLIBINTL)
 
 retest_SOURCES = retest.c
 if TRE_MULTIBYTE
@@ -59,7 +59,7 @@ endif TRE_MULTIBYTE
   randtest_LDADD = libxtre.la $(LDADD)
 endif !TRE_DEBUG
 
-INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/gnulib/lib
+INCLUDES = -I$(top_srcdir)/lib
 
 EXTRA_DIST = build-tests.sh
 
