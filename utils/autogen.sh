@@ -24,7 +24,7 @@ aclocal -I m4
 autoheader
 
 # Create Makefile.in's.
-automake --add-missing
+automake --foreign --add-missing
 
 # Create the configure script.
 autoconf

@@ -139,14 +139,9 @@ Portable
 
  Free
 
-   TRE is free; you can redistribute it and/or modify it under the
-   terms of the GNU Lesser General Public License as published by the
-   Free Software Foundation. See the file COPYING, included in the
-   distribution packages, for the complete license.
-
-   If you cannot accept the GNU LGPL, it may be possible that you can
-   persuade me to give or sell you a version which is licensed
-   differently.  Please contact me for more information.
+   TRE is released under a license which is essentially the same as
+   the "2 clause" BSD-style license used in NetBSD.  See the file
+   LICENSE for details.
 
 Roadmap
 
