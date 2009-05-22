@@ -196,7 +196,7 @@ static regaparams_t match_params;
 
 /* The color string used with the --color option.  If set, the
    environment variable GREP_COLOR overrides this default value. */
-static char *highlight = "01;31";
+static const char *highlight = "01;31";
 
 /* Sets `record' to the next complete record from file `fd', and `record_len'
    to the length of the record.	 Returns 1 when there are no more records,
@@ -473,7 +473,7 @@ main(int argc, char **argv)
   int comp_flags = REG_EXTENDED;
   char *tmp_str;
   char *regexp = NULL;
-  char *delim_regexp = "\n";
+  const char *delim_regexp = "\n";
   int word_regexp = 0;
   int literal_string = 0;
   int max_cost_set = 0;

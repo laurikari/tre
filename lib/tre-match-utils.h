@@ -19,7 +19,7 @@
 
 */
 
-#define str_source ((tre_str_source*)string)
+#define str_source ((const tre_str_source*)string)
 
 #ifdef TRE_WCHAR
 
@@ -66,7 +66,7 @@
 	      }								      \
 	    else							      \
 	      {								      \
-		w = tre_mbrtowc(&next_c, str_byte, max, &mbstate);	      \
+		w = tre_mbrtowc(&next_c, str_byte, (size_t)max, &mbstate);    \
 		if (w == (size_t)-1 || w == (size_t)-2)			      \
 		  return REG_NOMATCH;					      \
 		if (w == 0 && len >= 0)					      \
@@ -89,7 +89,7 @@
 	str_user_end = str_source->get_next_char(&next_c, &pos_add_next,      \
                                                  str_source->context);	      \
       }									      \
-  } while(0)
+  } while(/*CONSTCOND*/0)
 
 #else /* !TRE_MULTIBYTE */
 
@@ -120,7 +120,7 @@
 	str_user_end = str_source->get_next_char(&next_c, &pos_add_next,      \
                                                  str_source->context);	      \
       }									      \
-  } while(0)
+  } while(/*CONSTCOND*/0)
 
 #endif /* !TRE_MULTIBYTE */
 
@@ -145,7 +145,7 @@
 	str_user_end = str_source->get_next_char(&next_c, &pos_add_next,      \
 						 str_source->context);	      \
       }									      \
-  } while(0)
+  } while(/*CONSTCOND*/0)
 
 #endif /* !TRE_WCHAR */
 

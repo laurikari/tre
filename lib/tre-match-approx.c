@@ -213,7 +213,6 @@ tre_set_params(tre_tnfa_approx_reach_t *reach,
     reach->params.max_err = value;
 }
 
-
 reg_errcode_t
 tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 		    tre_str_type_t type, int *match_tags,
@@ -294,11 +293,11 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 #ifdef TRE_USE_ALLOCA
     buf = alloca(total_bytes);
 #else /* !TRE_USE_ALLOCA */
-    buf = xmalloc(total_bytes);
+    buf = xmalloc((unsigned)total_bytes);
 #endif /* !TRE_USE_ALLOCA */
     if (!buf)
       return REG_ESPACE;
-    memset(buf, 0, total_bytes);
+    memset(buf, 0, (size_t)total_bytes);
 
     /* Allocate `tmp_tags' from `buf'. */
     tmp_tags = (void *)buf;
@@ -337,7 +336,7 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
   GET_NEXT_WCHAR();
   pos = 0;
 
-  while (1)
+  while (/*CONSTCOND*/1)
     {
       DPRINT(("%03d:%2lc/%05d\n", pos, (tre_cint_t)next_c, (int)next_c));
 
@@ -349,38 +348,38 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 	  DPRINT(("  init"));
 	  for (trans = tnfa->initial; trans->state; trans++)
 	    {
-	      int id = trans->state_id;
+	      int stateid = trans->state_id;
 
 	      /* If this state is not currently in `reach_next', add it
 		 there. */
-	      if (reach_next[id].pos < pos)
+	      if (reach_next[stateid].pos < pos)
 		{
 		  if (trans->assertions && CHECK_ASSERTIONS(trans->assertions))
 		    {
 		      /* Assertions failed, don't add this state. */
-		      DPRINT((" !%d (assert)", id));
+		      DPRINT((" !%d (assert)", stateid));
 		      continue;
 		    }
-		  DPRINT((" %d", id));
-		  reach_next[id].state = trans->state;
-		  reach_next[id].pos = pos;
+		  DPRINT((" %d", stateid));
+		  reach_next[stateid].state = trans->state;
+		  reach_next[stateid].pos = pos;
 
 		  /* Compute tag values after this transition. */
 		  for (i = 0; i < num_tags; i++)
-		    reach_next[id].tags[i] = -1;
+		    reach_next[stateid].tags[i] = -1;
 
 		  if (trans->tags)
 		    for (i = 0; trans->tags[i] >= 0; i++)
 		      if (trans->tags[i] < num_tags)
-			reach_next[id].tags[trans->tags[i]] = pos;
+			reach_next[stateid].tags[trans->tags[i]] = pos;
 
 		  /* Set the parameters, depth, and costs. */
-		  reach_next[id].params = default_params;
-		  reach_next[id].depth = 0;
+		  reach_next[stateid].params = default_params;
+		  reach_next[stateid].depth = 0;
 		  for (i = 0; i < TRE_M_LAST; i++)
-		    reach_next[id].costs[0][i] = 0;
+		    reach_next[stateid].costs[0][i] = 0;
 		  if (trans->params)
-		    tre_set_params(&reach_next[id], trans->params,
+		    tre_set_params(&reach_next[stateid], trans->params,
 				   default_params);
 
 		  /* If this is the final state, mark the exact match. */
@@ -388,7 +387,7 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 		    {
 		      match_eo = pos;
 		      for (i = 0; i < num_tags; i++)
-			match_tags[i] = reach_next[id].tags[i];
+			match_tags[i] = reach_next[stateid].tags[i];
 		      for (i = 0; i < TRE_M_LAST; i++)
 			match_costs[i] = 0;
 		    }
@@ -502,7 +501,6 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 	while (deque_end != deque_start)
 	  {
 	    tre_tnfa_approx_reach_t *reach_p;
-	    int id;
 	    int depth;
 	    int cost, cost0;
 	    tre_tnfa_transition_t *trans;
@@ -697,8 +695,8 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 	      cost0 = reach[id].costs[0][TRE_M_COST];
 	      err = 0;
 
-	      if (trans->code_min > prev_c ||
-		  trans->code_max < prev_c)
+	      if (trans->code_min > (tre_cint_t)prev_c
+		  || trans->code_max < (tre_cint_t)prev_c)
 		{
 		  /* Handle substitutes.  The required character was not in
 		     the string, so match it in place of whatever was supposed

@@ -53,7 +53,7 @@ regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 #endif /* TRE_MULTIBYTE */
     {
       unsigned int i;
-      const unsigned char *str = (unsigned char *)regex;
+      const unsigned char *str = (const unsigned char *)regex;
       tre_char_t *wstr = wregex;
 
       for (i = 0; i < n; i++)
@@ -103,7 +103,7 @@ regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 #endif /* TRE_MULTIBYTE */
 
   wregex[wlen] = L'\0';
-  ret = tre_compile(preg, wregex, wlen, cflags);
+  ret = tre_compile(preg, wregex, (unsigned)wlen, cflags);
   xfree(wregex);
 #else /* !TRE_WCHAR */
   ret = tre_compile(preg, (const tre_char_t *)regex, n, cflags);

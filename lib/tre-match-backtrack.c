@@ -184,7 +184,7 @@ typedef struct tre_backtrack_struct {
 	stack->item.tags[i] = (_tags)[i];				      \
       BT_STACK_MBSTATE_IN;						      \
     }									      \
-  while (0)
+  while (/*CONSTCOND*/0)
 
 #define BT_STACK_POP()							      \
   do									      \
@@ -203,7 +203,7 @@ typedef struct tre_backtrack_struct {
       BT_STACK_MBSTATE_OUT;						      \
       stack = stack->prev;						      \
     }									      \
-  while (0)
+  while (/*CONSTCOND*/0)
 
 #undef MIN
 #define MIN(a, b) ((a) <= (b) ? (a) : (b))
@@ -383,9 +383,9 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   if (state == NULL)
     goto backtrack;
 
-  while (1)
+  while (/*CONSTCOND*/1)
     {
-      tre_tnfa_transition_t *trans_i, *next_state;
+      tre_tnfa_transition_t *next_state;
       int empty_br_match;
 
       DPRINT(("start loop\n"));
@@ -437,7 +437,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	  DPRINT(("  should match back reference %d\n", bt));
 	  /* Get the substring we need to match against.  Remember to
 	     turn off REG_NOSUB temporarily. */
-	  tre_fill_pmatch(bt + 1, pmatch, tnfa->cflags & !REG_NOSUB,
+	  tre_fill_pmatch(bt + 1, pmatch, tnfa->cflags & /*LINTED*/!REG_NOSUB,
 			  tnfa, tags, pos);
 	  so = pmatch[bt].rm_so;
 	  eo = pmatch[bt].rm_eo;
@@ -472,23 +472,28 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	  if (len < 0)
 	    {
 	      if (type == STR_USER)
-		result = str_source->compare(so, pos, bt_len,
+		result = str_source->compare((unsigned)so, (unsigned)pos,
+					     (unsigned)bt_len,
 					     str_source->context);
 #ifdef TRE_WCHAR
 	      else if (type == STR_WIDE)
-		result = wcsncmp((wchar_t*)string + so, str_wide - 1, bt_len);
+		result = wcsncmp((const wchar_t*)string + so, str_wide - 1,
+				 (size_t)bt_len);
 #endif /* TRE_WCHAR */
 	      else
-		result = strncmp((char*)string + so, str_byte - 1, bt_len);
+		result = strncmp((const char*)string + so, str_byte - 1,
+				 (size_t)bt_len);
 	    }
 	  else if (len - pos < bt_len)
 	    result = 1;
 #ifdef TRE_WCHAR
 	  else if (type == STR_WIDE)
-	    result = wmemcmp((wchar_t*)string + so, str_wide - 1, bt_len);
+	    result = wmemcmp((const wchar_t*)string + so, str_wide - 1,
+			     (size_t)bt_len);
 #endif /* TRE_WCHAR */
 	  else
-	    result = memcmp((char*)string + so, str_byte - 1, bt_len);
+	    result = memcmp((const char*)string + so, str_byte - 1,
+			    (size_t)bt_len);
 
 	  if (result == 0)
 	    {
@@ -550,7 +555,8 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		  trans_i->code_min, trans_i->code_max,
 		  trans_i->code_min, trans_i->code_max,
 		  trans_i->assertions, trans_i->state_id));
-	  if (trans_i->code_min <= prev_c && trans_i->code_max >= prev_c)
+	  if (trans_i->code_min <= (tre_cint_t)prev_c
+	      && trans_i->code_max >= (tre_cint_t)prev_c)
 	    {
 	      if (trans_i->assertions
 		  && (CHECK_ASSERTIONS(trans_i->assertions)

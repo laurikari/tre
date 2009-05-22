@@ -62,8 +62,10 @@ regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
   const char *err;
   size_t err_len;
 
+  /*LINTED*/(void)&preg;
   if (errcode >= 0
-      && errcode < (sizeof(tre_error_messages) / sizeof(*tre_error_messages)))
+      && errcode < (int)(sizeof(tre_error_messages)
+			 / sizeof(*tre_error_messages)))
     err = gettext(tre_error_messages[errcode]);
   else
     err = gettext("Unknown error");

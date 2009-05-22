@@ -116,9 +116,9 @@ mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
 
 static int valid_reobj = 0;
 static regex_t reobj;
-static regmatch_t pmatch[32];
-static CHAR_T *regex_pattern;
-static int cflags;
+static regmatch_t pmatch_global[32];
+static const CHAR_T *regex_pattern;
+static int cflags_global;
 static int use_regnexec = 0;
 static int use_regncomp = 0;
 static int avoid_eflags = 0;
@@ -203,7 +203,8 @@ wrap_regcomp(regex_t *preg, const CHAR_T *data, size_t len, int cflags)
 }
 
 static int
-execute(CHAR_T *data, int len, size_t pmatch_len, regmatch_t *pmatch, int eflags)
+execute(const CHAR_T *data, int len, size_t pmatch_len, regmatch_t *pmatch,
+	int eflags)
 {
 #ifdef MALLOC_DEBUGGING
   int i = 0;
@@ -230,8 +231,8 @@ execute(CHAR_T *data, int len, size_t pmatch_len, regmatch_t *pmatch, int eflags
 }
 
 static int
-check(va_list ap, int ret, CHAR_T *str, size_t pmatch_len, regmatch_t *pmatch,
-      int eflags)
+check(va_list ap, int ret, const CHAR_T *str,
+      size_t pmatch_len, regmatch_t *pmatch, int eflags)
 {
   int fail = 0;
 
@@ -239,11 +240,11 @@ check(va_list ap, int ret, CHAR_T *str, size_t pmatch_len, regmatch_t *pmatch,
     {
 #ifndef WRETEST
       printf("Exec error, regex: \"%s\", cflags %d, "
-	     "string: \"%s\", eflags %d\n", regex_pattern, cflags,
+	     "string: \"%s\", eflags %d\n", regex_pattern, cflags_global,
 	     str, eflags);
 #else /* WRETEST */
       printf("Exec error, regex: \"%ls\", cflags %d, "
-	     "string: \"%ls\", eflags %d\n", regex_pattern, cflags,
+	     "string: \"%ls\", eflags %d\n", regex_pattern, cflags_global,
 	     str, eflags);
 #endif /* WRETEST */
       printf("	got %smatch (regexec returned %d)\n", ret ? "no " : "", ret);
@@ -297,7 +298,7 @@ check(va_list ap, int ret, CHAR_T *str, size_t pmatch_len, regmatch_t *pmatch,
 	    }
 	}
 
-      if (!(cflags & REG_NOSUB) && reobj.re_nsub != i - 1
+      if (!(cflags_global & REG_NOSUB) && reobj.re_nsub != i - 1
 	  && reobj.re_nsub <= pmatch_len && pmatch)
 	{
 #ifndef WRETEST
@@ -332,12 +333,12 @@ check(va_list ap, int ret, CHAR_T *str, size_t pmatch_len, regmatch_t *pmatch,
 
 
 static void
-test_nexec(char *data, size_t len, int eflags, ...)
+test_nexec(const char *data, size_t len, int eflags, ...)
 {
   int m;
   int fail = 0;
   int extra_flags[] = {0, REG_BACKTRACKING_MATCHER, REG_APPROX_MATCHER};
-  int i;
+  size_t i;
   va_list ap;
 
   if (!valid_reobj)
@@ -376,9 +377,11 @@ test_nexec(char *data, size_t len, int eflags, ...)
 
       /* Test with a pmatch array. */
       exec_tests++;
-      m = execute(data, len, elementsof(pmatch), pmatch, final_flags);
+      m = execute(data, len, elementsof(pmatch_global), pmatch_global,
+		  final_flags);
       va_start(ap, eflags);
-      fail |= check(ap, m, data, elementsof(pmatch), pmatch, final_flags);
+      fail |= check(ap, m, data, elementsof(pmatch_global), pmatch_global,
+		    final_flags);
       va_end(ap);
 
       /* Same test with a NULL pmatch. */
@@ -400,7 +403,7 @@ test_nexec(char *data, size_t len, int eflags, ...)
 
 
 static void
-test_exec(char *str, int eflags, ...)
+test_exec(const char *str, int eflags, ...)
 {
   int m;
   int fail = 0;
@@ -409,7 +412,7 @@ test_exec(char *str, int eflags, ...)
 		       REG_BACKTRACKING_MATCHER,
 		       REG_APPROX_MATCHER,
 		       REG_BACKTRACKING_MATCHER | REG_APPROX_MATCHER};
-  int i;
+  size_t i;
   va_list ap;
 
   if (!valid_reobj)
@@ -448,9 +451,11 @@ test_exec(char *str, int eflags, ...)
 
 	  /* Test with a pmatch array. */
 	  exec_tests++;
-	  m = execute(str, len, elementsof(pmatch), pmatch, final_flags);
+	  m = execute(str, len, elementsof(pmatch_global), pmatch_global,
+		      final_flags);
 	  va_start(ap, eflags);
-	  fail |= check(ap, m, str, elementsof(pmatch), pmatch, final_flags);
+	  fail |= check(ap, m, str, elementsof(pmatch_global), pmatch_global,
+			final_flags);
 	  va_end(ap);
 
 	  /* Same test with a NULL pmatch. */
@@ -472,7 +477,7 @@ test_exec(char *str, int eflags, ...)
 
 
 static void
-test_comp(char *re, int flags, int ret)
+test_comp(const char *re, int flags, int ret)
 {
   int errcode = 0;
   int len = strlen(re);
@@ -501,7 +506,7 @@ test_comp(char *re, int flags, int ret)
 #define re wregex
 #endif /* WRETEST */
   regex_pattern = re;
-  cflags = flags;
+  cflags_global = flags;
 
 #ifdef MALLOC_DEBUGGING
   {

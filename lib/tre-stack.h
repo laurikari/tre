@@ -67,7 +67,7 @@ declare_popf(int, int);
     {									      \
       status = tre_stack_push_ ## typetag(s, value);			      \
     }									      \
-  while (0)
+  while (/*CONSTCOND*/0)
 
 #define STACK_PUSHX(s, typetag, value)					      \
   {									      \
