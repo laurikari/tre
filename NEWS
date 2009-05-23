@@ -1,3 +1,12 @@
+Version 0.7.6
+  - The license is changed from LGPL to a BSD-style license.  The new
+    license is essentially the same as the "2 clause" BSD-style
+    license used in NetBSD.  See the file LICENSE for details.
+
+  - No longer using gnulib due to potential license conflicts.
+
+  - Bug fixes.
+
 Version 0.7.5
   - Swedish translation added.
 

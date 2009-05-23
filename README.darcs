@@ -18,7 +18,7 @@ You will need the following tools installed on your system:
   - darcs (if you're reading this, you should already have it)
   - autoconf 2.59 or newer
   - automake 1.9.x (newer is usually better)
-  - gettext 0.14.3 or newer
+  - gettext 0.17 or newer
   - libtool 1.5.22 or newer
   - zip (Info-Zip 2.3), optional
 
