@@ -471,7 +471,7 @@ PyTre_ncompile(PyObject *self, PyObject *args)
 {
   TrePatternObject *rv;
   char *pattern;
-  size_t pattlen;
+  int pattlen;
   int cflags = 0;
   int rc;
 
