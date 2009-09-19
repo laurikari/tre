@@ -24,7 +24,7 @@ tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
   int ret;
 #if TRE_WCHAR
   tre_char_t *wregex;
-  int wlen;
+  size_t wlen;
 
   wregex = xmalloc(sizeof(tre_char_t) * (n + 1));
   if (wregex == NULL)
@@ -90,7 +90,7 @@ tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 #endif /* TRE_MULTIBYTE */
 
   wregex[wlen] = L'\0';
-  ret = tre_compile(preg, wregex, (unsigned)wlen, cflags);
+  ret = tre_compile(preg, wregex, wlen, cflags);
   xfree(wregex);
 #else /* !TRE_WCHAR */
   ret = tre_compile(preg, (const tre_char_t *)regex, n, cflags);
