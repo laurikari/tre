@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
 lib_LTLIBRARIES = libtre.la
-libtre_la_LDFLAGS = -no-undefined -version-info 6:5:2 $(LDFLAGS)
+libtre_la_LDFLAGS = -no-undefined -version-info 5:0:0 $(LDFLAGS)
 libtre_la_LIBADD = $(LTLIBINTL)
 
 noinst_HEADERS =		\
@@ -30,5 +30,5 @@ if TRE_APPROX
 libtre_la_SOURCES += tre-match-approx.c
 endif TRE_APPROX
 
-dist_pkginclude_HEADERS = regex.h
+dist_pkginclude_HEADERS = tre.h regex.h
 nodist_pkginclude_HEADERS = tre-config.h

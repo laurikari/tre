@@ -23,7 +23,7 @@
 #include "Python.h"
 #include "structmember.h"
 
-#include <tre/regex.h>
+#include <tre/tre.h>
 
 #define	TRE_MODULE	"tre"
 
@@ -55,7 +55,7 @@ _set_tre_err(int rc, regex_t *rgx)
   char emsg[256];
   size_t elen;
 
-  elen = regerror(rc, rgx, emsg, sizeof(emsg));
+  elen = tre_regerror(rc, rgx, emsg, sizeof(emsg));
   if (emsg[elen] == '\0')
     elen--;
   errval = Py_BuildValue("s#", emsg, elen);
@@ -77,7 +77,7 @@ TreFuzzyness_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
   self = (TreFuzzynessObject*)type->tp_alloc(type, 0);
   if (self == NULL)
     return NULL;
-  regaparams_default(&self->ap);
+  tre_regaparams_default(&self->ap);
   if (!PyArg_ParseTupleAndKeywords(args, kwds, "|iiiiiiii", kwlist,
 				   &self->ap.cost_del, &self->ap.cost_ins,
 				   &self->ap.max_cost, &self->ap.cost_subst,
@@ -372,7 +372,7 @@ PyTrePattern_match(TrePatternObject *self, PyObject *args)
   targ = PyString_AsString(pstring);
   tlen = PyString_Size(pstring);
 
-  rc = reganexec(&self->rgx, targ, tlen, &mo->am, fz->ap, eflags);
+  rc = tre_reganexec(&self->rgx, targ, tlen, &mo->am, fz->ap, eflags);
 
   if (PyErr_Occurred())
     {
@@ -416,7 +416,7 @@ static PyMemberDef TrePattern_members[] = {
 static void
 PyTrePattern_dealloc(TrePatternObject *self)
 {
-  regfree(&self->rgx);
+  tre_regfree(&self->rgx);
   PyObject_Del(self);
 }
 
@@ -482,7 +482,7 @@ PyTre_ncompile(PyObject *self, PyObject *args)
   if (rv == NULL)
     return NULL;
 
-  rc = regncomp(&rv->rgx, (char*)pattern, pattlen, cflags);
+  rc = tre_regncomp(&rv->rgx, (char*)pattern, pattlen, cflags);
   if (rc != REG_OK)
     {
       if (!PyErr_Occurred())

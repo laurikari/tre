@@ -1,5 +1,5 @@
 /*
-  test-str-source.c - Sample program for using reguexec()
+  test-str-source.c - Sample program for using tre_reguexec()
 
   This software is released under a BSD-style license.
   See the file LICENSE for details and copyright.
@@ -101,7 +101,7 @@ free_str_source(tre_str_source *s)
   free(s);
 }
 
-/* Run one test with reguexec */
+/* Run one test with tre_reguexec */
 static void
 test_reguexec(const char *str, const char *regex)
 {
@@ -113,12 +113,12 @@ test_reguexec(const char *str, const char *regex)
   if (!source)
     return;
 
-  regcomp(&preg, regex, REG_EXTENDED);
-  if (reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
+  tre_regcomp(&preg, regex, REG_EXTENDED);
+  if (tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
     printf("Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
 
   free_str_source(source);
-  regfree(&preg);
+  tre_regfree(&preg);
 }
 
 int

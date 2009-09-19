@@ -65,9 +65,9 @@ main(int argc, char **argv)
 	{
 	  buf = malloc(sizeof(*buf) * len);
 	  strncpy(buf, regex, len - 1);
-	  status = regncomp(&preg, buf, len, flags);
+	  status = tre_regncomp(&preg, buf, len, flags);
 	  if (status == REG_OK)
-	    regfree(&preg);
+	    tre_regfree(&preg);
 	}
       printf("\n");
     }

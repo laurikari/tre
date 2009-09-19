@@ -48,10 +48,10 @@ static wchar_t wstr[MAXSTRSIZE];
 static wchar_t wregex[MAXSTRSIZE];
 static int woffs[MAXSTRSIZE];
 
-#define regexec regwexec
-#define regnexec regwnexec
-#define regcomp regwcomp
-#define regncomp regwncomp
+#define tre_regexec tre_regwexec
+#define tre_regnexec tre_regwnexec
+#define tre_regcomp tre_regwcomp
+#define tre_regncomp tre_regwncomp
 
 /* Iterate mbrtowc over the multi-byte sequence STR of length LEN,
    store the result in BUF and memoize the successive byte offsets
@@ -142,14 +142,14 @@ wrap_regexec(const CHAR_T *data, size_t len,
 
   if (len == 0 && use_regnexec)
     {
-      /* Zero length string and using regnexec(), the pointer we give
+      /* Zero length string and using tre_regnexec(), the pointer we give
 	 should not be dereferenced at all. */
       buf = NULL;
     }
   else
     {
       /* Copy the data to a separate buffer to make a better test for
-	 regexec() and regnexec(). */
+	 tre_regexec() and tre_regnexec(). */
       buf = xmalloc((len + !use_regnexec) * sizeof(CHAR_T));
       if (!buf)
 	return REG_ESPACE;
@@ -161,15 +161,15 @@ wrap_regexec(const CHAR_T *data, size_t len,
   if (use_regnexec)
     {
       if (len == 0)
-	result = regnexec(&reobj, NULL, len, pmatch_len, pmatch, eflags);
+	result = tre_regnexec(&reobj, NULL, len, pmatch_len, pmatch, eflags);
       else
-	result = regnexec(&reobj, buf, len, pmatch_len, pmatch, eflags);
+	result = tre_regnexec(&reobj, buf, len, pmatch_len, pmatch, eflags);
     }
   else
 #endif /* HAVE_REGNEXEC */
     {
       buf[len] = L('\0');
-      result = regexec(&reobj, buf, pmatch_len, pmatch, eflags);
+      result = tre_regexec(&reobj, buf, pmatch_len, pmatch, eflags);
     }
 
   xfree(buf);
@@ -181,12 +181,12 @@ wrap_regcomp(regex_t *preg, const CHAR_T *data, size_t len, int cflags)
 {
 #ifdef HAVE_REGNCOMP
   if (use_regncomp)
-    return regncomp(preg, data, len, cflags);
+    return tre_regncomp(preg, data, len, cflags);
   else
-    return regcomp(preg, data, cflags);
+    return tre_regcomp(preg, data, cflags);
 #else /* !HAVE_REGNCOMP */
   fprintf(stderr, "%s\n", data);
-  return regcomp(preg, data, cflags);
+  return tre_regcomp(preg, data, cflags);
 #endif /* !HAVE_REGNCOMP */
 }
 
@@ -235,7 +235,7 @@ check(va_list ap, int ret, const CHAR_T *str,
 	     "string: \"%ls\", eflags %d\n", regex_pattern, cflags_global,
 	     str, eflags);
 #endif /* WRETEST */
-      printf("	got %smatch (regexec returned %d)\n", ret ? "no " : "", ret);
+      printf("	got %smatch (tre_regexec returned %d)\n", ret ? "no " : "", ret);
       return 1;
     }
 
@@ -472,7 +472,7 @@ test_comp(const char *re, int flags, int ret)
 
   if (valid_reobj)
     {
-      regfree(&reobj);
+      tre_regfree(&reobj);
       valid_reobj = 0;
     }
 
@@ -1659,7 +1659,7 @@ main(int argc, char **argv)
 #endif /* TRE_MULTIBYTE */
 #endif
 
-  regfree(&reobj);
+  tre_regfree(&reobj);
 
   printf("\n");
   if (comp_errors || exec_errors)

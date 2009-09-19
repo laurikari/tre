@@ -112,8 +112,8 @@ run_tests(int len, int samples, double *sample_data, int repeats,
   for (i = 0; i < samples; i++) {
     c1 = clock();
     for (j = 0; j < repeats; j++)
-      if ((errcode = regexec(reobj, str, 10, pmatch, 0))) {
-	regerror(errcode, reobj, tmpbuf, 255);
+      if ((errcode = tre_regexec(reobj, str, 10, pmatch, 0))) {
+	tre_regerror(errcode, reobj, tmpbuf, 255);
 	printf("error: %s\n", tmpbuf);
       }
     c2 = clock();
@@ -184,7 +184,7 @@ main(int argc, char **argv)
     printf("# pattern: \"a*\"\n");
     printf("# string:  \"aaaaaa...\"\n");
     len = 0;
-    regcomp(&reobj, "a*", REG_EXTENDED);
+    tre_regcomp(&reobj, "a*", REG_EXTENDED);
     while (len <= max_len) {
 
       str = malloc(sizeof(char) * (len+1));
@@ -204,7 +204,7 @@ main(int argc, char **argv)
     printf("# pattern: \"(a)*\"\n");
     printf("# string:  \"aaaaaa...\"\n");
     len = 0;
-    regcomp(&reobj, "(a)*", REG_EXTENDED);
+    tre_regcomp(&reobj, "(a)*", REG_EXTENDED);
     while (len <= max_len) {
 
       str = malloc(sizeof(char) * (len+1));
@@ -223,7 +223,7 @@ main(int argc, char **argv)
   case 2:
     printf("# pattern: \"(a*)\"\n");
     printf("# string:  \"aaaaaa...\"\n");    len = 0;
-    regcomp(&reobj, "(a*)", REG_EXTENDED);
+    tre_regcomp(&reobj, "(a*)", REG_EXTENDED);
     while (len <= max_len) {
 
       str = malloc(sizeof(char) * (len+1));
@@ -242,7 +242,7 @@ main(int argc, char **argv)
     printf("# pattern: \"(a*)*|b*\"\n");
     printf("# string:  \"aaaaaa...b\"\n");
     len = 0;
-    regcomp(&reobj, "(a*)*|b*", REG_EXTENDED);
+    tre_regcomp(&reobj, "(a*)*|b*", REG_EXTENDED);
     while (len <= max_len) {
       str = malloc(sizeof(char) * (len+1));
       for (i = 0; i < len-1; i++)
@@ -281,12 +281,12 @@ main(int argc, char **argv)
       tmpbuf[i+1] = '*';
       tmpbuf[i+2] = '\0';
       printf("# pat = %s\n", tmpbuf);
-      regcomp(&reobj, tmpbuf, REG_EXTENDED);
+      tre_regcomp(&reobj, tmpbuf, REG_EXTENDED);
 
       run_tests(len, samples, sample_data, repeats, &reobj, str, tmpbuf);
       stats(sample_data, samples, len);
       len = len + (max_len/steps);
-      regfree(&reobj);
+      tre_regfree(&reobj);
     }
     free(str);
     break;
@@ -295,7 +295,7 @@ main(int argc, char **argv)
     printf("# pattern: \"foobar\"\n");
     printf("# string:  \"aaaaaa...foobar\"\n");
     len = 0;
-    regcomp(&reobj, "foobar", REG_EXTENDED);
+    tre_regcomp(&reobj, "foobar", REG_EXTENDED);
     while (len <= max_len) {
       str = malloc(sizeof(char) * (len+7));
       for (i = 0; i < len; i++) {
@@ -324,7 +324,7 @@ main(int argc, char **argv)
     printf("# pattern: \"a*foobar\"\n");
     printf("# string:  \"aaaaaa...foobar\"\n");
     len = 0;
-    regcomp(&reobj, "a*foobar", REG_EXTENDED);
+    tre_regcomp(&reobj, "a*foobar", REG_EXTENDED);
     while (len <= max_len) {
       str = malloc(sizeof(char) * (len+7));
       for (i = 0; i < len; i++) {
@@ -350,7 +350,7 @@ main(int argc, char **argv)
     printf("# pattern: \"(a)*foobar\"\n");
     printf("# string:  \"aaaaabbaaab...foobar\"\n");
     len = 0;
-    regcomp(&reobj, "(a)*foobar", REG_EXTENDED);
+    tre_regcomp(&reobj, "(a)*foobar", REG_EXTENDED);
     while (len <= max_len) {
       str = malloc(sizeof(char) * (len+7));
       for (i = 0; i < len; i++) {
@@ -380,7 +380,7 @@ main(int argc, char **argv)
     printf("# pattern: \"(a|b)*foobar\"\n");
     printf("# string:  \"aaaaabbaaab...foobar\"\n");
     len = 0;
-    regcomp(&reobj, "(a|b)*foobar", REG_EXTENDED);
+    tre_regcomp(&reobj, "(a|b)*foobar", REG_EXTENDED);
     while (len <= max_len) {
       str = malloc(sizeof(char) * (len+7));
       for (i = 0; i < len; i++) {
@@ -460,7 +460,7 @@ main(int argc, char **argv)
     return 1;
   }
 
-  regfree(&reobj);
+  tre_regfree(&reobj);
 
   return 0;
 }

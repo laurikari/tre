@@ -1,5 +1,5 @@
 /*
-  regcomp.c - TRE POSIX compatible regex compilation functions.
+  tre_regcomp.c - TRE POSIX compatible regex compilation functions.
 
   This software is released under a BSD-style license.
   See the file LICENSE for details and copyright.
@@ -14,12 +14,12 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "regex.h"
+#include "tre.h"
 #include "tre-internal.h"
 #include "xmalloc.h"
 
 int
-regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
+tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 {
   int ret;
 #if TRE_WCHAR
@@ -100,28 +100,28 @@ regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 }
 
 int
-regcomp(regex_t *preg, const char *regex, int cflags)
+tre_regcomp(regex_t *preg, const char *regex, int cflags)
 {
-  return regncomp(preg, regex, regex ? strlen(regex) : 0, cflags);
+  return tre_regncomp(preg, regex, regex ? strlen(regex) : 0, cflags);
 }
 
 
 #ifdef TRE_WCHAR
 int
-regwncomp(regex_t *preg, const wchar_t *regex, size_t n, int cflags)
+tre_regwncomp(regex_t *preg, const wchar_t *regex, size_t n, int cflags)
 {
   return tre_compile(preg, regex, n, cflags);
 }
 
 int
-regwcomp(regex_t *preg, const wchar_t *regex, int cflags)
+tre_regwcomp(regex_t *preg, const wchar_t *regex, int cflags)
 {
   return tre_compile(preg, regex, regex ? wcslen(regex) : 0, cflags);
 }
 #endif /* TRE_WCHAR */
 
 void
-regfree(regex_t *preg)
+tre_regfree(regex_t *preg)
 {
   tre_free(preg);
 }

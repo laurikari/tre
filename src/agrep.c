@@ -262,7 +262,7 @@ tre_agrep_get_next_record(int fd, const char *filename)
 	}
 
       /* Find the next record delimiter. */
-      errcode = regnexec(&delim, next_record, data_len - (next_record - buf),
+      errcode = tre_regnexec(&delim, next_record, data_len - (next_record - buf),
 			 1, pmatch, 0);
 
 
@@ -377,7 +377,7 @@ tre_agrep_handle_file(const char *filename)
 	break;
 
       /* See if the record matches. */
-      errcode = reganexec(&preg, record, record_len, &match, match_params, 0);
+      errcode = tre_reganexec(&preg, record, record_len, &match, match_params, 0);
       if ((!invert_match && errcode == REG_OK)
 	  || (invert_match && errcode == REG_NOMATCH))
 	{
@@ -494,7 +494,7 @@ main(int argc, char **argv)
   print_filename = -1;
   print_cost = 0;
   be_silent = 0;
-  regaparams_default(&match_params);
+  tre_regaparams_default(&match_params);
   match_params.max_cost = 0;
 
   /* Parse command line options. */
@@ -740,28 +740,28 @@ Copyright (c) 2001-2009 Ville Laurikari <vl@iki.fi>.\n"));
     }
 
   /* Compile the pattern. */
-  errcode = regcomp(&preg, regexp, comp_flags);
+  errcode = tre_regcomp(&preg, regexp, comp_flags);
   if (errcode)
     {
       char errbuf[256];
-      regerror(errcode, &preg, errbuf, sizeof(errbuf));
+      tre_regerror(errcode, &preg, errbuf, sizeof(errbuf));
       fprintf(stderr, "%s: %s: %s\n",
 	      program_name, _("Error in search pattern"), errbuf);
       return 2;
     }
 
   /* Compile the record delimiter pattern. */
-  errcode = regcomp(&delim, delim_regexp, REG_EXTENDED | REG_NEWLINE);
+  errcode = tre_regcomp(&delim, delim_regexp, REG_EXTENDED | REG_NEWLINE);
   if (errcode)
     {
       char errbuf[256];
-      regerror(errcode, &preg, errbuf, sizeof(errbuf));
+      tre_regerror(errcode, &preg, errbuf, sizeof(errbuf));
       fprintf(stderr, "%s: %s: %s\n",
 	      program_name, _("Error in record delimiter pattern"), errbuf);
       return 2;
     }
 
-  if (regexec(&delim, "", 0, NULL, 0) == REG_OK)
+  if (tre_regexec(&delim, "", 0, NULL, 0) == REG_OK)
     {
       fprintf(stderr, "%s: %s\n", program_name,
 	      _("Record delimiter pattern must not match an empty string"));
