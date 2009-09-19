@@ -1,21 +1,11 @@
 /*
   tre-python.c - TRE Python language bindings
 
-  Copyright (c) 2004-2006 Nikolai SAOUKH <nms+python@otdel-1.org>
+  This sotfware is released under a BSD-style license.
+  See the file LICENSE for details and copyright.
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  The original version of this code was contributed by
+  Nikolai Saoukh <nms+python@otdel1.org>.
 
 */
 
@@ -335,7 +325,7 @@ newTreMatchObject(void)
 }
 
 static PyObject *
-PyTrePattern_match(TrePatternObject *self, PyObject *args)
+PyTrePattern_search(TrePatternObject *self, PyObject *args)
 {
   PyObject *pstring;
   int eflags = 0;
@@ -401,7 +391,7 @@ PyTrePattern_match(TrePatternObject *self, PyObject *args)
 }
 
 static PyMethodDef TrePattern_methods[] = {
-  { "match", (PyCFunction)PyTrePattern_match, METH_VARARGS,
+  { "search", (PyCFunction)PyTrePattern_search, METH_VARARGS,
     "try to match against given string, returning " TRE_MODULE ".match object "
     "or None on failure" },
   {NULL, NULL}
