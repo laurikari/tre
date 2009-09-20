@@ -140,12 +140,13 @@ atom.
 
 
 <p>
-Adding a <tt>?</tt> to a repeat operator makes the subexpression
-minimal, or non-greedy.  Normally a repeated expression is greedy,
-that is, it matches as many characters as possible.  A non-greedy
-subexpression matches as few characters as possible.  Note that this
-does not (always) mean the same thing as matching as many or few
-repetitions as possible.
+Adding a <tt>?</tt> to a repeat operator makes the subexpression minimal, or
+non-greedy.  Normally a repeated expression is greedy, that is, it matches as
+many characters as possible.  A non-greedy subexpression matches as few
+characters as possible.  Note that this does not (always) mean the same thing
+as matching as many or few repetitions as possible.  Also note
+that <strong>minimal repetitions are not currently supported for approximate
+matching</strong>.
 </p>
 
 <h3>Approximate matching settings</h3>
@@ -193,7 +194,9 @@ insertions, deletions, and substitutions, respectively.  The equation
 can have a multiplier for each of <tt>i</tt>, <tt>d</tt>, and
 <tt>s</tt>.  The multiplier is the cost of the error, and the number
 after <tt>&lt;</tt> is the maximum allowed cost of a match.  Spaces
-and pluses can be inserted to make the equation readable.
+and pluses can be inserted to make the equation readable.  In fact, when
+specifying only a cost equation, adding a space after the opening <tt>{</tt>
+is <strong>required</strong>.
 </p>
 
 <p>
@@ -208,7 +211,7 @@ Examples:
 of insertions to two.</dd>
 <dt><tt>{&lt;3}</tt></dt>
 <dd>Sets the maximum cost to three.
-<dt><tt>{2i + d + 2s &lt; 5}</tt></dt>
+<dt><tt>{ 2i + 1d + 2s &lt; 5 }</tt></dt>
 <dd>Sets the cost of an insertion to two, a deletion to one, a
 substitution to two, and the maximum cost to five.
 </dl>
@@ -394,14 +397,14 @@ EREs and BREs.
 </td></tr>
 </table>
 
-Options allow compile time options to be turned on/off for particular parts of the 
+Options allow compile time options to be turned on/off for particular parts of the
 regular expression. The options equate to several compile time options specified to
 the regcomp API function. If the option is specified in the first section, it is
 turned on. If it is specified in the second section (after the <tt>-</tt>), it is
 turned off.
 <ul>
 <li>i - Case insensitive.
-<li>n - Forces special handling of the new line character. See the REG_NEWLINE flag in 
+<li>n - Forces special handling of the new line character. See the REG_NEWLINE flag in
 the <a href="tre-api.html">API Manual</a>.
 <li>r - Causes the regex to be matched in a right associative manner rather than the normal
 left associative manner.

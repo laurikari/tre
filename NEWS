@@ -1,3 +1,13 @@
+Version 0.8.0
+  - Added tre_ prefix to all functions exported from libtre.  This
+    changes the binary interface (ABI).  The old source interface
+    (API) is still available in <tre/regex.h>.  New programs should
+    use <tre/tre.h>.
+
+  - Visual C++ 6 project files replaced with Visual Studio 2008 files.
+
+  - Bug fixes.
+
 Version 0.7.6
   - The license is changed from LGPL to a BSD-style license.  The new
     license is essentially the same as the "2 clause" BSD-style
