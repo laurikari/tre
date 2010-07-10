@@ -337,9 +337,18 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
   char *targ;
   size_t tlen;
 
-  if (!PyArg_ParseTuple(args, "SO!|i:search", &pstring, &TreFuzzynessType,
+  if (PyTuple_Size(args) > 0 && PyUnicode_Check(PyTuple_GetItem(args, 0)))
+    {
+      if (!PyArg_ParseTuple(args, "UO!|i:search", &pstring, &TreFuzzynessType,
 			&fz, &eflags))
-    return NULL;
+      return NULL;
+    }
+  else
+    {
+      if (!PyArg_ParseTuple(args, "SO!|i:search", &pstring, &TreFuzzynessType,
+			&fz, &eflags))
+      return NULL;
+    }
 
   mo = newTreMatchObject();
   if (mo == NULL)
@@ -356,10 +365,26 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
   mo->am.nmatch = nsub;
   mo->am.pmatch = pm;
 
-  targ = PyString_AsString(pstring);
-  tlen = PyString_Size(pstring);
+  if (PyUnicode_Check(pstring))
+    {
+      Py_ssize_t len = PyUnicode_GetSize(pstring);
+      wchar_t *buf = calloc(sizeof(wchar_t), len);
+      if(!buf)
+        {
+          Py_DECREF(mo);
+          return PyErr_NoMemory();
+        }
+      PyUnicode_AsWideChar(pstring, buf, len);
+      rc = tre_regawnexec(&self->rgx, buf, len, &mo->am, fz->ap, eflags);
+      free(buf);
+    }
+  else
+    {
+      targ = PyString_AsString(pstring);
+      tlen = PyString_Size(pstring);
 
-  rc = tre_reganexec(&self->rgx, targ, tlen, &mo->am, fz->ap, eflags);
+      rc = tre_reganexec(&self->rgx, targ, tlen, &mo->am, fz->ap, eflags);
+    }
 
   if (PyErr_Occurred())
     {
