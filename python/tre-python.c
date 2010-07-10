@@ -347,17 +347,14 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
 
   nsub = self->rgx.re_nsub + 1;
   pm = PyMem_New(regmatch_t, nsub);
-  if (pm != NULL)
+  if (!pm)
     {
-      mo->am.nmatch = nsub;
-      mo->am.pmatch = pm;
-    }
-  else
-    {
-      /* XXX */
       Py_DECREF(mo);
-      return NULL;
+      return PyErr_NoMemory();
     }
+
+  mo->am.nmatch = nsub;
+  mo->am.pmatch = pm;
 
   targ = PyString_AsString(pstring);
   tlen = PyString_Size(pstring);
