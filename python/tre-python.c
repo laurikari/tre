@@ -445,7 +445,7 @@ static PyTypeObject TrePatternType = {
 };
 
 static TrePatternObject *
-newTrePatternObject(PyObject *args)
+newTrePatternObject()
 {
   TrePatternObject *self;
 
@@ -460,19 +460,43 @@ static PyObject *
 PyTre_ncompile(PyObject *self, PyObject *args)
 {
   TrePatternObject *rv;
-  char *pattern;
+  PyUnicodeObject *upattern = NULL;
+  char *pattern = NULL;
   int pattlen;
   int cflags = 0;
   int rc;
 
-  if (!PyArg_ParseTuple(args, "s#|i:compile", &pattern, &pattlen, &cflags))
-    return NULL;
+  if (PyTuple_Size(args) > 0 && PyUnicode_Check(PyTuple_GetItem(args, 0)))
+    {
+      if (!PyArg_ParseTuple(args, "U|i:compile", &upattern, &cflags))
+        return NULL;
+    }
+  else
+    {
+      if (!PyArg_ParseTuple(args, "s#|i:compile", &pattern, &pattlen, &cflags))
+        return NULL;
+    }
 
-  rv = newTrePatternObject(args);
+  rv = newTrePatternObject();
   if (rv == NULL)
     return NULL;
 
-  rc = tre_regncomp(&rv->rgx, (char*)pattern, pattlen, cflags);
+  if (upattern != NULL)
+    {
+      Py_ssize_t len = PyUnicode_GetSize(upattern);
+      wchar_t *buf = calloc(sizeof(wchar_t), len);
+      if(!buf)
+        {
+          Py_DECREF(rv);
+          return PyErr_NoMemory();
+        }
+      PyUnicode_AsWideChar(upattern, buf, len);
+      rc = tre_regwncomp(&rv->rgx, buf, len, cflags);
+      free(buf);
+    }
+  else
+    rc = tre_regncomp(&rv->rgx, (char*)pattern, pattlen, cflags);
+
   if (rc != REG_OK)
     {
       if (!PyErr_Occurred())
