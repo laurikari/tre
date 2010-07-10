@@ -337,7 +337,7 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
   char *targ;
   size_t tlen;
 
-  if (!PyArg_ParseTuple(args, "SO!|i:match", &pstring, &TreFuzzynessType,
+  if (!PyArg_ParseTuple(args, "SO!|i:search", &pstring, &TreFuzzynessType,
 			&fz, &eflags))
     return NULL;
 
@@ -392,7 +392,7 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
 
 static PyMethodDef TrePattern_methods[] = {
   { "search", (PyCFunction)PyTrePattern_search, METH_VARARGS,
-    "try to match against given string, returning " TRE_MODULE ".match object "
+    "try to search in the given string, returning " TRE_MODULE ".match object "
     "or None on failure" },
   {NULL, NULL}
 };
