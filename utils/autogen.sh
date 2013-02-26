@@ -6,7 +6,7 @@ set -e
 rm -rf autom4te.cache
 
 # Generate the ChangeLog file.
-darcs changes --summary > ChangeLog
+#darcs changes --summary > ChangeLog
 
 # Replace variables here and there to get a consistent tree.
 ./utils/replace-vars.sh
