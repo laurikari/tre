@@ -19,6 +19,7 @@
 *.ncb
 *.tlog
 *.sdf
+*.opensdf
 *.opt
 *.plg
 *.log
