@@ -14,10 +14,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\tre.h">
+    <ClInclude Include="..\include\tre\tre.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\tre-config.h">
+    <ClInclude Include="..\include\tre\tre-config.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="..\lib\regex.h">

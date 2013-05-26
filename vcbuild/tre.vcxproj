@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\tre-config.h" />
-    <ClInclude Include="..\include\tre.h" />
+    <ClInclude Include="..\include\tre\tre-config.h" />
+    <ClInclude Include="..\include\tre\tre.h" />
     <ClInclude Include="..\lib\regex.h" />
     <ClInclude Include="..\lib\tre-ast.h" />
     <ClInclude Include="..\lib\tre-compile.h" />
@@ -71,7 +71,7 @@
       <Optimization>Disabled</Optimization>
       <BrowseInformation>true</BrowseInformation>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../win32;../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../win32;../include/tre</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -85,7 +85,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <StringPooling>true</StringPooling>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../win32;../include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../win32;../include/tre</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
