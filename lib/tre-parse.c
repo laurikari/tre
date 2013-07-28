@@ -133,7 +133,7 @@ tre_expand_ctype(tre_mem_t mem, tre_ctype_t class, tre_ast_node_t ***items,
   DPRINT(("  expanding class to character ranges\n"));
   for (j = 0; (j < 256) && (status == REG_OK); j++)
     {
-      c = j;
+      c = (tre_cint_t) j;
       if (tre_isctype(c, class)
 	  || ((cflags & REG_ICASE)
 	      && (tre_isctype(tre_tolower(c), class)
@@ -1210,7 +1210,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  DPRINT(("tre_parse:	extension: '%.*" STRF "\n",
 			  REST(ctx->re)));
 		  ctx->re += 2;
-		  while (/*CONSTCOND*/1)
+		  while (/*CONSTCOND*/(void)1,1)
 		    {
 		      if (*ctx->re == L'i')
 			{
