@@ -135,6 +135,13 @@ extern int
 tre_regexec(const regex_t *preg, const char *string, size_t nmatch,
 	regmatch_t pmatch[], int eflags);
 
+extern int
+tre_regcompb(regex_t *preg, const char *regex, int cflags);
+
+extern int
+tre_regexecb(const regex_t *preg, const char *string, size_t nmatch,
+	regmatch_t pmatch[], int eflags);
+
 extern size_t
 tre_regerror(int errcode, const regex_t *preg, char *errbuf,
 	 size_t errbuf_size);
@@ -164,6 +171,14 @@ tre_regncomp(regex_t *preg, const char *regex, size_t len, int cflags);
 extern int
 tre_regnexec(const regex_t *preg, const char *string, size_t len,
 	 size_t nmatch, regmatch_t pmatch[], int eflags);
+
+/* regn*b versions take byte literally as 8-bit values */
+extern int
+tre_regncompb(regex_t *preg, const char *regex, size_t n, int cflags);
+
+extern int
+tre_regnexecb(const regex_t *preg, const char *str, size_t len,
+	  size_t nmatch, regmatch_t pmatch[], int eflags);
 
 #ifdef TRE_WCHAR
 extern int
@@ -208,6 +223,11 @@ tre_regaexec(const regex_t *preg, const char *string,
 extern int
 tre_reganexec(const regex_t *preg, const char *string, size_t len,
 	  regamatch_t *match, regaparams_t params, int eflags);
+
+extern int
+tre_regaexecb(const regex_t *preg, const char *string,
+	  regamatch_t *match, regaparams_t params, int eflags);
+
 #ifdef TRE_WCHAR
 /* Wide character approximate matching. */
 extern int
