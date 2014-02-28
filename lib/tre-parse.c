@@ -332,7 +332,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 		  if (!class)
 		    status = REG_ECTYPE;
 		  /* Optimize character classes for 8 bit character sets. */
-		  if (status == REG_OK && TRE_MB_CUR_MAX == 1)
+		  if (status == REG_OK && ctx->cur_max == 1)
 		    {
 		      status = tre_expand_ctype(ctx->mem, class, items,
 						&i, &max_i, ctx->cflags);
