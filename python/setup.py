@@ -11,7 +11,7 @@ import shutil
 
 version = "0.8.0"
 data_files = []
-include_dirs = ["../lib"]
+include_dirs = ["../include"]
 libraries = ["tre"]
 
 if sys.platform == "win32":
