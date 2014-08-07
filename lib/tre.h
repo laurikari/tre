@@ -290,6 +290,13 @@ tre_have_backrefs(const regex_t *preg);
 extern int
 tre_have_approx(const regex_t *preg);
 
+/* Static buffer size constants */
+/* TODO: make configurable by autoconf system or 
+ * make dynamically allocated */
+
+#define COMPILE_STACK_SIZE_IN_BYTES 102400
+#define EXPRESSION_RING_BUFFER_SIZE_IN_BYTES 65536
+
 #ifdef __cplusplus
 }
 #endif

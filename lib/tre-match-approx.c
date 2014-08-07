@@ -469,7 +469,7 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 	 no more states can be reached with better costs. */
       {
 	/* XXX - dynamic ringbuffer size */
-	tre_tnfa_approx_reach_t *ringbuffer[512];
+	tre_tnfa_approx_reach_t *ringbuffer[EXPRESSION_RING_BUFFER_SIZE_IN_BYTES];
 	tre_tnfa_approx_reach_t **deque_start, **deque_end;
 
 	deque_start = deque_end = ringbuffer;
@@ -513,7 +513,7 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 		/* Too many errors or cost too large. */
 		DPRINT(("  delete: from %03d: cost too large\n", id));
 		deque_start++;
-		if (deque_start >= (ringbuffer + 512))
+		if (deque_start >= (ringbuffer + EXPRESSION_RING_BUFFER_SIZE_IN_BYTES))
 		  deque_start = ringbuffer;
 		continue;
 	      }
@@ -611,12 +611,12 @@ tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 		/* Add to the end of the deque. */
 		*deque_end = &reach_next[dest_id];
 		deque_end++;
-		if (deque_end >= (ringbuffer + 512))
+		if (deque_end >= (ringbuffer + EXPRESSION_RING_BUFFER_SIZE_IN_BYTES))
 		  deque_end = ringbuffer;
 		assert(deque_end != deque_start);
 	      }
 	    deque_start++;
-	    if (deque_start >= (ringbuffer + 512))
+	    if (deque_start >= (ringbuffer + EXPRESSION_RING_BUFFER_SIZE_IN_BYTES))
 	      deque_start = ringbuffer;
 	  }
 
