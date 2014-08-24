@@ -512,14 +512,14 @@ else
 fi
 
 AC_ARG_VAR(TRE_EXPRESSION_STACK_SIZE_IN_BYTES, [Size in bytes of the stack used by \
-expresssion compiler. Large patterns may need large buffers. Defaults to 10240 bytes. ])
+expresssion compiler. Large patterns may need a large stack. Defaults to 10240 bytes. ])
 if test -z $TRE_EXPRESSION_STACK_SIZE_IN_BYTES; then
   AC_DEFINE_UNQUOTED(TRE_EXPRESSION_STACK_SIZE_IN_BYTES,  10240,  [ TRE expression compiler stack size in bytes.  ])
   TRE_EXPRESSION_STACK_SIZE_IN_BYTES=10240
 fi
 
 AC_ARG_VAR(TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES, [Size in bytes of the ring buffer \
-used by the expression compiler. Large patterns may need large buffers. Defaults to 512 bytes. ])
+used by the expression compiler. Large patterns may need a large ring buffer. Defaults to 512 bytes. ])
 if test -z $TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES; then
   AC_DEFINE_UNQUOTED(TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES,  512,  [ TRE expression ring buffer size in bytes.  ])
   TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES=512
