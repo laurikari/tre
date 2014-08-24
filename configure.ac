@@ -511,6 +511,12 @@ else
   AM_CONDITIONAL(TRE_MULTIBYTE, false)
 fi
 
+AC_ARG_VAR(TRE_COMPILE_STACK_SIZE_IN_BYTES, [Size in bytes of the stack used by \
+expresssion compiler. Large patterns may need large buffers. Defaults to 10240 bytes. ])
+
+AC_ARG_VAR(TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES, [Size in bytes of the ring buffer \
+used by the expression compiler. Large patterns may need large buffers. Defaults to 512 bytes. ])
+
 AC_SYS_LARGEFILE
 
 AM_GNU_GETTEXT([external])
