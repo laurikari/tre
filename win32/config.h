@@ -180,4 +180,6 @@
 /* Avoid silly warnings about "insecure" functions. */
 #define _CRT_SECURE_NO_DEPRECATE 1
 
-#define snprintf sprintf_s
+#if (!defined _MSC_VER) || (_MSC_VER < 1900) /* not needed in vs2015 */
+	#define snprintf sprintf_s
+#endif
