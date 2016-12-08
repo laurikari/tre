@@ -16,6 +16,52 @@ does not depend on the searched string. This quadratic behaviour
 occurs only on pathological cases which are probably very rare in
 practice.
 
+
+Hacking
+=======
+
+Here's how to work with this code.
+
+Prerequisites
+-------------
+
+You will need the following tools installed on your system:
+
+  - autoconf
+  - automake
+  - gettext
+  - libtool
+  - zip (optional)
+
+
+Building
+--------
+
+First, prepare the tre.  Change to the root of the source directory
+and run:
+    ./utils/autogen.sh
+This will regenerate various things using the prerequisite tools so
+that you end up with a buildable tree.
+
+After this, you can run the configure script and build TRE as usual:
+    ./configure
+    make
+    make check
+    make install
+
+
+Building a soarce code package
+------------------------------
+
+In a prepared tree, this command creates a source code tarball:
+    ./configure && make dist
+
+Alternatively, you can run
+    ./utils/build-sources.sh
+which builds the source code packages and puts them in the `dist`
+subdirectory.  This script needs a working `zip` command.
+
+
 Features
 ========
 

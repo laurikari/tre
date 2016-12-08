@@ -5,7 +5,7 @@
 # cannot be filled in by the configure script.
 #
 
-version=`grep AC_INIT configure.ac | cut -d , -f 2`
+version=`grep AC_INIT configure.ac | cut -d , -f 2 | cut -d ')' -f 1`
 version=`echo $version`
 version_1=`echo $version | cut -d . -f 1`
 version_2=`echo $version | cut -d . -f 2`

@@ -24,3 +24,11 @@
 *.plg
 *.log
 *.vcxproj.user
+*~
+Makefile.in
+/ABOUT-NLS
+/aclocal.m4
+/config.h.in
+/configure
+/dist
+/tmp-build
