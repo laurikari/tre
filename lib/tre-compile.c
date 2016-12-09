@@ -1871,7 +1871,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 
   /* Allocate a stack used throughout the compilation process for various
      purposes. */
-  stack = tre_stack_new(512, 10240, 128);
+  stack = tre_stack_new(512, TRE_EXPRESSION_STACK_SIZE_IN_BYTES, 128);
   if (!stack)
     return REG_ESPACE;
   /* Allocate a fast memory allocator. */

@@ -511,6 +511,20 @@ else
   AM_CONDITIONAL(TRE_MULTIBYTE, false)
 fi
 
+AC_ARG_VAR(TRE_EXPRESSION_STACK_SIZE_IN_BYTES, [Size in bytes of the stack used by \
+expresssion compiler. Large patterns may need a large stack. Defaults to 10240 bytes. ])
+if test -z $TRE_EXPRESSION_STACK_SIZE_IN_BYTES; then
+  AC_DEFINE_UNQUOTED(TRE_EXPRESSION_STACK_SIZE_IN_BYTES,  10240,  [ TRE expression compiler stack size in bytes.  ])
+  TRE_EXPRESSION_STACK_SIZE_IN_BYTES=10240
+fi
+
+AC_ARG_VAR(TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES, [Size in bytes of the ring buffer \
+used by the expression compiler. Large patterns may need a large ring buffer. Defaults to 512 bytes. ])
+if test -z $TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES; then
+  AC_DEFINE_UNQUOTED(TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES,  512,  [ TRE expression ring buffer size in bytes.  ])
+  TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES=512
+fi
+
 AC_SYS_LARGEFILE
 
 AM_GNU_GETTEXT([external])
@@ -567,5 +581,8 @@ TRE is now configured as follows:
   Multibyte character set support:    $tre_multibyte
   Approximate matching support:       $tre_approx
   Build and install agrep:            $tre_agrep
+
+  Expression compiler stack size in bytes:           $TRE_EXPRESSION_STACK_SIZE_IN_BYTES
+  Expression compiler ring buffer size in bytes:     $TRE_EXPRESSION_RING_BUFFER_SIZE_IN_BYTES
 
 EOF
