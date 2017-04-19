@@ -1340,9 +1340,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 	      break;
 
 	    case CHAR_RPAREN:  /* end of current subexpression */
-	      if ((ctx->cflags & REG_EXTENDED && depth > 0)
-		  || (ctx->re > ctx->re_start
-		      && *(ctx->re - 1) == CHAR_BACKSLASH))
+	      if (((ctx->ciflags & REG_EXTENDED) && depth > 0)
+		    || (!(ctx->cflags & REG_EXTENDED)
+                && ctx->re > ctx->re_start
+		        && *(ctx->re - 1) == CHAR_BACKSLASH))
 		{
 		  DPRINT(("tre_parse:	    empty: '%.*" STRF "'\n",
 			  REST(ctx->re)));
