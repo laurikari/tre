@@ -218,16 +218,16 @@ Roadmap
 There are currently two features, both related to collating
 elements, missing from 100% POSIX compliance. These are:
 
-* Support for collating elements (e.g. [[.<X>.]], where <X> is a
+* Support for collating elements (e.g. [[.\<X>.]], where \<X> is a
   collating element). It is not possible to support
   multi-character collating elements portably, since POSIX does
   not define a way to determine whether a character sequence is a
   multi-character collating element or not.
 
-* Support for equivalence classes, for example [[=<X>=]], where
-  <X> is a collating element. An equivalence class matches any
+* Support for equivalence classes, for example [[=\<X>=]], where
+  \<X> is a collating element. An equivalence class matches any
   character which has the same primary collation weight as
-  <X>. Again, POSIX provides no portable mechanism for
+  \<X>. Again, POSIX provides no portable mechanism for
   determining the primary collation weight of a collating
   element.
 
