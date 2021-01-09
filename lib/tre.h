@@ -93,7 +93,8 @@ typedef enum {
   REG_BADBR,		/* Invalid content of {} */
   REG_ERANGE,		/* Invalid use of range operator */
   REG_ESPACE,		/* Out of memory.  */
-  REG_BADRPT            /* Invalid use of repetition operators. */
+  REG_BADRPT,		/* Invalid use of repetition operators. */
+  REG_BADMAX,		/* Maximum repetition in {} too large */
 } reg_errcode_t;
 
 /* POSIX tre_regcomp() flags. */

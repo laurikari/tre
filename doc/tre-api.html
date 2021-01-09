@@ -190,7 +190,7 @@ invalid.</dd>
 <dd><tt>\{\}</tt> or <tt>{}</tt> imbalance.</dd>
 <dt><tt>REG_BADBR</tt></dt>
 <dd><tt>{}</tt> content invalid: not a number, more than two numbers,
-first larger than second, or number too large.
+or first larger than second.
 <dt><tt>REG_ERANGE</tt></dt>
 <dd>Invalid character range, e.g. ending point is earlier in the
 collating order than the starting point.</dd>
@@ -199,6 +199,8 @@ collating order than the starting point.</dd>
 <dt><tt>REG_BADRPT</tt></dt>
 <dd>Invalid use of repetition operators: two or more repetition operators have
 been chained in an undefined way.</dd>
+<dt><tt>REG_BADMAX</tt></dt>
+<dd>Maximum repetition in ><tt>{}</tt> too large.</dd>
 </dl>
 </blockquote>
 
