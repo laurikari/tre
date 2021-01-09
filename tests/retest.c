@@ -1290,7 +1290,7 @@ main(int argc, char **argv)
 
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
-  test_exec(",.(a23_Nt-ï¿½o)", 0, REG_OK, 3, 9, END);
+  test_exec(",.(a23_Nt-öo)", 0, REG_OK, 3, 9, END);
   test_comp("\\d+", REG_EXTENDED, 0);
   test_exec("uR120_4=v4", 0, REG_OK, 2, 5, END);
   test_comp("\\D+", REG_EXTENDED, 0);
@@ -1631,15 +1631,15 @@ main(int argc, char **argv)
    */
 
   /* This same test with the correct locale is below. */
-  test_comp("ï¿½ï¿½+", REG_EXTENDED, 0);
-  test_exec("ï¿½ï¿½ï¿½Î¾Þ¤Ï¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 0, REG_OK, 10, 13, END);
+  test_comp("µ¡+", REG_EXTENDED, 0);
+  test_exec("¤³¤Î¾Þ¤Ï¡¢µ¡¡¦ÍøÊØÀ­¡¦¥»¥­", 0, REG_OK, 10, 13, END);
 
 #if !defined(WIN32) && !defined(__OpenBSD__)
   if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") != NULL)
     {
       printf("\nTesting LC_CTYPE en_US.ISO-8859-1\n");
-      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZï¿½ï¿½ï¿½", REG_ICASE, 0);
-      test_exec("abCDefGhiJKlmNoPqRStuVwXyzï¿½ï¿½ï¿½", 0, REG_OK, 0, 29, END);
+      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZåäö", REG_ICASE, 0);
+      test_exec("abCDefGhiJKlmNoPqRStuVwXyzÅÄÖ", 0, REG_OK, 0, 29, END);
     }
 
 #ifdef TRE_MULTIBYTE
@@ -1649,8 +1649,8 @@ main(int argc, char **argv)
       /* I tried to make a test where implementations not aware of multibyte
 	 character sets will fail.  I have no idea what the japanese text here
 	 means, I took it from http://www.ipsec.co.jp/. */
-      test_comp("ï¿½ï¿½+", REG_EXTENDED, 0);
-      test_exec("ï¿½ï¿½ï¿½Î¾Þ¤Ï¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", 0, REG_OK, 10, 12, END);
+      test_comp("µ¡+", REG_EXTENDED, 0);
+      test_exec("¤³¤Î¾Þ¤Ï¡¢µ¡¡¦ÍøÊØÀ­¡¦¥»¥­", 0, REG_OK, 10, 12, END);
 
       test_comp("a", REG_EXTENDED, 0);
       test_nexec("foo\000bar", 7, 0, REG_OK, 5, 6, END);
