@@ -1,7 +1,7 @@
 /*
   tre-python.c - TRE Python language bindings
 
-  This sotfware is released under a BSD-style license.
+  This software is released under a BSD-style license.
   See the file LICENSE for details and copyright.
 
   The original version of this code was contributed by
