@@ -1621,6 +1621,7 @@ main(int argc, char **argv)
   test_comp("a\\{1,0\\}", 0, REG_BADBR);
   test_comp("a\\{x\\}", 0, REG_BADBR);
   test_comp("a\\{\\}", 0, REG_BADBR);
+  test_comp("a\\{1,256\\}", 0, REG_BADMAX);
 
 
 
