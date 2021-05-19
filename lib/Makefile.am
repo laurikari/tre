@@ -2,6 +2,7 @@
 lib_LTLIBRARIES = libtre.la
 libtre_la_LDFLAGS = -no-undefined -version-info 5:0:0 $(LDFLAGS)
 libtre_la_LIBADD = $(LTLIBINTL)
+AM_CPPFLAGS = -I$(top_srcdir)/include/tre
 
 noinst_HEADERS =		\
 	tre-ast.h		\
@@ -28,6 +29,3 @@ libtre_la_SOURCES =		\
 if TRE_APPROX
 libtre_la_SOURCES += tre-match-approx.c
 endif TRE_APPROX
-
-dist_pkginclude_HEADERS = tre.h regex.h
-nodist_pkginclude_HEADERS = tre-config.h
