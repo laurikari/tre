@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\tre\tre-config.h" />
+    <ClInclude Include="..\win32\tre-config.h" />
     <ClInclude Include="..\include\tre\tre.h" />
-    <ClInclude Include="..\lib\regex.h" />
+    <ClInclude Include="..\include\tre\regex.h" />
     <ClInclude Include="..\lib\tre-ast.h" />
     <ClInclude Include="..\lib\tre-compile.h" />
     <ClInclude Include="..\lib\tre-internal.h" />
