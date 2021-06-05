@@ -375,7 +375,12 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
           return PyErr_NoMemory();
         }
       PyUnicode_AsWideChar(pstring, buf, len);
+      // The matching process can be slow. So, let other Python threads
+      // run in parallel by releasing the GIL. See
+      // https://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code.
+      Py_BEGIN_ALLOW_THREADS
       rc = tre_regawnexec(&self->rgx, buf, len, &mo->am, fz->ap, eflags);
+      Py_END_ALLOW_THREADS
       free(buf);
     }
   else
@@ -383,7 +388,10 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
       targ = PyString_AsString(pstring);
       tlen = PyString_Size(pstring);
 
+      // See above: allow other Python threads to run.
+      Py_BEGIN_ALLOW_THREADS
       rc = tre_reganexec(&self->rgx, targ, tlen, &mo->am, fz->ap, eflags);
+      Py_END_ALLOW_THREADS
     }
 
   if (PyErr_Occurred())
