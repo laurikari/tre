@@ -1,0 +1,64 @@
+#
+# These changes to setup.py* from PR#19 have not yet been merged
+# because while they bring setup.py closer to standard practice
+# with respect to the include directory (and possibly with
+# libtool), they require two new copies of the tre.h and tre-config.h
+# files where the new copies in the include directory do not seem
+# to get updated with changes in the old ones, either by the
+# configure script itself, or by merging pull requests for changes
+# in the the TRE library itself.  They also seem to be a mixed bag,
+# using an independent "include/tre" directory for the header
+# files, but using the internal lib/.libs directory created by the
+# GNU libtool for the library itself.
+#
+# Sorting this out has been left until the other PRs have been
+# dealt with, but this file has been added so the changes are not
+# lost if/when PR#19 is closed.  It will be removed when the
+# question does get sorted out.
+#
+#    Tom Rushworth 2023/05/12
+#
+diff --git a/python/setup.py b/python/setup.py
+index 00d1e6c..54a02b4 100644
+--- a/python/setup.py
++++ b/python/setup.py
+@@ -11,7 +11,8 @@ import shutil
+ 
+ version = "0.8.0"
+ data_files = []
+-include_dirs = ["../lib"]
++include_dirs = ["../include"]
++library_dirs = ["../lib/.libs"]
+ libraries = ["tre"]
+ 
+ if sys.platform == "win32":
+@@ -33,6 +34,7 @@ setup(name = "tre",
+                                sources = ["tre-python.c"],
+                                define_macros = [("HAVE_CONFIG_H", None)],
+                                include_dirs = include_dirs,
++                               library_dirs = library_dirs,
+                                libraries = libraries
+                                ),
+                      ],
+diff --git a/python/setup.py.in b/python/setup.py.in
+index 681b613..c007299 100644
+--- a/python/setup.py.in
++++ b/python/setup.py.in
+@@ -11,7 +11,8 @@ import shutil
+ 
+ version = "@TRE_VERSION@"
+ data_files = []
+-include_dirs = ["../lib"]
++include_dirs = ["../include"]
++library_dirs = ["../lib/.libs"]
+ libraries = ["tre"]
+ 
+ if sys.platform == "win32":
+@@ -33,6 +34,7 @@ setup(name = "tre",
+                                sources = ["tre-python.c"],
+                                define_macros = [("HAVE_CONFIG_H", None)],
+                                include_dirs = include_dirs,
++                               library_dirs = library_dirs,
+                                libraries = libraries
+                                ),
+                      ],
