@@ -1,0 +1,49 @@
+---- Fuzzyness with maxerr 0
+tre.Fuzzyness(delcost=1,inscost=1,maxcost=2147483647,subcost=1,maxdel=2147483647,maxerr=0,maxins=2147483647,maxsub=2147483647)
+---- Fuzzyness with maxerr 3
+tre.Fuzzyness(delcost=1,inscost=1,maxcost=2147483647,subcost=1,maxdel=2147483647,maxerr=3,maxins=2147483647,maxsub=2147483647)
+==== Start of tests
++++ Test 0 pattern: Don(ald( Ervin)?)? Knuth
+... Subject: 
+In addition to fundamental contributions in several branches of
+theoretical computer science, Donnald Erwin Kuth is the creator of the
+TeX computer typesetting system, the related METAFONT font definition
+language and rendering system, and the Computer Modern family of
+typefaces.
+
+
+~~~ Codepoint size: p=1 s=1
+    len(m.groups())=3
+    m.groups: ((95, 113), (99, 108), (102, 108))
+      (95, 113) ---> Donnald Erwin Kuth
+      (99, 108) ---> ald Erwin
+      (102, 108) --->  Erwin
+    m.[0]: Donnald Erwin Kuth
+    m.[1]: ald Erwin
+    m.[2]:  Erwin
+=== Test 0 passed
++++ Test 1 pattern: xyzzy
+... Subject: qqsvxyzzyaabbcc
+~~~ Codepoint size: p=1 s=1
+    len(m.groups())=1
+    m.groups: ((4, 9),)
+      (4, 9) ---> xyzzy
+    m.[0]: xyzzy
+=== Test 1 passed
++++ Test 2 pattern: xyzzy
+... Subject: qqsvxyzzyaabbccđžš
+~~~ Codepoint size: p=1 s=2
+    len(m.groups())=1
+    m.groups: ((4, 9),)
+      (4, 9) ---> xyzzy
+    m.[0]: xyzzy
+=== Test 2 passed
++++ Test 3 pattern: xyzzy
+... Subject: qqsvxyzzyaabbcc😀
+~~~ Codepoint size: p=1 s=4
+    len(m.groups())=1
+    m.groups: ((4, 9),)
+      (4, 9) ---> xyzzy
+    m.[0]: xyzzy
+=== Test 3 passed
+#### All 4 tests passed.

@@ -1,0 +1,114 @@
+rewind to 0
+str[0] = 120
+str[1] = 102
+rewind to 1
+str[1] = 102
+str[2] = 111
+str[3] = 111
+str[4] = 102
+comparing 1-4 and 4-7
+rewind to 2
+str[2] = 111
+str[3] = 111
+rewind to 3
+str[3] = 111
+str[4] = 102
+rewind to 4
+str[4] = 102
+str[5] = 111
+str[6] = 102
+str[7] = 111
+rewind to 5
+str[5] = 111
+str[6] = 102
+rewind to 6
+str[6] = 102
+str[7] = 111
+str[8] = 111
+str[9] = 102
+comparing 6-9 and 9-12
+str[10] = 111
+Match: 6 - 12
+rewind to 0
+str[0] = 99
+str[1] = 97
+str[2] = 116
+str[3] = 99
+comparing 0-3 and 3-6
+str[4] = 97
+rewind to 1
+str[1] = 97
+Match: 0 - 6
+rewind to 0
+str[0] = 99
+str[1] = 97
+str[2] = 116
+str[3] = 100
+comparing 0-3 and 3-6
+rewind to 1
+str[1] = 97
+rewind to 1
+str[1] = 97
+str[2] = 116
+rewind to 2
+str[2] = 116
+rewind to 2
+str[2] = 116
+str[3] = 100
+rewind to 3
+str[3] = 100
+rewind to 3
+str[3] = 100
+str[4] = 111
+rewind to 4
+str[4] = 111
+str[5] = 103
+str[6] = 0
+comparing 3-6 and 6-9
+rewind to 0
+str[0] = 100
+str[1] = 111
+rewind to 1
+str[1] = 111
+str[2] = 103
+str[3] = 100
+comparing 0-3 and 3-6
+str[4] = 111
+Match: 0 - 6
+rewind to 0
+str[0] = 100
+str[1] = 111
+rewind to 1
+str[1] = 111
+str[2] = 103
+str[3] = 99
+comparing 0-3 and 3-6
+rewind to 1
+str[1] = 111
+str[2] = 103
+rewind to 2
+str[2] = 103
+rewind to 2
+str[2] = 103
+str[3] = 99
+rewind to 3
+str[3] = 99
+rewind to 3
+str[3] = 99
+str[4] = 97
+str[5] = 116
+str[6] = 0
+comparing 3-6 and 6-9
+rewind to 4
+rewind to 4
+str[4] = 97
+str[5] = 116
+rewind to 5
+str[5] = 116
+rewind to 5
+str[5] = 116
+str[6] = 0
+rewind to 6
+rewind to 6
+str[6] = 0
+rewind to 7

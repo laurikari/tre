@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+#
+#   tests/agrep/wscript - part of TRE
+#   test driver for agrep waf build script.
+#
+#   This software is released under a BSD-style license.
+#   See the file LICENSE for details and copyright.
+#
+
+from waflib import Logs,Options,Task,Utils
+import os,shutil
+
+import lib_unit_tests
+
+debug_agrep_tests = False
+debug_at_colour = "PINK"
+debug_agrep_test_name = False
+
+def options(opt):
+   pass
+
+def configure(cfg):
+   if Options.options.log_wscripts:
+      Logs.pprint('CYAN','Configuring in {:s}, VARIANT{{{!s}}}'.format(cfg.path.abspath(),cfg.env["VARIANT"]))
+
+class run_agrep_test(Task.Task):
+   """
+   This is essentially a unit test, but it is so specific to agrep that there is no point trying to make it a general class.
+   """
+   color = 'CYAN'
+   # after = ['vnum','inst']
+   vars=[]
+   def __init__(self,*args,**kw):
+      #       (self,base_name,agrep_node,test_args_node,input_path,expected_output_path,actual_output_path):
+      if debug_agrep_test_name:
+         Logs.pprint(debug_at_colour,"kw={!s}".format(kw))
+         Logs.pprint(debug_at_colour,"self.bld = {!s}".format(getattr(self,'bld',None)))
+         Logs.pprint(debug_at_colour,"self.generator = {!s}".format(getattr(self,'generator',None)))
+      super(run_agrep_test,self).__init__(*args,**kw)
+      self.name = "agrep_"+args[0]+"_test"
+      # self.agrep_node = args[1]
+      # self.test_args_node = args[2]
+      # self.input_node = args[3]
+      # self.expected_output_node = args[4]
+      # self.actual_output_node = args[5]
+      self.inputs = [args[1],args[2],args[3],args[4]]
+      self.outputs = [args[5]]
+      if "bld" not in kw:
+         self.abs_prefix_len = 0
+      else:          
+         self.abs_prefix_len = len(kw["bld"].srcnode.abspath()) + 1 # allow for trailing '/' on prefix
+   def __str__(self):
+      return self.outputs[0].abspath()[self.abs_prefix_len:-4]
+   def keyword(self):
+      return "Testing"
+   def runnable_status(self):
+      ret = super(run_agrep_test,self).runnable_status()
+      if ret == Task.SKIP_ME:
+         # Task has been run before (it is up to date).
+         # Always run the unit tests again if they are runnable
+         return Task.RUN_ME
+      return ret
+   def run(self):
+      # There can be multiple instances of this running (with different args_files) in parallel,
+      # so the log output can be intermixed and very confusing.
+      agrep_pgm = self.inputs[0].abspath()
+      args_file_name = self.inputs[1].abspath()
+      input_file_name = self.inputs[2].abspath()
+      short_input_name = os.path.basename(input_file_name)
+      if short_input_name.endswith(".input"):
+         short_input_name = short_input_name[0:-3] # get rid of "put" to match "make check" output
+      expected_output_name = self.inputs[3].abspath() # used by diff at end.
+      actual_output_name = self.outputs[0].abspath()
+      # Argh.  To match the "make check" expected output, we need to copy the input file to something ending in ".in" instead of ".input"
+      cwd = self.outputs[0].parent.abspath()
+      short_input_path = os.path.join(cwd,short_input_name)
+      shutil.copyfile(input_file_name,short_input_path)
+      if debug_agrep_tests:
+         Logs.pprint("RED","for {:s} cwd={:s}".format(short_input_name,cwd))
+      try:
+         # Try for the stashed OS environment.
+         fu = getattr(self.generator.bld,'all_agrep_paths')
+      except AttributeError:
+         # Make a copy of the OS environment and stash it.
+         fu = os.environ.copy()
+         self.generator.bld.all_agrep_paths = fu
+      extras = ["","-c","-H","-l","-n","-s","-M","--show-position","--color","-H -n -s --color --show-position"]
+      with open(actual_output_name,'wb') as out_file:
+         with open(args_file_name,'r') as args_file:
+            for args_line in args_file:
+               if args_line.startswith('#'):
+                  continue
+               args_line = args_line.rstrip() # get rid of trailing newline
+               # Note that the args_line has all kinds of funky stuff in it, quote it if any other interpreter is going to see it.
+               if debug_agrep_tests:
+                  Logs.pprint("CYAN","args line: {{{:s}}}".format(args_line))
+               for flags in extras:
+                  cmd = [agrep_pgm]
+                  tst = "#### TEST: agrep"
+                  if len(flags) > 0:
+                     lst = flags.split()
+                     for f in lst:
+                        tst += " "+f
+                     cmd += lst
+                  else:
+                     tst += " "
+                  if len(args_line) > 0:
+                     lst = args_line.split()
+                     for a in lst:
+                        tst += " "+a
+                     cmd += lst
+                  cmd_1 = cmd + [short_input_name]
+                  if debug_agrep_tests:
+                     Logs.pprint(debug_at_colour,"{:s} {:s}".format(tst,input_file_name))
+                  out_file.write(bytes("{:s} {:s}\n".format(tst,short_input_name),'iso-8859-1'))
+                  # Use stderr=Utils.subprocess.STDOUT instead of stderr=Utils.subprocess.PIPE to see actual error message,
+                  # but it disagrees with the expected output.
+                  proc = Utils.subprocess.Popen(cmd_1,executable=agrep_pgm,cwd=cwd,env=fu,
+                                                stderr=Utils.subprocess.PIPE,stdout=Utils.subprocess.PIPE)
+                  (stdout_lines,stderr_lines) = proc.communicate()
+                  status = proc.returncode
+                  if None != stdout_lines:
+                     out_file.write(stdout_lines)
+                  out_file.write(bytes("\nExit status {:d}.\n".format(status),'iso-8859-1'))
+                  if debug_agrep_tests:
+                     Logs.pprint(debug_at_colour,"{:s} < {:s}".format(tst,input_file_name))
+                  out_file.write(bytes("{:s} < {:s}\n".format(tst,short_input_name),'iso-8859-1'))
+                  with open(input_file_name,"r") as in_file:
+                     # See above re stderr for messages.
+                     proc = Utils.subprocess.Popen(cmd,executable=agrep_pgm,cwd=cwd,env=fu,stdin=in_file,
+                                                   stderr=Utils.subprocess.PIPE,stdout=Utils.subprocess.PIPE)
+                     (stdout_lines,stderr_lines) = proc.communicate()
+                     status = proc.returncode
+                     if None != stdout_lines:
+                        out_file.write(stdout_lines)
+                     out_file.write(bytes("\nExit status {:d}.\n".format(status),'iso-8859-1'))
+      # Compare the actual output to the expected output.
+      short_output_name = os.path.basename(actual_output_name)
+      diff_args = ['diff','-qba',short_output_name,expected_output_name]
+      diff_exec = self.generator.bld.env.DIFF
+      # Logs.pprint('YELLOW','type(diff_exec)={:s}'.format(type(diff_exec)))
+      if list == type(diff_exec):
+         # Just take the first one.
+         diff_exec = diff_exec[0]
+      # Logs.pprint('YELLOW','type(cwd)={:s}'.format(type(cwd)))
+      diff_proc = Utils.subprocess.Popen(diff_args,executable=diff_exec,cwd=cwd,env=fu,stderr=Utils.subprocess.PIPE,stdout=Utils.subprocess.PIPE)
+      (diff_stdout,diff_stderr) = diff_proc.communicate()
+      rc = diff_proc.returncode
+      filename = os.path.join(cwd,short_input_name[0:-3])
+      filename += " (" + short_output_name + ('{verified}' if 0 == rc else "") + ')'
+      tup = (filename,rc,diff_stdout,diff_stderr)
+      self.generator.utest_result = tup
+      lib_unit_tests.testlock.acquire()
+      try:
+         bld = self.generator.bld
+         Logs.debug("ut: %r",tup)
+         try:
+            bld.utest_results.append(tup)
+         except AttributeError:
+            bld.utest_results=[tup]
+      finally:
+         lib_unit_tests.testlock.release()
+
+def build(bld):
+   if Options.options.log_wscripts:
+      Logs.pprint('NORMAL','Building in {0:s}, VARIANT{{{1:s}}}'.format(bld.path.abspath(),bld.env["VARIANT"]))
+   if not bld.env.BUILD_TESTS or not bld.changeable_task_group or not bld.env.variant_ap:
+      return
+   # Build and run the tests.
+   # This is meant to reproduce the effect of the run-tests.sh shell script.
+   # For each *.args file, and each set of command line flags in extra_flags, run agrep twice for each line in the
+   # *.args file using the corresponding *.input file (once with the input filename as a command line arg, and once
+   # with the input filename as standard input).
+   bld.set_group('test_tasks')
+   agrep_node = bld.env.AGREP_NODE
+   if debug_agrep_tests:
+      Logs.pprint(debug_at_colour,"AGREP_NODE={:s}".format(agrep_node.abspath()))
+   test_args_nodes = bld.path.ant_glob("*.args")
+   # Make sure we have a directory in the build hierarchy
+   for test_args_node in test_args_nodes:
+      test_args_name = test_args_node.abspath()
+      base_name_with_ext = os.path.basename(test_args_name)
+      base_name = os.path.splitext(base_name_with_ext)[0]
+      input_node = bld.path.find_node(base_name+".input")
+      expected_output_node = bld.path.find_node(base_name+".ok")
+      actual_output_name = base_name + ".out"
+      # actual_output_node = bld.path.get_bld().make_node(base_name+".out")
+      actual_output_node = bld.path.find_or_declare(actual_output_name)
+      if debug_agrep_tests:
+         Logs.pprint(debug_at_colour,"test args file: {{{:s}}}".format(test_args_name))
+         Logs.pprint(debug_at_colour,"base_name_with_ext: {{{:s}}}".format(base_name_with_ext))
+         Logs.pprint(debug_at_colour,"base_name: {{{:s}}}".format(base_name))
+         Logs.pprint(debug_at_colour,"input: {{{:s}}}".format(input_node.abspath()))
+         Logs.pprint(debug_at_colour,"expected_output: {{{:s}}}".format(expected_output_node.abspath()))
+         Logs.pprint(debug_at_colour,"actual_output: {{{:s}}}".format(actual_output_node.abspath()))
+      # The run-tests.sh script runs agrep many times, accumlating the output and then diffing the accumulation with expected.
+      # To match that (and use the same input and expected output files) we need a specialized task that does everything in
+      # order and not a bunch of individual tasks executed in (near) random order.
+      agrep_test = run_agrep_test(base_name,agrep_node,test_args_node,input_node,expected_output_node,actual_output_node,bld=bld,env=bld.env)
+      bld.add_to_group(agrep_test)
+   # Go back to the regular task group
+   bld.set_group('build_tasks')
