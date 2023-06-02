@@ -522,67 +522,128 @@ Exit status 1.
 #### TEST: agrep -H -n -s --color --show-position -v . < exitstatus.in
 
 Exit status 1.
+#### TEST: agrep  -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep  -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -c -e \) exitstatus.in
+0
+
+Exit status 1.
+#### TEST: agrep -c -e \) < exitstatus.in
+0
+
+Exit status 1.
+#### TEST: agrep -H -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -H -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -l -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -l -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -n -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -n -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -s -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -s -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -M -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -M -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep --show-position -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep --show-position -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep --color -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep --color -e \) < exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -H -n -s --color --show-position -e \) exitstatus.in
+
+Exit status 1.
+#### TEST: agrep -H -n -s --color --show-position -e \) < exitstatus.in
+
+Exit status 1.
 #### TEST: agrep  -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep  -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -c -d .* dummy exitstatus.in
-exitstatus.in:0
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -c -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -H -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -H -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -l -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -l -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -n -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -n -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -s -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -s -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -M -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -M -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep --show-position -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep --show-position -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep --color -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep --color -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -H -n -s --color --show-position -d .* dummy exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep -H -n -s --color --show-position -d .* dummy < exitstatus.in
 
-Exit status 1.
+Exit status 2.
 #### TEST: agrep  -d {1 dummy exitstatus.in
 
 Exit status 2.
