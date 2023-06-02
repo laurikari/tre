@@ -91,7 +91,13 @@ stats(double *sample_data, int samples, int len)
     percent = 100*error/mean;
   else
     percent = 0;
+  /* This printf is using the single code point +/- symbol. */
+#ifdef SRC_IN_ISO_8859_1
   printf("# error: ±%.16f (±%.4f%%)\n", error, percent);
+#else
+  /* Use the UTF-8 encoding. */
+  printf("# error: Â±%.16f (Â±%.4f%%)\n", error, percent);
+#endif
 
   printf("%d\t%.5f\t%.5f\n", len, mean, error);
 
@@ -170,7 +176,13 @@ main(int argc, char **argv)
       repeats = atoi(optarg);
       break;
     default:
+#ifdef SRC_IN_ISO_8859_1
       printf("Pälli.\n");
+#endif
+#ifdef SRC_IN_UTF_8
+      /* iconv -f ISO-8859-1 -t UTF-8 file_with_lines_above > bbb_utf_8 */
+      printf("PÃ¤lli.\n");
+#endif
       return 1;
     }
   }
@@ -430,7 +442,7 @@ main(int argc, char **argv)
 	  l = 0;
 
 
-	  while (s != '\0') {
+	  while (*s /* TBR added * */ != '\0') {
 	    if (*s == 'a') {
 	      s++;
 	      l++;

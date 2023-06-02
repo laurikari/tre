@@ -23,6 +23,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <locale.h>
+/* look for getopt in order to use a -o option for output. */
+#include <unistd.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H */
@@ -102,6 +104,8 @@ mbntowc (wchar_t *buf, const char *str, size_t len, int *off)
 #define L(x) (x)
 #endif /* !WRETEST */
 
+static FILE *output_fd = NULL;
+
 static int valid_reobj = 0;
 static regex_t reobj;
 static regmatch_t pmatch_global[32];
@@ -126,10 +130,10 @@ static void
 test_status(char c)
 {
   static int k = 0;
-  printf("%c", c);
+  fprintf(output_fd,"%c", c);
   if (++k % 79 == 0)
-    printf("\n");
-  fflush(stdout);
+    fprintf(output_fd,"\n");
+  fflush(output_fd);
 }
 
 
@@ -227,15 +231,15 @@ check(va_list ap, int ret, const CHAR_T *str,
   if (ret != va_arg(ap, int))
     {
 #ifndef WRETEST
-      printf("Exec error, regex: \"%s\", cflags %d, "
+      fprintf(output_fd,"Exec error, regex: \"%s\", cflags %d, "
 	     "string: \"%s\", eflags %d\n", regex_pattern, cflags_global,
 	     str, eflags);
 #else /* WRETEST */
-      printf("Exec error, regex: \"%ls\", cflags %d, "
+      fprintf(output_fd,"Exec error, regex: \"%ls\", cflags %d, "
 	     "string: \"%ls\", eflags %d\n", regex_pattern, cflags_global,
 	     str, eflags);
 #endif /* WRETEST */
-      printf("	got %smatch (tre_regexec returned %d)\n", ret ? "no " : "", ret);
+      fprintf(output_fd,"	got %smatch (tre_regexec returned %d)\n", ret ? "no " : "", ret);
       return 1;
     }
 
@@ -258,7 +262,7 @@ check(va_list ap, int ret, const CHAR_T *str,
 	      if ((rm_so = woffs[rm_so]) < 0 ||
 		  (n = rm_eo, rm_eo = woffs[rm_eo]) < 0)
 		{
-		  printf("Invalid or incomplete multi-byte sequence "
+		  fprintf(output_fd,"Invalid or incomplete multi-byte sequence "
 			 "in string %ls before byte offset %d\n", str, n);
 		  return 1;
 		}
@@ -268,14 +272,14 @@ check(va_list ap, int ret, const CHAR_T *str,
 	      || pmatch[i].rm_eo != rm_eo)
 	    {
 #ifndef WRETEST
-	      printf("Exec error, regex: \"%s\", string: \"%s\"\n",
+	      fprintf(output_fd,"Exec error, regex: \"%s\", string: \"%s\"\n",
 		     regex_pattern, str);
-	      printf("	group %d: expected (%d, %d) \"%.*s\", "
+	      fprintf(output_fd,"	group %d: expected (%d, %d) \"%.*s\", "
 		     "got (%d, %d) \"%.*s\"\n",
 #else /* WRETEST */
-	      printf("Exec error, regex: \"%ls\", string: \"%ls\"\n",
+	      fprintf(output_fd,"Exec error, regex: \"%ls\", string: \"%ls\"\n",
 		     regex_pattern, str);
-	      printf("	group %d: expected (%d, %d) \"%.*ls\", "
+	      fprintf(output_fd,"	group %d: expected (%d, %d) \"%.*ls\", "
 		     "got (%d, %d) \"%.*ls\"\n",
 #endif /* WRETEST */
 		     i, rm_so, rm_eo, rm_eo - rm_so, str + rm_so,
@@ -290,11 +294,11 @@ check(va_list ap, int ret, const CHAR_T *str,
 	  && reobj.re_nsub <= pmatch_len && pmatch)
 	{
 #ifndef WRETEST
-	  printf("Comp error, regex: \"%s\"\n", regex_pattern);
+	  fprintf(output_fd,"Comp error, regex: \"%s\"\n", regex_pattern);
 #else /* WRETEST */
-	  printf("Comp error, regex: \"%ls\"\n", regex_pattern);
+	  fprintf(output_fd,"Comp error, regex: \"%ls\"\n", regex_pattern);
 #endif /* WRETEST */
-	  printf("  re_nsub is %d, should be %d\n", (int)reobj.re_nsub, i - 1);
+	  fprintf(output_fd,"  re_nsub is %d, should be %d\n", (int)reobj.re_nsub, i - 1);
 	  fail = 1;
 	}
 
@@ -304,13 +308,13 @@ check(va_list ap, int ret, const CHAR_T *str,
 	  {
 	    if (!fail)
 #ifndef WRETEST
-	      printf("Exec error, regex: \"%s\", string: \"%s\"\n",
+	      fprintf(output_fd,"Exec error, regex: \"%s\", string: \"%s\"\n",
 		     regex_pattern, str);
 #else /* WRETEST */
-	      printf("Exec error, regex: \"%ls\", string: \"%ls\"\n",
+	      fprintf(output_fd,"Exec error, regex: \"%ls\", string: \"%ls\"\n",
 		     regex_pattern, str);
 #endif /* WRETEST */
-	    printf("  group %d: expected (-1, -1), got (%d, %d)\n",
+	    fprintf(output_fd,"  group %d: expected (-1, -1), got (%d, %d)\n",
 		   i, (int)pmatch[i].rm_so, (int)pmatch[i].rm_eo);
 	    fail = 1;
 	  }
@@ -341,7 +345,7 @@ test_nexec(const char *data, size_t len, int eflags, ...)
 	if (wlen < 0)
 	  {
 	    exec_errors++;
-	    printf("Invalid or incomplete multi-byte sequence in %s\n", data);
+	    fprintf(output_fd,"Invalid or incomplete multi-byte sequence in %s\n", data);
 	    return;
 	  }
 	wstr[wlen] = L'\0';
@@ -415,7 +419,7 @@ test_exec(const char *str, int eflags, ...)
 	if (wlen < 0)
 	  {
 	    exec_errors++;
-	    printf("Invalid or incomplete multi-byte sequence in %s\n", str);
+	    fprintf(output_fd,"Invalid or incomplete multi-byte sequence in %s\n", str);
 	    return;
 	  }
 	wstr[wlen] = L'\0';
@@ -485,7 +489,7 @@ test_comp(const char *re, int flags, int ret)
     if (wlen < 0)
       {
 	comp_errors++;
-	printf("Invalid or incomplete multi-byte sequence in %s\n", re);
+	fprintf(output_fd,"Invalid or incomplete multi-byte sequence in %s\n", re);
 	return;
       }
     wregex[wlen] = L'\0';
@@ -529,11 +533,11 @@ test_comp(const char *re, int flags, int ret)
   if (errcode != ret)
     {
 #ifndef WRETEST
-      printf("Comp error, regex: \"%s\"\n", regex_pattern);
+      fprintf(output_fd,"Comp error, regex: \"%s\"\n", regex_pattern);
 #else /* WRETEST */
-      printf("Comp error, regex: \"%ls\"\n", regex_pattern);
+      fprintf(output_fd,"Comp error, regex: \"%ls\"\n", regex_pattern);
 #endif /* WRETEST */
-      printf("	expected return code %d, got %d.\n",
+      fprintf(output_fd,"	expected return code %d, got %d.\n",
 	     ret, errcode);
       comp_errors++;
     }
@@ -550,6 +554,26 @@ test_comp(const char *re, int flags, int ret)
 int
 main(int argc, char **argv)
 {
+
+  int ch;
+  output_fd = stdout;
+  while (EOF != (ch = getopt(argc,argv,"o:"))) {
+    switch (ch) {
+      case 'o':
+        if (NULL == (output_fd = fopen(optarg,"w"))) {
+          fprintf(stderr,"Could not open {%s} for output, quitting\n",optarg);
+          exit(1);
+        }
+        break;
+      default:
+        fprintf(stderr,"Invalid command line option '-%c', quitting\n",ch);
+        if (NULL != output_fd && stdout != output_fd) {
+          fclose(output_fd);
+          output_fd = NULL;
+        }
+        exit(1);
+    }
+  }
 
 #ifdef WRETEST
   /* Need an 8-bit locale.  Or move the two tests with non-ascii
@@ -1290,7 +1314,19 @@ main(int argc, char **argv)
 
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
+#ifdef SRC_IN_ISO_8859_1
   test_exec(",.(a23_Nt-ˆo)", 0, REG_OK, 3, 9, END);
+#else
+#ifdef SRC_IN_UTF_8
+  /* iconv -f ISO-8859-1 -t UTF-8 file_with_lines_above > www_utf_8 */
+  test_exec(",.(a23_Nt-√∂o)", 0, REG_OK, 3, 9, END);
+#else
+  unsigned char str_000[] = {
+    ',','.','(','a','2','3','_','N','t','-',0xF6,'o',0x00
+  };
+  test_exec((char const *)str_000, 0, REG_OK, 3, 9, END);
+#endif
+#endif
   test_comp("\\d+", REG_EXTENDED, 0);
   test_exec("uR120_4=v4", 0, REG_OK, 2, 5, END);
   test_comp("\\D+", REG_EXTENDED, 0);
@@ -1629,51 +1665,129 @@ main(int argc, char **argv)
    * Internationalization tests.
    */
 
-  /* This same test with the correct locale is below. */
+  /* This same test with the correct locale is below.
+     TBR: This is a guess for the source encoding, see comments below after the locale is set to a Japanese locale. */
+#ifdef SRC_IN_EUC_JP
   test_comp("µ°+", REG_EXTENDED, 0);
-  test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠", 0, REG_OK, 10, 13, END);
+  test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠",
+            0, REG_OK, 10, 13, END);
+#else
+#ifdef SRC_IN_UTF_8
+  /* iconv -f EUC_JP -t UTF-8 file_with_lines_above > zzz_utf_8
+     This may be incorrect because the match results might be incorrect for UTF-8, I (TBR) just don't know enough to be certain.
+     It compiles and runs successfully on my desktop with the C.UTF-8 locale. */
+  test_comp("Ê©ü+", REG_EXTENDED, 0);
+  test_exec("„Åì„ÅÆË≥û„ÅØ„ÄÅÊ©ü„ÉªÂà©‰æøÊÄß„Éª„Çª„Ç≠",
+            0, REG_OK, 15, 18, END);
+#else
+  /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
+  unsigned char str_001[] = {
+    0xB5,0xA1,'+',0x00
+  };
+  unsigned char str_002[] = {
+    0xA4,0xB3,0xA4,0xCE,0xBE,0xDE,0xA4,0xCF,0xA1,0xA2,0xB5,0xA1,0xA1,0xA6,0xCD,0xF8,0xCA,0xD8,0xC0,0xAD,0xA1,0xA6,0xA5,0xBB,0xA5,0xAD,0x00
+  };
+  test_comp((char const *)str_001, REG_EXTENDED, 0);
+  test_exec((char const *)str_002, 0, REG_OK, 10, 13, END);
+#endif
+#endif
 
 #if !defined(WIN32) && !defined(__OpenBSD__)
-  if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") != NULL)
+  if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") != NULL ||
+      setlocale(LC_CTYPE, "en_US.ISO8859-1" /* FreeBSD seems to spell it differently */) != NULL)
     {
-      printf("\nTesting LC_CTYPE en_US.ISO-8859-1\n");
+      fprintf(output_fd,"\nTesting LC_CTYPE en_US.ISO-8859-1\n");
+#ifdef SRC_IN_ISO_8859_1
       test_comp("aBCdeFghiJKlmnoPQRstuvWXyZÂ‰ˆ", REG_ICASE, 0);
       test_exec("abCDefGhiJKlmNoPqRStuVwXyz≈ƒ÷", 0, REG_OK, 0, 29, END);
+#else
+#ifdef SRC_IN_UTF_8
+      /* iconv -f ISO-8859-1 -t UTF-8 file_with_lines_above > yyy_utf_8 */
+      /* This fails with no match on freebsd, but succeeds in linux. */
+      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZ√•√§√∂", REG_ICASE, 0);
+      test_exec("abCDefGhiJKlmNoPqRStuVwXyz√Ö√Ñ√ñ", 0, REG_OK, 0, 29, END);
+#else
+      /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
+      unsigned char str_003[] = {
+        'a','B','C','d','e','F','g','h','i','J','K','l','m','n','o','P','Q','R','s','t','u','v','W','X','y','Z',0xE5,0xE4,0xF6,0x00
+      };
+      unsigned char str_004[] = {
+        'a','b','C','D','e','f','G','h','i','J','K','l','m','N','o','P','q','R','S','t','u','V','w','X','y','z',0xC5,0xC4,0xD6,0x00
+      };
+      test_comp((char const *)str_003, REG_ICASE, 0);
+      test_exec((char const *)str_004, 0, REG_OK, 0, 29, END);
+#endif
+#endif
     }
 
 #ifdef TRE_MULTIBYTE
-  if (setlocale(LC_CTYPE, "ja_JP.eucjp") != NULL)
+  if (setlocale(LC_CTYPE, "ja_JP.eucjp") != NULL ||
+      setlocale(LC_CTYPE, "ja_JP.eucJP") != NULL)
     {
-      printf("\nTesting LC_CTYPE ja_JP.eucjp\n");
+      fprintf(output_fd,"\nTesting LC_CTYPE ja_JP.eucjp\n");
       /* I tried to make a test where implementations not aware of multibyte
 	 character sets will fail.  I have no idea what the japanese text here
 	 means, I took it from http://www.ipsec.co.jp/. */
+      /* TBR 2023/03/22: iconv has (at least) the following encoding names for Japanese:
+           EUC-JIS-2004 EUC-JISX0213
+           EUC-JP-MS EUCJP-MS EUCJP-OPEN EUCJP-WIN EUCJPMS
+           EUC-JP CSEUCPKDFMTJAPANESE EUCJP IBM-EUCJP
+           ISO-2022-JP-1 ISO2022-JP1
+           ISO-2022-JP-2 CSISO2022JP2 ISO2022-JP2 ISO-2022-JP-2004 ISO-2022-JP-3 ISO2022-JP2004 ISO2022-JP3
+           ISO-2022-JP CSISO2022JP ISO2022-JP
+         Both iconv arguments of EUC-JP and EUC-JP-MS produced the converted strings below,
+         all the others I tried resulted in invalid characters.  So guess at EUC-JP.
+         If anyone knows what the encoding actually was, feel free to let me know at tbr at acm dot org :). */
+#ifdef SRC_IN_EUC_JP
       test_comp("µ°+", REG_EXTENDED, 0);
       test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠", 0, REG_OK, 10, 12, END);
-
+#else
+#ifdef SRC_IN_UTF_8
+      /* iconv -f EUC_JP -t UTF-8 file_with_lines_above > zzz_utf_8
+         This may fail because the match results might be incorrect for UTF-8, I (TBR) just don't know enough to be certain.
+         It compiles and runs successfully on my desktop with the C.UTF-8 locale. */
+      test_comp("Ê©ü+", REG_EXTENDED, 0);
+      test_exec("„Åì„ÅÆË≥û„ÅØ„ÄÅÊ©ü„ÉªÂà©‰æøÊÄß„Éª„Çª„Ç≠", 0, REG_OK, 10, 12, END);
+#else
+      /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
+      /* This test uses the same strings (str_001 and str_002) as above, now with a Japanese locale.
+         NOTE THE DIFFERENCE IN MATCH RESULTS - (10,13) earlier with the default locale, and (10,12) here with the Japanese locale. */
+      test_comp((char const *)str_001, REG_EXTENDED, 0);
+      test_exec((char const *)str_002, 0, REG_OK, 10, 12, END);
+#endif
+#endif
       test_comp("a", REG_EXTENDED, 0);
       test_nexec("foo\000bar", 7, 0, REG_OK, 5, 6, END);
       test_comp("c$", REG_EXTENDED, 0);
       test_exec("abc", 0, REG_OK, 2, 3, END);
+    }
+  else
+    {
+      fprintf(output_fd,"\nTRE_MULTIBYTE enabled, but skipping LC_CTYPE ja_JP.eucJP (locale unavailable)\n");
     }
 #endif /* TRE_MULTIBYTE */
 #endif
 
   tre_regfree(&reobj);
 
-  printf("\n");
+  fprintf(output_fd,"\n");
   if (comp_errors || exec_errors)
-    printf("%d (%d + %d) out of %d tests FAILED!\n",
+    fprintf(output_fd,"%d (%d + %d) out of %d tests FAILED!\n",
 	   comp_errors + exec_errors, comp_errors, exec_errors,
 	   comp_tests + exec_tests);
   else
-    printf("All %d tests passed.\n", comp_tests + exec_tests);
+    fprintf(output_fd,"All %d tests passed.\n", comp_tests + exec_tests);
 
 
 #ifdef MALLOC_DEBUGGING
   if (xmalloc_dump_leaks())
     return 1;
 #endif /* MALLOC_DEBUGGING */
+
+  if (NULL != output_fd && stdout != output_fd) {
+    fclose(output_fd);
+    output_fd = NULL;
+  }
 
   return comp_errors || exec_errors;
 }
