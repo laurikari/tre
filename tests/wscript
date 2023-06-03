@@ -47,30 +47,27 @@ def build(bld):
          Logs.pprint("CYAN","src.parent.find_node('lib')={{{:s}}}".format(bld.path.get_src().parent.find_node("lib").abspath()))
          Logs.pprint("CYAN","bld.parent={{{:s}}}".format(bld.path.parent.abspath()))
          Logs.pprint("CYAN","bld.parent.get_bld()={{{:s}}}".format(bld.path.parent.get_bld().abspath()))
-      incl_list = [bld.path.parent.get_bld().make_node("lib").abspath(),  # for tre-config.h
-                   bld.path.get_src().parent.find_node("lib").abspath(),  # for tre.h
-                   bld.path.parent.get_bld().abspath()]                   # for config.h
-      #
-      use_list = ["TESTS","static_libtre"]
+      incl_list = [bld.path.get_src().parent.find_node("lib").abspath()] # for xmalloc.h
+      use_list = ["TESTS","LIBTRE","static_libtre"]
       # 1
       retest_node = bld.path.find_node('retest.c')
       # some non-UTF-8 in the output breaks showing the results...
-      bld(features='c cprogram lib_unit_test',source=[retest_node],target="retest",use=use_list,includes=incl_list,
-          DEBUG_ME=debug_test_builds)
+      bld(features='c cprogram lib_unit_test',source=[retest_node],target="retest",use=use_list,
+          includes=incl_list,DEBUG_ME=debug_test_builds)
       # 2
       strtest_node = bld.path.find_node('test-str-source.c')
-      bld(features='c cprogram lib_unit_test',source=[strtest_node],target="strtest",use=use_list,includes=incl_list,
-          DEBUG_ME=debug_test_builds)
+      bld(features='c cprogram lib_unit_test',source=[strtest_node],target="strtest",use=use_list,
+          includes=incl_list,DEBUG_ME=debug_test_builds)
       # 3 -- This takes a long time (and at the moment runs out of swap space), skip it.
       randtest_node = bld.path.find_node('randtest.c')
-      # bld(features='c cprogram lib_unit_test',source=[randtest_node],target="randtest",use=use_list,includes=incl_list,
-      #     DEBUG_ME=debug_test_builds)
+      # bld(features='c cprogram lib_unit_test',source=[randtest_node],target="randtest",use=use_list,
+      #     includes=incl_list,DEBUG_ME=debug_test_builds)
       # 4
       benchtest_node = bld.path.find_node('bench.c')
       # bench.c needs the math library (for sqrt) under linux, just leave it out for now.
       # The bench program needs at least a "-t N" command line argument where 1 <= N <= 9.
-      # bld(features='c cprogram lib_unit_test',source=[benchtest_node],target="benchtest",use=use_list,lib=["m"],includes=incl_list,
-      #     DEBUG_ME=debug_test_builds)
+      # bld(features='c cprogram lib_unit_test',source=[benchtest_node],target="benchtest",use=use_list,lib=["m"],
+      #     includes=incl_list,DEBUG_ME=debug_test_builds)
       if "AGREP_NODE" in bld.env: # agrep built.
          bld.recurse("agrep")
       # Go back to the regular task group

@@ -284,8 +284,9 @@ def variant_decorator(platsys,func_to_decorate,variant_group_list):
          Logs.pprint(debug_bv_colour,"Queued commands: {{{!s}}}".format(variant_commands))
       # -----------------
       # Add a function to summarize test results if more than one variant was queued.
-      Logs.pprint(debug_build_variants,"opt.enable_tests: {{{!s}}}".format(curr_opt.enable_tests ))
-      Logs.pprint(debug_build_variants,"build_default_enable_tests {{{!s}}}".format(orig_env.build_default_enable_test))
+      if debug_build_variants:
+         Logs.pprint(debug_bv_colour,"opt.enable_tests: {{{!s}}}".format(curr_opt.enable_tests ))
+         Logs.pprint(debug_bv_colour,"build_default_enable_tests {{{!s}}}".format(orig_env.build_default_enable_test))
       if len(variant_commands) > 1 and (curr_opt.enable_tests or
                                         (hasattr(orig_env,"build_default_enable_tests") and orig_env.build_default_enable_tests)):
          summary_command_name = command+"_test_summary"

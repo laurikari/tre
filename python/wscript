@@ -143,11 +143,12 @@ def build(bld):
    else:
       py_ext_path = py_ext_name
    # Use the static libtre for the python extension, so we only have to install one library for testing.
-   tre_python = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext_path,name="tre_python",use=["static_libtre"])
+   tre_python = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext_path,name="tre_python",use=["LIBTRE","static_libtre"])
    if using_venv and bld.env.VENV_USE_LIB64:
       # Just build it again in lib64, because it is too complicated to figure out where python is going to look for it.
       py_ext64_path = os.path.join(bld.env.VENV_PATH,"lib64","python"+bld.env.PYTHON_VERSION,"site-packages",py_ext_name)
-      tre_python64 = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext64_path,name="tre_python64",use=["static_libtre"])
+      tre_python64 = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext64_path,
+                         name="tre_python64",use=["LIBTRE","static_libtre"])
    if bld.changeable_task_group and bld.env.BUILD_TESTS and using_venv:
       # Build and run the tests.
       tre_python.post() # So we can get the link_task.outputs[0]

@@ -32,11 +32,11 @@ def configure(cfg):
 def build(bld):
    if Options.options.log_wscripts:
       Logs.pprint("NORMAL","Building in {:s}, VARIANT{{{:s}}}".format(bld.path.abspath(),bld.env['VARIANT']))
-   agrep_nodes = bld.path.ant_glob('*.c')
+   agrep_nodes = bld.path.ant_glob("*.c")
    # Use the static libtre for agrep
-   agrep_task_gen = bld.program(source=agrep_nodes,target="agrep",use=["AGREP","static_libtre"])
+   agrep_task_gen = bld.program(source=agrep_nodes,target="agrep",use=["AGREP","LIBTRE","static_libtre"])
    # If we want an agrep that uses the dynamic library instead:
-   # bld.program(source=agrep_nodes,target="agrep",use=["AGREP","dynamic_libtre"])
+   # bld.program(source=agrep_nodes,target="agrep",use=["AGREP","LIBTRE","dynamic_libtre"])
    if bld.changeable_task_group and bld.env.BUILD_TESTS:
       # Prepare for building and running tests
       agrep_task_gen.post() # So we can get the link_task.outputs[0]

@@ -14,6 +14,7 @@ def options(opt):
    pass
 
 debug_lib_tre_config = False
+debug_lib_tre_include = False
 
 def configure(cfg):
    if Options.options.log_wscripts:
@@ -60,11 +61,12 @@ def configure(cfg):
                      Logs.pprint("RED","   got one: '{:s}'".format(d))
                   cfg.env[DEFKEYS].append(k)
                   cfg.env.DEFINES.append(d)
-      dname = ((cfg.env.VARIANT + '/') if len(cfg.env.VARIANT) > 0 else '') + cfg.path.get_bld().path_from(cfg.bldnode)
+      dname = ((cfg.env.VARIANT + '/') if len(cfg.env.VARIANT) > 0 else '')
+      dname += cfg.path.parent.get_bld().path_from(cfg.bldnode) + "/include/tre"
       if debug_lib_tre_config:
          Logs.pprint("YELLOW","cfg.bldnode {:s}".format(cfg.bldnode.abspath()))
-         Logs.pprint("YELLOW","cfg.path.get_bld {:s}".format(cfg.path.get_bld().abspath()))
-         Logs.pprint("YELLOW","--------- {:s}".format(cfg.path.get_bld().path_from(cfg.bldnode)))
+         Logs.pprint("YELLOW","cfg.path.get_bld {:s}".format(cfg.path.parent.get_bld().abspath()))
+         Logs.pprint("YELLOW","--------- {:s}".format(cfg.path.parent.get_bld().path_from(cfg.bldnode)))
          Logs.pprint("CYAN","--------- {:s}".format(dname))
       fname = dname + "/tre-config.h"
       cfg.write_config_header(configfile=fname,top=True,remove=False)
@@ -72,15 +74,21 @@ def configure(cfg):
          Logs.pprint("GREEN","Finished {:s} for TRE regex package.".format(fname))
       cfg.env.DEFINES = top_defines
       cfg.env[DEFKEYS] = top_defkeys
+      # Set up INCLUDES_LIBTRE for this variant, so we can say use=["LIBTRE",...] to get the include paths.
+      # Some of the needed includes are in the build directory, some are in the source directory...
+      bld_parent_path = cfg.path.parent.get_bld().abspath() + '/' + cfg.env.VARIANT
+      incdir = "/include/tre"
+      incl_list = [bld_parent_path+incdir,                     # for tre-config.h
+                   cfg.path.parent.get_src().abspath()+incdir, # for tre.h
+                   bld_parent_path]                            # for config.h
+      if debug_lib_tre_include:
+         Logs.pprint("PINK","variant {:s} INCLUDES_LIBTRE={!s}".format(cfg.env.VARIANT,incl_list))
+      cfg.env["INCLUDES_LIBTRE"] = incl_list
    cfg.setenv("")
 
 def build(bld):
    if Options.options.log_wscripts:
       Logs.pprint('NORMAL','Building in {:s}, VARIANT{{{:s}}}'.format(bld.path.abspath(),bld.env.VARIANT))
-   # Some of the needed includes are in the build directory, some are in the source directory...
-   incl_list = [bld.path.get_bld().abspath(),        # for tre-config.h
-                bld.path.get_src().abspath(),        # for tre.h
-                bld.path.parent.get_bld().abspath()] # for config.h
    # If we're not building for approximate matching, we need to exclude the entire approximate source code file.
    excl_list = [] if bld.env.variant_ap else ["tre-match-approx.c"]
    lib_nodes = bld.path.ant_glob("*.c",excl=excl_list)
@@ -91,7 +99,7 @@ def build(bld):
    # It might be better to do them completely separately for darwin.
    # We use a distinct target path here to avoid confusion as to which one is
    # being used when other targets are linking to one of the libraries.
-   bld.objects(features=['c'],source=lib_nodes,target="lib_objects",includes=incl_list)
+   bld.objects(features=['c'],source=lib_nodes,target="lib_objects",use=["LIBTRE"])
    # Build a static TRE library (we need a distinct name to avoid target collision)
    # This builds libtre.a on a unix-like system (adds lib to target name).
    # The steps required to build things are ususally deduced from the souce list,
