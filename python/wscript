@@ -14,7 +14,7 @@ from waflib.Task import Task
 
 import python_unit_tests
 
-debug_python_venv = True
+debug_python_venv = False
 
 class no_lib64_symlink_EnvBuilder(venv.EnvBuilder):
    """
