@@ -1,7 +1,7 @@
 Introduction
 ============
 
-This file documents the work in progress as of 2023/0601 for adding
+This file documents the work in progress as of 2023/06/18 for adding
 "waf" (an alternate build system, see https://waf.io) to the TRE
 project.
 
@@ -34,7 +34,7 @@ What the waf build system does do for TRE developement is:
      control much less confusing.
 
    + It works on multiple platforms without further depenencies.
-     As of 2023/05/30, it builds and tests successfully on Linux,
+     As of 2023/06/18, it builds and tests successfully on Linux,
      FreeBSD, and MacOS.  (MacOS does need the Xcode command line tools,
      but does not need an xcode project file.)
 
@@ -65,7 +65,7 @@ like the GNU autotools do with "./configure;make".  This is very
 different from the usual project build process, and is even different
 from the usual use of the waf build system.
 
-There many command line options, use:
+There are many command line options, use:
 
    ./waf -h
 
@@ -116,17 +116,33 @@ This would normally be a simple command:
 
    ./waf install
 
-but, while the waf system does have tools for installation, at this
-time (2023/05/30) no effort has been made to use them, so a
-"./waf install" command is unlikely to work (and even if it does work,
-there is no telling which of the configurations will be installed (or
-where)).
+but at this time (2023/06/18) it is still not recommended.  It will
+currently attempt to installl exactly one of the viable variations
+but no effort has been make to ensure that it installs the right
+things in the right places.
+
+Cleaning
+========
+
+The simple command:
+
+   ./waf clean
+
+will remove a large portion of the build products, but it will not
+remove the configuration information, and it has not been tested to
+see if it removes everything it should remove and leaves everything
+it should leave.
+
+If you want to completely clean up after experimenting with it, just
+remove the entire build tree.  The build tree includes the configuration
+information, so if you remove the entire tree you will have to configure
+waf again before further building.
 
 Roadmap
 =======
 
 I am actively working on the waf build system, and I will work on a
-functional "install" once I have sorted out the outstanding PRs.
+more functional "install" once I have sorted out the outstanding PRs.
 
 I'm not a big user of Windows, but waf does work on that platform
 (again, needing only python and compiler tools, no IDE).  However, the
