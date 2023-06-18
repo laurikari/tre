@@ -73,49 +73,6 @@ def configure(cfg):
          cfg.env.viable_python_ext = False
          continue
       cfg.env.viable_python_ext = True
-      venv_path = cfg.bldnode.abspath() + '/'
-      venv_path +=  ((cfg.env.VARIANT + '/') if len(cfg.env.VARIANT) > 0 else '')
-      venv_path +=  cfg.path.get_bld().path_from(cfg.bldnode)
-      var_env["VENV_PATH"] = venv_path
-      # Logs.pprint("YELLOW","venv path {{{!s}}}".format(venv_path))
-      # Test for 64-bit lib needed (but only on some platforms)
-      symlinks_work = True
-      use_lib64 = False
-      if sys.maxsize > 2**32 and "windows" != var_env.PLATSYS:
-         # The built in venv.EnvBuilder code will put in a symlink lib64 -> lib on posix-like
-         # systems because many distros do it and it's too complicated for python to try and
-         # untangle it.  Unfortunately, if we want to run this build over any kind of remote
-         # filesyste (e.g. NFS, SMB, VM shared folder, etc.) symlinks are not going to work.
-         # Try making a symlink to a directory to see if we need to fiddle things.
-         lib64_path = os.path.join(venv_path,"lib64")
-         if os.path.exists(lib64_path):
-            use_lib64 = True
-         else:
-            dummy_target_path = os.path.join(venv_path,"dummy_target")
-            dummy_symlink_path = os.path.join(venv_path,"dummy_symlink")
-            try:
-               os.makedirs(dummy_target_path)
-               os.symlink(dummy_target_path,dummy_symlink_path)
-            except:
-               symlinks_work = False
-               use_lib64 = True
-            if os.path.exists(dummy_symlink_path):
-               os.remove(dummy_symlink_path)
-            if os.path.exists(dummy_target_path):
-               os.rmdir(dummy_target_path)
-      var_env["VENV_USE_LIB64"] = use_lib64
-      if not symlinks_work:
-         # We only need one binary to go under lib<whatever> (and nothing from the base python),
-         # so just override the EnvBuilder class with code that builds both lib and lib64 as
-         # ordinary directories, and put our binary in when it gets built.
-         if debug_python_venv:
-            Logs.pprint('RED','Creating symlink-free python venv in {0:s}'.format(venv_path))
-         venv_builder = no_lib64_symlink_EnvBuilder()
-      else:
-         if debug_python_venv:
-            Logs.pprint('GREEN','Creating ordinary python venv in {0:s}'.format(venv_path))
-         venv_builder = venv.EnvBuilder()
-      venv_builder.create(venv_path)
    cfg.setenv("")
    # Turn off install of .pyc and .pyo files (and hence building them) since we're not
    # building anything with python source, only testing with it.
@@ -131,25 +88,18 @@ def build(bld):
    if Options.options.log_wscripts:
       Logs.pprint('NORMAL','Building in {:s}, VARIANT{{{:s}}}'.format(bld.path.abspath(),bld.env['VARIANT']))
    tre_py_nodes = bld.path.ant_glob('*.c')
-   # Logs.pprint("CYAN","env for python extent:\n{!s}".format(bld.env))
-   # Logs.pprint("YELLOW","VENV_PATH = {:s}".format(bld.env["VENV_PATH"]))
-   # We want to build the extension module right in the virtual environment's site-packages directory
-   # so we can test it without having to copy it and play with indirect dependencies.
    # The "pyext" feature will modify the final component of the path as needed (e.g. adding the PYTAG).
-   using_venv = ("VENV_PATH" in bld.env)
-   py_ext_name = "tre"
-   if using_venv:
-      py_ext_path = os.path.join(bld.env.VENV_PATH,"lib","python"+bld.env.PYTHON_VERSION,"site-packages",py_ext_name)
-   else:
-      py_ext_path = py_ext_name
+   py_ext_path = "tre"
    # Use the static libtre for the python extension, so we only have to install one library for testing.
    tre_python = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext_path,name="tre_python",use=["LIBTRE","static_libtre"])
-   if using_venv and bld.env.VENV_USE_LIB64:
-      # Just build it again in lib64, because it is too complicated to figure out where python is going to look for it.
-      py_ext64_path = os.path.join(bld.env.VENV_PATH,"lib64","python"+bld.env.PYTHON_VERSION,"site-packages",py_ext_name)
-      tre_python64 = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext64_path,
-                         name="tre_python64",use=["LIBTRE","static_libtre"])
-   if bld.changeable_task_group and bld.env.BUILD_TESTS and using_venv:
+   # FIXME: Any particular variant will be either 32 or 64-bit, but there is only one exentsion per variant.
+   # if sys.maxsize > 2**32 and "windows" != bld_env.PLATSYS:
+   #    # Just build it again for lib64, because it is too complicated to figure out where python is going to look for it.
+   #    py_ext_path64 = "tre64"
+   #    tre_python64 = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext_path64,
+   #                       name="tre_python64",use=["LIBTRE","static_libtre"])
+   if bld.changeable_task_group and bld.env.BUILD_TESTS:
+      debug_unit_test = False
       # Build and run the tests.
       tre_python.post() # So we can get the link_task.outputs[0]
       # Logs.pprint("YELLOW","tre_python.tasks = {!s}".format(tre_python.tasks))
@@ -159,13 +109,9 @@ def build(bld):
       # Logs.pprint("YELLOW","tre_python.link_task.outputs[0] = {!s}".format(tre_python.link_task.outputs[0]))
       py_ext_node = tre_python.link_task.outputs[0] # the extension node
       test_node = bld.path.find_node("example.py")
-      # make sure that a change of the extension from tre_python results in another test run
-      # by adding it as a manual dependency of the "example.py" program.
-      # Logs.pprint("YELLOW","test_node = {!s}".format(test_node.abspath()))
-      # Logs.pprint("YELLOW","py_ext_node = {!s}".format(py_ext_node.abspath()))
-      bld.add_manual_dependency(test_node,py_ext_node)
       # Put the tests in a different group from the build targets to avoid having to figure out indirect dependencies.
       bld.set_group('test_tasks')
-      ext_test = bld(features="python_unit_test",source=[test_node],DEBUG_ME=False,install_path=None)
+      # bld.DEBUG_PATH = debug_unit_test
+      bld(features="python_unit_test",source=[test_node],extensions_to_test=[py_ext_node],DEBUG_ME=debug_unit_test,install_path=None)
       # Go back to the regular task group
       bld.set_group('build_tasks')

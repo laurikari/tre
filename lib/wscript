@@ -89,6 +89,7 @@ def configure(cfg):
 def build(bld):
    if Options.options.log_wscripts:
       Logs.pprint('NORMAL','Building in {:s}, VARIANT{{{:s}}}'.format(bld.path.abspath(),bld.env.VARIANT))
+   debug_install = False # bld.cmd.startswith("install")
    # If we're not building for approximate matching, we need to exclude the entire approximate source code file.
    excl_list = [] if bld.env.variant_ap else ["tre-match-approx.c"]
    lib_nodes = bld.path.ant_glob("*.c",excl=excl_list)
@@ -105,7 +106,15 @@ def build(bld):
    # The steps required to build things are ususally deduced from the souce list,
    # but since we have no sources here (only objects), we need to supply the features
    # so waf can find the steps from those.
-   bld.stlib(features=['c','cstlib'],target="static/tre",name="static_libtre",use="lib_objects")
+   if debug_install:
+      Logs.pprint("CYAN","building static lib")
+   # The waf system won't install a static library unless it is given an install_path.
+   bld.stlib(features=['c','cstlib'],target="static/tre",name="static_libtre",use="lib_objects",install_path="${LIBDIR}",
+             DEBUG_ME=debug_install)
    # Build a dynamic TRE library (we need a distinct name to avoid target collision)
    # This builds libtre.so on a unix-like system (adds lib to target name).
-   bld.shlib(features=['c','cshlib'],target="dynamic/tre",name="dynamic_libtre",use="lib_objects")
+   if debug_install:
+      Logs.pprint("CYAN","building dynamic lib")
+   bld.shlib(features=['c','cshlib'],target="dynamic/tre",name="dynamic_libtre",use="lib_objects",DEBUG_ME=debug_install)
+   if debug_install:
+      Logs.pprint("CYAN","finished libs")

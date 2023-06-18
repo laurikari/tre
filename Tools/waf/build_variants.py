@@ -15,7 +15,9 @@ bciuls_tuple = (BuildContext, CleanContext, InstallContext, UninstallContext, Li
 debug_build_all = False
 debug_build_variants = False
 debug_build_variant_queuing = False
+debug_install = False
 debug_bv_colour = "YELLOW"
+debug_bi_colour = "YELLOW"
 
 variant_test_results = None
 
@@ -158,6 +160,10 @@ def create_variant_commands(variant_name_path_list):
                # It is also used as the key to locate the configured environment.
                # Note that waf forces the use of '/' in the path used as the environment key.
                variant = bld_variant_path
+               def __setattr__(self,name,value):
+                  if getattr(self,"DEBUG_PATH",False) and "path" == name:
+                     Logs.pprint("RED","setting path attr for {{{!s}}} to {{{!s}}}".format(self,value))
+                  object.__setattr__(self,name,value)
    bciuls_ctx = bciuls_tuple[0]
    if not bciuls_ctx.__name__.startswith("build_"):
       from_name = bciuls_ctx.__name__.replace('Context','').lower()
@@ -178,9 +184,11 @@ def variant_decorator(platsys,func_to_decorate,variant_group_list):
    # This should be private to this module (only called by redirect_to_variants(variant_group_list) below).
    def variant_wrapper(*args,**kwargs):
       global variant_test_results
+      queue_msg_colour = 'BLUE'   # See waflib/Logs.py colors_lst for available colours.
       # Get the Context for this command.
       ctx = args[0]
       orig_env = ctx.env          # Configset from the original configuration command
+      command = ctx.cmd
       default_build_variant = orig_env.default_variant_name
       if debug_build_variants or debug_build_variant_queuing or debug_build_all:
          Logs.pprint(debug_bv_colour,"Entered variant_wrapper(...), type(ctx) {{{!s}}}".format(type(ctx)))
@@ -192,6 +200,26 @@ def variant_decorator(platsys,func_to_decorate,variant_group_list):
          if debug_build_variants:
             for cfg_key in ctx.all_envs:
                Logs.pprint(debug_bv_colour,"--------- cfg_key {{{:s}}}".format(cfg_key))
+      if ctx.__class__.cmd.startswith("install"):
+         # We only want to install one variant.
+         if debug_install:
+            Logs.pprint(debug_bi_colour,"entered install wrapper")
+         if ctx.variant and len(ctx.variant) > 0:
+            # A specific variant, just do the requested install.
+            if debug_install:
+               Logs.pprint(debug_bi_colour,"variant not empty, go with existing fn")
+            ret_val = func_to_decorate(*args,**kwargs)
+            return ret_val
+         # This is the original unmodified install command, but we only want to install ONE variant,
+         # so queue the default and not anything else.
+         Logs.pprint(queue_msg_colour,'Queuing {:s}/{:s}/{:s} (default)'.format(command,platsys,default_build_variant))
+         default_install = command+"_"+default_build_variant
+         # Do the actual command pushing (Options.commands contains any following arguments from the command line).
+         if debug_install:
+            Logs.pprint(debug_bi_colour,"Queued command: {{{!s}}}".format(default_install))
+         Options.commands = [default_install] + Options.commands
+         # Do NOT proceed with the wrapped function when there is no variant.
+         return None
       if ctx.variant and len(ctx.variant) > 0:
          # The build context has a variant set, so just call the appropriate function (one of the ones created by create_variant_commands()).
          if debug_build_variants or debug_build_variant_queuing or debug_build_all:
@@ -199,8 +227,7 @@ def variant_decorator(platsys,func_to_decorate,variant_group_list):
          ret_val = func_to_decorate(*args,**kwargs)
          return ret_val
       if ctx.__class__.cmd.startswith("build_test_summary"):
-         # The build context has a variant set, so just call the appropriate function (one of the ones created by create_variant_commands()).
-         # ctx.setenv(ctx.variant)
+         # This is the test summary, show the test results and don't queue anything.
          if debug_build_variants or debug_build_variant_queuing:
             Logs.pprint(debug_bv_colour,"test_summary, go with show_summary fn")
          ret_val = show_variant_test_summary(ctx)
@@ -210,9 +237,7 @@ def variant_decorator(platsys,func_to_decorate,variant_group_list):
       if debug_build_variants or debug_build_variant_queuing or debug_build_all:
          Logs.pprint(debug_bv_colour,"type(variant_test_results) {!s}".format(type(variant_test_results)))
       variant_test_results = dict()
-      command = ctx.cmd
       variant_commands = []
-      queue_msg_colour = 'BLUE'   # See waflib/Logs.py colors_lst for available colours.
       curr_opt = Options.options  # options from the command line for this build
       # Build all the variants if (a) explicitly enabled for this command,
       # or (b) not explicitly disabled for both this command and the eariler configuration.
@@ -279,9 +304,6 @@ def variant_decorator(platsys,func_to_decorate,variant_group_list):
          # is messed up and does not provide a set of options).
          Logs.pprint(queue_msg_colour,'Queuing {:s}/{:s}/{:s} (default)'.format(command,platsys,default_build_variant))
          variant_commands = [command+"_"+default_build_variant]
-      # Do the actual command pushing (Options.commands are any following arguments from the command line).
-      if debug_build_variants or debug_build_variant_queuing:
-         Logs.pprint(debug_bv_colour,"Queued commands: {{{!s}}}".format(variant_commands))
       # -----------------
       # Add a function to summarize test results if more than one variant was queued.
       if debug_build_variants:
@@ -292,6 +314,10 @@ def variant_decorator(platsys,func_to_decorate,variant_group_list):
          summary_command_name = command+"_test_summary"
          Logs.pprint(queue_msg_colour,"Queuing {:s}".format(summary_command_name))
          variant_commands += [summary_command_name]
+      # -----------------
+      # Do the actual command pushing (Options.commands contains any following arguments from the command line).
+      if debug_build_variants or debug_build_variant_queuing:
+         Logs.pprint(debug_bv_colour,"Queued commands: {{{!s}}}".format(variant_commands))
       Options.commands = variant_commands + Options.commands
       # Do NOT proceed with the wrapped function when there is no variant, because at least
       # for the 'clean' case this will end up removing ALL variants, plus removing/altering
