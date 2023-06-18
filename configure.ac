@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(TRE, 0.8.0)
 AC_CONFIG_SRCDIR([lib/regcomp.c])
-AC_CONFIG_AUX_DIR(utils)
+AC_CONFIG_AUX_DIR([utils])
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([foreign])
 AC_PREREQ(2.59)
