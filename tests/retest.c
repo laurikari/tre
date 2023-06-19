@@ -13,6 +13,21 @@
    regexp implementation.
 */
 
+/*
+   2023/06 - Compilers now sometimes require the input string constants to be
+             properly encoded, but how they decide on which encoding (if any)
+             is poorly documented and different for different platforms.
+             The non-ASCII encoded strings are now guarded by #ifdefs with one
+             of the following values.  Define/undef whichever one(s) you need.
+             These may affect the total number of tests performed, which may
+             make the waf build system result comparisons fail because the
+             output includes the number.  Look at the actual output files under
+             the build directory to see if all the attempted tests pass.
+   #define SRC_IN_ISO_8859_1
+   #define SRC_IN_UTF_8
+   #define SRC_IN_EUC_JP
+ */
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
@@ -1657,6 +1672,7 @@ main(int argc, char **argv)
   test_comp("a\\{1,0\\}", 0, REG_BADBR);
   test_comp("a\\{x\\}", 0, REG_BADBR);
   test_comp("a\\{\\}", 0, REG_BADBR);
+  test_comp("a\\{1,256\\}", 0, REG_BADMAX);
 
 
 

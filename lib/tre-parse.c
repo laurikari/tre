@@ -628,8 +628,10 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
     }
 
   /* Check that the repeat counts are sane. */
-  if ((max >= 0 && min > max) || max > RE_DUP_MAX)
+  if (max >= 0 && min > max)
     return REG_BADBR;
+  if (max > RE_DUP_MAX)
+    return REG_BADMAX;
 
 
   /*

@@ -86,4 +86,4 @@ Testing LC_CTYPE en_US.ISO-8859-1
 ################
 Testing LC_CTYPE ja_JP.eucjp
 ######################################
-All 7040 tests passed.
+All 7041 tests passed.

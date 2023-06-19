@@ -84,4 +84,4 @@
 ###
 Testing LC_CTYPE en_US.ISO-8859-1
 ################
-All 6999 tests passed.
+All 7000 tests passed.
