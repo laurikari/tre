@@ -65,8 +65,22 @@ static wchar_t wstr[MAXSTRSIZE];
 static wchar_t wregex[MAXSTRSIZE];
 static int woffs[MAXSTRSIZE];
 
+#ifdef TRE_USE_SYSTEM_REGEX_H
+/* Avoid some redefinition warnings from including tre.h. */
+#ifdef tre_regexec
+#undef tre_regexec
+/* No need for the *n* fn, it isn't in the system abi. */
+#endif
+#endif
 #define tre_regexec tre_regwexec
 #define tre_regnexec tre_regwnexec
+#ifdef TRE_USE_SYSTEM_REGEX_H
+/* Avoid some redefinition warnings from including tre.h. */
+#ifdef tre_regcomp 
+#undef tre_regcomp
+#endif
+/* No need for the *n* fn, it isn't in the system abi. */
+#endif
 #define tre_regcomp tre_regwcomp
 #define tre_regncomp tre_regwncomp
 
