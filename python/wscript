@@ -67,8 +67,8 @@ def configure(cfg):
       if not cfg.env.viable:
          # We aren't building libtre here, so there is no point in looking at the python extension.
          continue
-      if not cfg.env.variant_ap:
-         # The python extension needs approximate matching.
+      if not cfg.env.variant_ap or not cfg.env.variant_ti:
+         # The python extension needs approximate matching and the TRE native interface (not the system regex interface).
          # We can still build libtre but the python extension won't work.
          cfg.env.viable_python_ext = False
          continue

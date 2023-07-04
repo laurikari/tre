@@ -8,7 +8,9 @@
 #   See the file LICENSE for details and copyright.
 #
 #
-import os,sys,platform,sysconfig,subprocess
+import os,sys,platform,sysconfig,subprocess,collections
+# enum needs >= 3.4
+from enum import Enum
 # make sure the unit tests can handle UTF-8 output.
 # import codecs
 # # Python3.1+:
@@ -21,7 +23,7 @@ from waflib import Utils
 debug_final_config_envs = 0
 debug_build_config_envs = 0
 debug_build_defaults = False
-debug_specific_config_env = None # e.g. "nls/ap/wc/sb"
+debug_specific_config_env = None # "nls/ap/wc/mb/ti" # e.g. "nls/ap/wc/sb"
 
 top = "."
 # Set up platform dependent build directory so the project can live on a shared file system
@@ -58,10 +60,14 @@ width_variants = ["wc","nc"]
 #      build the wchar_t variants (wide) or not
 #   mb/sb        (multi/single) byte (multi-byte is encodings like UTF-8)
 encoding_variants = ["mb","sb"]
+#      conform to the system regex ABI or not
+#   ti/ri        Tre Interface or system Regex Interface
+rxabi_variants = ["ti","ri"]
+#
 # Strings names for the variants need to be unique with respect to all the other variant names because
 # they get used as part of variable names (e.g. cfg.env.variant_nls or cfg.env.variant_mb).
 #
-variant_group_list = [lang_variants,match_variants,width_variants,encoding_variants]
+variant_group_list = [lang_variants,match_variants,width_variants,encoding_variants,rxabi_variants]
 # Note that the python extension requires wide char, and is cannot be built for the narrow char variants.
 
 # Import the build variant machinery and start creating the data structures for the variants we want.
@@ -169,6 +175,21 @@ def options(opt):
    opt.add_option("--disable-singlebyte", action="store_const", const=-1, dest="enable_sb",
                   help="skip single byte (char) variant (default)")
    #
+   # ti/ri
+   #
+   # Add option for building the TRE interface (ABI) variant
+   opt.parser.set_defaults(enable_ti=0)
+   opt.add_option("--enable-tre-abi", action="store_const", const=1, dest="enable_ti",
+                  help="build TRE ABI variant (default)")
+   opt.add_option("--disable-tre-abi", action="store_const", const=-1, dest="enable_ti",
+                  help="skip TRE ABI variant")
+   # Add option for building the system regex interface (ABI) variant
+   opt.parser.set_defaults(enable_ri=0)
+   opt.add_option("--enable-system-abi", action="store_const", const=1, dest="enable_ri",
+                  help="build system regex ABI variant")
+   opt.add_option("--disable-system-abi", action="store_const", const=-1, dest="enable_ri",
+                  help="skip system regex ABI variant (default)")
+   #
    # ###################
    # Add option for building agrep (only makes sense for the approximate matching variant)
    opt.parser.set_defaults(enable_agrep=1)
@@ -182,7 +203,7 @@ def options(opt):
       opt.parser.set_defaults(enable_python_extension=True)
       opt.add_option("--enable-pyext", action="store_true", dest="enable_python_extension", help="enable building python extension (default)")
       opt.add_option("--disable-pyext", action="store_false", dest="enable_python_extension", help="disable building python extension")
-   # Add option for building and running library tests FIXME - make this -1,0,1 like options for variants
+   # Add option for building and running library tests.
    opt.parser.set_defaults(enable_tests=1)
    opt.add_option("--enable-tests", action="store_const", const=1, dest="enable_tests",
                   help="enable building and running library tests (default)")
@@ -197,8 +218,6 @@ def options(opt):
    opt.parser.set_defaults(with_libutf8=False)
    opt.add_option("--with-libutf8", action="store_true", dest="with_libutf8", help="use libutf8.h if available")
    opt.add_option("--without-libutf8", action="store_false", dest="with_libutf8", help="do not use libutf8.h (default)")
-   # Add option for compatiblity with the system regex.h.
-   opt.parser.set_defaults(enable_sys_regex=False)
    # FIXME - lots more to do in configure before actually completing this.
    # opt.add_option("--enable-system-abi", action="store_true", dest="enable_sys_regex", help="try to make TRE compatible with the system regex ABI")
    # opt.add_option("--disable-system-abi", action="store_false", dest="enable_sys_regex", help="ignore the system regex ABI (default)")
@@ -257,108 +276,204 @@ def normalize_option_all(enable_value,default_value):
       return(1)
    return normalize_option(enable_value,default_value)
 
-# (<name_of_define>,
-#  bool - True to copy from platform_env or undef if appropriate, False to define according to variant.
-#  <defines description (comment body)>
-#  [, <explicit value to define>, True/False if the value should be quoted])
+# Data structure for describing what needs to be done for the C #define lines
+# in headers depending on whether a variant is True (yes) or not.
+CDef_Action = Enum("CDef_Action",["CPY_FRM_PLTFM","UNDEF","DEFINE"])
+CDef_Val_Type = Enum("CDef_Val_Type",["INT","STR","VAR"])
+CDef_Info = collections.namedtuple("CDef_Info",["name","comment",
+                                                "yes_action","yes_data",
+                                                "no_action","no_data"])
 
-defines_for_all_variants = [
-   ("HAVE_DLFCN_H",True,"Define to 1 if you have the <dlfcn.h> header file."),
-   ("HAVE_GETOPT_H",True,"Define to 1 if you have the <getopt.h> header file."),
-   ("HAVE_GETOPT_LONG",True,"Define to 1 if you have the 'getopt_long' function."),
+cdefs_for_all_variants = [
+   CDef_Info("HAVE_DLFCN_H","Define to 1 if you have the <dlfcn.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_GETOPT_H","Define to 1 if you have the <getopt.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_GETOPT_LONG","Define to 1 if you have the 'getopt_long' function.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_INTTYPES_H","Define to 1 if you have the <inttypes.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ISASCII","Define to 1 if you have the 'isascii' function.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ISBLANK","Define to 1 if you have the 'isblank' function.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_LIBUTF8_H","Define to 1 if you have the <libutf8.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_STDINT_H","Define to 1 if you have the <stdint.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_STDIO_H","Define to 1 if you have the <stdio.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_STDLIB_H","Define to 1 if you have the <stdlib.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_STRINGS_H","Define to 1 if you have the <strings.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_STRING_H","Define to 1 if you have the <string.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_SYS_STAT_H","Define to 1 if you have the <sys/stat.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_SYS_TYPES_H","Define to 1 if you have the <sys/types.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("_GNU_SOURCE","Define to enable GNU extensions in glibc.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
    # ("HAVE_ICONV",True,"Define if you have the iconv() (codeset conversion) function and it works."),
-   ("HAVE_INTTYPES_H",True,"Define to 1 if you have the <inttypes.h> header file."),
-   ("HAVE_ISASCII",True,"Define to 1 if you have the 'isascii' function."),
-   ("HAVE_ISBLANK",True,"Define to 1 if you have the 'isblank' function."),
-   ("HAVE_LIBUTF8_H",True,"Define to 1 if you have the <libutf8.h> header file."),
-   ("HAVE_STDINT_H",True,"Define to 1 if you have the <stdint.h> header file."),
-   ("HAVE_STDIO_H",True,"Define to 1 if you have the <stdio.h> header file."),
-   ("HAVE_STDLIB_H",True,"Define to 1 if you have the <stdlib.h> header file."),
-   ("HAVE_STRINGS_H",True,"Define to 1 if you have the <strings.h> header file."),
-   ("HAVE_STRING_H",True,"Define to 1 if you have the <string.h> header file."),
-   ("HAVE_SYS_STAT_H",True,"Define to 1 if you have the <sys/stat.h> header file."),
-   ("HAVE_SYS_TYPES_H",True,"Define to 1 if you have the <sys/types.h> header file."),
-   ("HAVE_UNISTD_H",True,"Define to 1 if you have the <unistd.h> header file."),
    # ("STDC_HEADERS",True,"Define to 1 if all of the C90 standard headers exist (not just the ones
    #    required in a freestanding environment). This macro is provided for
    #    backward compatibility; new code need not use it."),
-   ("_GNU_SOURCE",True,"Define to enable GNU extensions in glibc"),
 ]
 
-defines_for_debug = [
-   ("TRE_DEBUG",False,"Define if you want TRE to print debug messages to stdout."),
-   ("NDEBUG",False,"____"),
+cdefs_for_debug = [
+   CDef_Info("TRE_DEBUG","Define if you want TRE to print debug messages to stdout.",
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),CDef_Action.UNDEF,None),
+   CDef_Info("NDEBUG","____.",
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),CDef_Action.UNDEF,None),
 ]
 
-defines_for_nls = [
-   ("ENABLE_NLS",False,"Define to 1 if translation of program messages to the user+s native language is requested."),
+cdefs_for_nls = [
+   CDef_Info("ENABLE_NLS","Define to 1 if translation of program messages to the user+s native language is requested.",
+             # NLS - enable NLS
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),
+             # SLS - disable NLS
+             CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_DCGETTEXT","Define if the GNU dcgettext() function is already present or preinstalled.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_GETTEXT","Define if the GNU gettext() function is already present or preinstalled.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
    # These functions do not appear anywhere in the source code (as of 2023/05/25, so it is pointless to look for them.
-   # ("HAVE_CFLOCALECOPYCURRENT",True,"Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the CoreFoundation framework."),
-   # ("HAVE_CFPREFERENCESCOPYAPPVALUE",True,"Define to 1 if you have the MacOS X function CFPreferencesCopyAppValue in the CoreFoundation framework."),
-   ("HAVE_DCGETTEXT",True,"Define if the GNU dcgettext() function is already present or preinstalled."),
-   ("HAVE_GETTEXT",True,"Define if the GNU gettext() function is already present or preinstalled."),
+   # ("HAVE_CFLOCALECOPYCURRENT",Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the CoreFoundation framework."),
+   # ("HAVE_CFPREFERENCESCOPYAPPVALUE",Define to 1 if you have the MacOS X function CFPreferencesCopyAppValue in the CoreFoundation framework."),
 ]
 
-defines_for_approximate_matching = [
-   ("TRE_APPROX",False,"Define if you want to enable approximate matching functionality."),
+cdefs_for_ap = [
+   CDef_Info("TRE_APPROX","Define if you want to enable approximate matching functionality.",
+             # AP - enable approximate matching
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),
+             # EX - disable approximate matching
+             CDef_Action.UNDEF,None),
 ]
 
-defines_for_wide_characters = [
-   ("TRE_WCHAR",False,"Define if you want to enable wide character functionality."),
-   ("TRE_WTYPE",False,"Define if you want to enable wide character functionality."),
-   ("HAVE_MBSTATE_T",True,"Define to 1 if the system has the type 'mbstate_t'."),
-   ("HAVE_WCSRTOMBS",True,"Define to 1 if you have the 'wcsrtombs' function or macro."),
-   ("HAVE_ISWASCII",True,"Define to 1 if you have the 'iswascii' function or macro."),
-   ("HAVE_ISWBLANK",True,"Define to 1 if you have the 'iswblank' function or macro."),
-   ("HAVE_ISWCTYPE",True,"Define to 1 if you have the 'iswctype' function or macro."),
-   ("HAVE_ISWLOWER",True,"Define to 1 if you have the 'iswlower' function or macro."),
-   ("HAVE_ISWUPPER",True,"Define to 1 if you have the 'iswupper' function or macro."),
-   ("HAVE_TOWLOWER",True,"Define to 1 if you have the 'towlower' function or macro."),
-   ("HAVE_TOWUPPER",True,"Define to 1 if you have the 'towupper' function or macro."),
-   ("HAVE_WCHAR_H",True,"Define to 1 if you have the <wchar.h> header file."),
-   ("HAVE_WCHAR_T",True,"Define to 1 if the system has the type 'wchar_t'."),
-   ("HAVE_WCSCHR",True,"Define to 1 if you have the 'wcschr' function or macro."),
-   ("HAVE_WCSCPY",True,"Define to 1 if you have the 'wcscpy' function or macro."),
-   ("HAVE_WCSLEN",True,"Define to 1 if you have the 'wcslen' function or macro."),
-   ("HAVE_WCSNCPY",True,"Define to 1 if you have the 'wcsncpy' function or macro."),
-   ("HAVE_WCTYPE",True,"Define to 1 if you have the 'wctype' function or macro."),
-   ("HAVE_WCTYPE_H",True,"Define to 1 if you have the <wctype.h> header file."),
-   ("HAVE_WINT_T",True,"Define to 1 if the system has the type 'wint_t'."),
+cdefs_for_wide_characters = [
+   CDef_Info("TRE_WCHAR","Define if you want to enable wide character functionality.",
+             # WC - enable wide character
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),
+             # NC - disable wide character
+             CDef_Action.UNDEF,None),
+   CDef_Info("TRE_WTYPE","Define if you want to enable wide character functionality.",
+             # WC - enable wide character
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),
+             # NC - disable wide character
+             CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_MBSTATE_T","Define to 1 if the system has the type 'mbstate_t'.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCSRTOMBS","Define to 1 if you have the 'wcsrtombs' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ISWASCII","Define to 1 if you have the 'iswascii' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ISWBLANK","Define to 1 if you have the 'iswblank' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ISWCTYPE","Define to 1 if you have the 'iswctype' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ISWLOWER","Define to 1 if you have the 'iswlower' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ISWUPPER","Define to 1 if you have the 'iswupper' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_TOWLOWER","Define to 1 if you have the 'towlower' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_TOWUPPER","Define to 1 if you have the 'towupper' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCHAR_H","Define to 1 if you have the <wchar.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCHAR_T","Define to 1 if the system has the type 'wchar_t'.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCSCHR","Define to 1 if you have the 'wcschr' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCSCPY","Define to 1 if you have the 'wcscpy' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCSLEN","Define to 1 if you have the 'wcslen' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCSNCPY","Define to 1 if you have the 'wcsncpy' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCTYPE","Define to 1 if you have the 'wctype' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCTYPE_H","Define to 1 if you have the <wctype.h> header file.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WINT_T","Define to 1 if the system has the type 'wint_t'.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
 ]
 
-defines_for_multibyte = [
-   ("TRE_MULTIBYTE",False,"Define to enable multibyte character set support."),
-   ("HAVE_MBRTOWC",True,"Define to 1 if you have the 'mbrtowc' function or macro."),
-   ("HAVE_MBTOWC",True,"Define to 1 if you have the 'mbtowc' function or macro."),
-   ("HAVE_WCSTOMBS",True,"Define to 1 if you have the 'wcstombs' function or macro."),
+cdefs_for_multibyte = [
+   CDef_Info("TRE_MULTIBYTE","Define to enable multibyte character set support.",
+             # MB - enable multibyte
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),
+             # SB - disable multibyte
+             CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_MBRTOWC","Define to 1 if you have the 'mbrtowc' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_MBTOWC","Define to 1 if you have the 'mbtowc' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_WCSTOMBS","Define to 1 if you have the 'wcstombs' function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
 ]
 
-defines_for_regex = [
-   ("TRE_USE_SYSTEM_REGEX_H",False,"Define to include the system regex.h from TRE regex.h"),
-   ("HAVE_REGEX_H",True,"Define to 1 if you have the <regex.h> header file."),
-   ("HAVE_REG_ERRCODE_T",True,"Define to 1 if the system has the type 'reg_errcode_t'."),
-   # TRE_REGEX_T_FIELD seems to be required regardless of using the system regex ABI or not.
-   ("TRE_REGEX_T_FIELD",False,"Define to a field in the regex_t struct where TRE should store a pointer to the internal tre_tnfa_t structure",
-    "value",False),
-   ("TRE_SYSTEM_REGEX_H_PATH",True,"Define to the absolute path to the system regex.h"),
+# The regex defines may seem backwards because the "yes" action is to NOT use the system regex ABI.
+cdefs_for_regex = [
+   CDef_Info("TRE_USE_SYSTEM_REGEX_H","Define to include the system regex.h from TRE regex.h",
+             # TI - use TRE native ABI
+             CDef_Action.UNDEF,None,
+             # RI - use system ABI from <regex.h>
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1)),
+   CDef_Info("HAVE_REGEX_H","Define to 1 if you have the <regex.h> header file.",
+             # TI - use TRE native ABI
+             CDef_Action.UNDEF,None,
+             # RI - use system ABI from <regex.h>
+             CDef_Action.CPY_FRM_PLTFM,None),
+   CDef_Info("TRE_SYSTEM_REGEX_H_PATH","Define to the absolute path to the system regex.h",
+             # TI - use TRE native ABI
+             CDef_Action.UNDEF,None,
+             # RI - use system ABI from <regex.h>
+             CDef_Action.CPY_FRM_PLTFM,None),
+   CDef_Info("HAVE_REG_ERRCODE_T","Define to 1 if the system has the type 'reg_errcode_t'.",
+             # TI - use TRE native ABI
+             CDef_Action.CPY_FRM_PLTFM,None,
+             # RI - use system ABI from <regex.h>
+             CDef_Action.CPY_FRM_PLTFM,None),
+   CDef_Info("TRE_REGEX_T_FIELD",
+             "Define to a field in the regex_t struct where TRE should store a pointer to the internal tre_tnfa_t structure",
+             # TI - use TRE native ABI
+             CDef_Action.DEFINE,(CDef_Val_Type.VAR,"value"),
+             # CDef_Action.CPY_FRM_PLTFM,None,
+             # RI - use system ABI from <regex.h>
+             CDef_Action.CPY_FRM_PLTFM,None),
+   CDef_Info("_REGCOMP_INTERNAL", "Define on IRIX",
+             # TI - use TRE native ABI
+             CDef_Action.UNDEF,None,
+             # RI - use system ABI from <regex.h>
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1)),
 ]
 
 # FUTURE: make this a variation, only valid if "HAVE_ALLOCA" is in the platform env (header may be separate, or part of standard C library)
-defines_for_alloca = [
-   ("TRE_USE_ALLOCA",False,"Define if you want TRE to use alloca() instead of malloc() when allocating memory needed for regexec operations."),
-   ("HAVE_ALLOCA",True,"Define to 1 if you have 'alloca', as a function or macro."),
-   ("HAVE_ALLOCA_H",True,"Define to 1 if <alloca.h> works."),
-   ("C_ALLOCA",True,"Define to 1 if using 'alloca.c'."),
+cdefs_for_alloca = [
+   CDef_Info("TRE_USE_ALLOCA","Define if you want TRE to use alloca() instead of malloc() when allocating memory needed for regexec operations.",
+             CDef_Action.DEFINE,(CDef_Val_Type.INT,1),
+             CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ALLOCA","Define to 1 if you have 'alloca', as a function or macro.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("HAVE_ALLOCA_H","Define to 1 if <alloca.h> works.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("C_ALLOCA","Define to 1 if using 'alloca.c'.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None), # FIXME this should be yet another variant..
 ]
 
-defines_for_misc_stuff = [
-   ("WCHAR_MAX",True,"Define to the maximum value of wchar_t if not already defined elsewhere."),
-   ("WCHAR_T_SIGNED",True,"Define if wchar_t is signed."),
-   ("WCHAR_T_UNSIGNED",True,"Define if wchar_t is unsigned"),
-   ("_FILE_OFFSET_BITS",True,"Number of bits in a file offset, on hosts where this is settable."),
-   ("_GNU_SOURCE",True,"Define to enable GNU extensions in glibc."),
-   ("_LARGE_FILES",True,"Define for large files, on AIX-style hosts."),
-   ("_REGCOMP_INTERNAL",True,"Define on IRIX"),
+cdefs_for_alloca = [
+   CDef_Info("WCHAR_MAX","Define to the maximum value of wchar_t if not already defined elsewhere.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("WCHAR_T_SIGNED","Define if wchar_t is signed.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("WCHAR_T_UNSIGNED","Define if wchar_t is unsigned",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("_FILE_OFFSET_BITS","Number of bits in a file offset, on hosts where this is settable.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
+   CDef_Info("_LARGE_FILES","Define for large files, on AIX-style hosts.",
+             CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
    # See tail end of autoconf generated config.h for const, inline, and size_t workarounds.
 ]
 
@@ -429,7 +544,113 @@ def copy_define(key,comment,dst_env,src_env):
       dst_env.DEFINES = dst_DEFINES
       dst_env[DEFKEYS] = dst_DEFKEYS
 
+def find_sys_regex_path(cfg_ctx):
+   # Find the path to the system <regex.h> file or "_" if not available.
+   # Use the C preprocessor to do the search, and look for lines like:
+   #  {# 1 "/usr/include/regex.h" 1 3 4}
+   # in its output.
+   # The autotool configure uses:
+   # echo '#include <regex.h>' | $CC -E | grep '^#[a-z]* [0-9]* "\(.*regex.h\)"' | head -1 | sed 's/^#[a-z]* [0-9]* \"\(.*\)\".*/\1/'
+   no_path = "_"
+   rc = -1
+   stdout_data = None
+   stderr_data = None
+   if cfg_ctx.is_defined("HAVE_REGEX_H"):
+      cc_path = cfg_ctx.env.CC
+      # Logs.pprint("RED","cc_path {{{!s}}}".format(cc_path))
+      args = [cc_path[0], "-E"]
+      if "clang" in cc_path[0]:
+         # clang needs a "-" argument to tell it to read from stdin.
+         args += "-"
+      # GAH!  The type of input and output of the Popen depens on how streams have been opened, and I don't want to figure that out...
+      try:
+         proc = Utils.subprocess.Popen(args,stdin=Utils.subprocess.PIPE,stderr=Utils.subprocess.PIPE,stdout=Utils.subprocess.PIPE)
+         (stdout_data,stderr_data) = proc.communicate(input="#include <regex.h>\n")
+         rc = proc.returncode
+      except:
+         proc = Utils.subprocess.Popen(args,stdin=Utils.subprocess.PIPE,stderr=Utils.subprocess.PIPE,stdout=Utils.subprocess.PIPE)
+         (stdout_data,stderr_data) = proc.communicate(input=b"#include <regex.h>\n")
+         stdout_data = stdout_data.decode("UTF-8")
+         stderr_data = stderr_data.decode("UTF-8")
+         rc = proc.returncode
+      # Logs.pprint("PINK","type(stdout_data) = {{{!s}}}".format(type(stdout_data)))
+      if 0 == rc:
+         # Logs.pprint("PINK","rc==0")
+         for line in stdout_data.splitlines():
+            # Logs.pprint("PINK","|{!s}".format(line))
+            if line.startswith('#'):
+               rx = line.find('regex.h"')
+               if -1 != rx:
+                  rx += 7 # postion of trailing '"'
+                  qx = line.find('"') # look for leading '"'
+                  if -1 != qx and qx+1 < rx:
+                     cfg_ctx.define("TRE_SYSTEM_REGEX_H_PATH",line[qx+1:rx],comment="Define to the absolute path of the system regex.h")
+                     return
+      else:
+         Logs.pprint("PINK","rc=={:d}".format(rc))
+         Logs.pprint("PINK","{!s}".format(stderr_data))
+   # Not found.
+   cfg_ctx.define("TRE_SYSTEM_REGEX_H_PATH","_",comment="Define to the absolute path of the system regex.h (no <regex.h> found)")
+
+def find_sys_regex_field(cfg_ctx):
+   for candidate in ["buffer","re_comp","__re_comp","__reg_expression","re_g","re_pad[0]"]:
+      pgm = '''
+#include <sys/types.h>
+#include <regex.h>
+int zot()
+  {regex_t foo;
+   void *bar = foo.''' + candidate + ''';
+   foo.''' + candidate + ''' = bar;}
+'''
+      # If pgm compiles OK, candidate is good.
+      msg = "Checking for usable regex_t field {:s}".format(candidate)
+      ok = cfg_ctx.check(features="c",mandatory=False,fragment=pgm,msg=msg)
+      if ok:
+         cfg_ctx.define("TRE_REGEX_T_FIELD",candidate,quote=False)
+         return
+   cfg_ctx.define("TRE_REGEX_T_FIELD","failed_usable_regex_t_field_name_search",quote=False)
+
+def handle_c_defines(cfg,do_yes_actions,list_of_cdefs,platform_env):
+   dbg_this_cfg = (debug_build_config_envs > 0) or (cfg.env.VARIANT == debug_specific_config_env)
+   for info in list_of_cdefs:
+      cdef_name = info.name
+      cdef_comment = info.comment
+      if do_yes_actions:
+         action = info.yes_action
+         data = info.yes_data
+      else:
+         action = info.no_action
+         data = info.no_data
+      if CDef_Action.DEFINE == action:
+         if None == data:
+            # The value isn't important, just define to 1.
+            cfg.define(cdef_name,1,comment=cdef_comment)
+         else:
+            # data is a tuple (CDef_Val_Type,val).
+            cdef_type = data[0]
+            if CDef_Val_Type.INT == cdef_type:
+               cfg.define(cdef_name,data[1],comment=cdef_comment)
+            elif CDef_Val_Type.VAR == cdef_type:
+               cfg.define(cdef_name,data[1],comment=cdef_comment,quote=False)
+            elif CDef_Val_Type.STR == cdef_type:
+               cfg.define(cdef_name,data[1],comment=cdef_comment,quote=True)
+            else:
+               # Unexpected data type for cdef value, whine
+               msg = "Unexpected data value type in {:s} action for C #define {:s}"
+               Logs.pprint("RED",msg.format("yes" if do_yes_actions else "no",cdef_name))
+      elif CDef_Action.UNDEF == action:
+         # Remove any definition.
+         cfg.undefine(cdef_name,comment=cdef_comment)
+      elif CDef_Action.CPY_FRM_PLTFM == action:
+         # Copy any definition from the platform_env to the current one.
+         copy_define(cdef_name,cdef_comment,cfg.env,platform_env)
+      else:
+         # Unexpected cdef action, whine
+         msg = "Unexpected action type for C #define {:s}"
+         Logs.pprint("RED",msg.format(cdef_name))
+
 def handle_variant(cfg,variant_yes,variant_no,list_of_defines,platform_env):
+   # Only one of {variant_yes,variant_no} will be true for any particular env.
    dbg_this_cfg = (debug_build_config_envs > 0) or (cfg.env.VARIANT == debug_specific_config_env)
    if variant_yes:
       for t in list_of_defines:
@@ -467,7 +688,8 @@ def gather_env_for_variant(cfg):
    platform_env = cfg.all_envs[cfg.all_envs[""].PLATSYS]
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_all_variants variant {{{:s}}}".format(cfg.env.VARIANT))
-   handle_variant(cfg,True,False,defines_for_all_variants,platform_env)
+   # handle_variant(cfg,True,False,defines_for_all_variants,platform_env)
+   handle_c_defines(cfg,True,cdefs_for_all_variants,platform_env)
    #-------------------------------------------------- NLS
    if cfg.env.variant_nls:
       if not ("HAVE_LIBINTL_H" in platform_env) or "darwin" == platsys:
@@ -478,13 +700,13 @@ def gather_env_for_variant(cfg):
          return
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_nls variant {{{:s}}}".format(cfg.env.VARIANT))
-   handle_variant(cfg,cfg.env.variant_nls,cfg.env.variant_sls,defines_for_nls,platform_env)
+   handle_c_defines(cfg,cfg.env.variant_nls,cdefs_for_nls,platform_env)
    #-------------------------------------------------- AP
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_approximate_matching variant {{{:s}}}".format(cfg.env.VARIANT))
-   handle_variant(cfg,cfg.env.variant_ap,cfg.env.variant_ex,defines_for_approximate_matching,platform_env)
+   handle_c_defines(cfg,cfg.env.variant_ap,cdefs_for_ap,platform_env)
    #-------------------------------------------------- WC
-   dfwc = defines_for_wide_characters
+   cdfwc = cdefs_for_wide_characters
    if cfg.env.variant_wc:
       # We need wide character support, either <wchar.h> or <libutf8.h>, but not both at the same time.
       if ("HAVE_WCHAR_H" not in platform_env) or ("HAVE_WCTYPE_H" not in platform_env):
@@ -495,11 +717,11 @@ def gather_env_for_variant(cfg):
       if cfg.env.variant_sb:
          # autoconf skips the TRE_WTYPE for the non-multibyte build.
          ndx_to_remove = 1
-         # Use dfwc so we don't end up modifying the original for other variants.
-         dfwc = defines_for_wide_characters[0:ndx_to_remove] + defines_for_wide_characters[ndx_to_remove+1:]
+         # Use cdfwc so we don't end up modifying the original for other variants.
+         cdfwc = cdefs_for_wide_characters[0:ndx_to_remove] + cdefs_for_wide_characters[ndx_to_remove+1:]
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_wide_characters variant {{{:s}}}".format(cfg.env.VARIANT))
-   handle_variant(cfg,cfg.env.variant_wc,cfg.env.variant_nc,dfwc,platform_env)
+   handle_c_defines(cfg,cfg.env.variant_wc,cdfwc,platform_env)
    #-------------------------------------------------- MB
    # In both Linux and FreeBSD mbstate_t is defined when "#include <wchar.h>" is processed.
    # There are ways to get mbstate_t without wchar.h, but they differ, so for now skip configs with "mb" but not "wc".  
@@ -511,15 +733,16 @@ def gather_env_for_variant(cfg):
       return
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_multibyte variant {{{:s}}}".format(cfg.env.VARIANT))
-   handle_variant(cfg,cfg.env.variant_mb,cfg.env.variant_sb,defines_for_multibyte,platform_env)
-   #-------------------------------------------------- system regex compatibility (fake variant always off)
+   handle_c_defines(cfg,cfg.env.variant_mb,cdefs_for_multibyte,platform_env)
+   #-------------------------------------------------- TI/RI system regex compatibility
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_regex variant {{{:s}}}".format(cfg.env.VARIANT))
-   handle_variant(cfg,False,True,defines_for_regex,platform_env)
+   handle_c_defines(cfg,cfg.env.variant_ti,cdefs_for_regex,platform_env)
    #--------------------------------------------------
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_alloca variant {{{:s}}}".format(cfg.env.VARIANT))
-   handle_variant(cfg,(cfg.env.build_default_with_alloca>0),(cfg.env.build_default_with_alloca<0),defines_for_alloca,platform_env)
+   # handle_variant(cfg,(cfg.env.build_default_with_alloca>0),(cfg.env.build_default_with_alloca<0),defines_for_alloca,platform_env)
+   handle_c_defines(cfg,(cfg.env.build_default_with_alloca>0),cdefs_for_alloca,platform_env)
    #--------------------------------------------------
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Finished defines_* variant {{{:s}}}".format(cfg.env.VARIANT))
@@ -567,6 +790,11 @@ def configure(cfg):
    if not (cfg.env.build_default_enable_mb >= 0 or cfg.env.build_default_enable_sb >= 0):
       # Rule out the "don't build anything" case by taking the simplest one.
       cfg.env.build_default_enable_sb = 1
+   cfg.env.build_default_enable_ti = normalize_option_all(opts.enable_ti,1)
+   cfg.env.build_default_enable_ri = normalize_option_all(opts.enable_ri,-1)
+   if not (cfg.env.build_default_enable_ti >= 0 or cfg.env.build_default_enable_ri >= 0):
+      # Rule out the "don't build anything" case by taking the simplest one.
+      cfg.env.build_default_enable_ti = 1
    cfg.env.build_default_with_alloca = 1 if opts.with_alloca else -1
    if debug_build_defaults:
       msg = "type({:s}) {{{!s}}} val {{{!s}}}"
@@ -578,6 +806,8 @@ def configure(cfg):
       Logs.pprint("PINK",msg.format("build_default_enable_nc",type(cfg.env.build_default_enable_nc),cfg.env.build_default_enable_nc))
       Logs.pprint("PINK",msg.format("build_default_enable_mb",type(cfg.env.build_default_enable_mb),cfg.env.build_default_enable_mb))
       Logs.pprint("PINK",msg.format("build_default_enable_sb",type(cfg.env.build_default_enable_sb),cfg.env.build_default_enable_sb))
+      Logs.pprint("PINK",msg.format("build_default_enable_ti",type(cfg.env.build_default_enable_ti),cfg.env.build_default_enable_ti))
+      Logs.pprint("PINK",msg.format("build_default_enable_ri",type(cfg.env.build_default_enable_ri),cfg.env.build_default_enable_ri))
    #
    cfg.env.build_default_enable_agrep = Options.options.enable_agrep
    cfg.env.build_default_enable_python_extension = Options.options.enable_python_extension
@@ -599,7 +829,7 @@ def configure(cfg):
    cfg.define("TRE_VERSION_2",package_version_minor)
    cfg.define("TRE_VERSION_3",package_version_miniscule)
    cfg.define("VERSION",package_version)
-   cfg.define("_GNU_SOURCE",1)
+   cfg.define("_GNU_SOURCE",1) # only if gcc?
    # ================= Debug
    # FIXME - make this a rel/dbg variant
    cfg.define("NDEBUG",1,comment="Define if you want to disable debug assertions.")
@@ -666,9 +896,6 @@ def configure(cfg):
       ("memory.h",False,None),
       ("regex.h",False,None),
       ("assert.h",True,None)]
-   # if Options.options.enable_sys_regex:
-   #    # regex.h compatibility has been requested, so we need regex.h
-   #    lib_incs += [("regex.h",True,None)]
    # Logs.pprint("CYAN","0 env.DEFINES {{{!s}}}".format(cfg.env.DEFINES))
    # Logs.pprint("CYAN","0 env.define_key {{{!s}}}".format(cfg.env.define_key))
    #
@@ -686,6 +913,8 @@ def configure(cfg):
          cfg.check(features=feat,header_name=lib[0],mandatory=lib[1],auto_add_header_name=True)
       else:
          cfg.check(features=feat,header_name=lib[0],mandatory=lib[1],errmsg=lib[2],auto_add_header_name=True)
+   regex_path = find_sys_regex_path(cfg)
+   find_sys_regex_field(cfg)
    # Make the options consistent with the headers found.
    # The cfg.define() and cfg.undefine() methods manage both DEFINES and define_key lists,
    # so these will go into config.h (or nowhere) not the compiler command line.
@@ -783,15 +1012,6 @@ def configure(cfg):
    if "freebsd" == platsys or "linux" == platsys:
       # cfg.define("LT_OBJDIR",".libs/") # Libtool stuff???
       cfg.define("STDC_HEADERS",1)
-   if not Options.options.enable_sys_regex:
-      cfg.undefine("TRE_USE_SYSTEM_REGEX_H")
-      cfg.define("TRE_SYSTEM_REGEX_H_PATH","_")
-      cfg.define("TRE_REGEX_T_FIELD","value",quote=False)
-   else:
-      # FIXME: lots more to do here....
-      # "TRE_USE_SYSTEM_REGEX_H"
-      # "TRE_SYSTEM_REGEX_H_PATH"
-      pass
    # Return from the platform availability env to the original one.
    cfg.setenv("")
    #===========================================================================
