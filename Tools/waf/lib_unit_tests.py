@@ -26,7 +26,8 @@ BuildContext.switch_to_test_group = switch_to_test_group
 
 def return_to_build_group(self):
    # Return to the task group for building regular stuff.
-   # Logs.pprint('CYAN','switching task group back to {{{:s}}} from {{{:s}}}'.format(current_build_group,self.get_group_name(self.current_group)))
+   # msg = "switching task group back to {{{:s}}} from {{{:s}}}"
+   # Logs.pprint('CYAN',msg.format(current_build_group,self.get_group_name(self.current_group)))
    self.set_group('build_tasks')
 
 # Patch the BuildContext class so that all instances have return_to_build_group() as a method.
