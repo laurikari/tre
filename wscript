@@ -433,7 +433,7 @@ cdefs_for_regex = [
              CDef_Action.CPY_FRM_PLTFM,None),
    CDef_Info("HAVE_REG_ERRCODE_T","Define to 1 if the system has the type 'reg_errcode_t'.",
              # TI - use TRE native ABI
-             CDef_Action.CPY_FRM_PLTFM,None,
+             CDef_Action.UNDEF,None,
              # RI - use system ABI from <regex.h>
              CDef_Action.CPY_FRM_PLTFM,None),
    CDef_Info("TRE_REGEX_T_FIELD",
@@ -476,6 +476,14 @@ cdefs_for_alloca = [
              CDef_Action.CPY_FRM_PLTFM,None, CDef_Action.UNDEF,None),
    # See tail end of autoconf generated config.h for const, inline, and size_t workarounds.
 ]
+
+def cdef_is_in_env(key,env):
+   # Check to see if key is a cdef in the given env.
+   ban = key + '='
+   for x in env.DEFINES:
+      if x.startswith(ban):
+         return True
+   return False
 
 def copy_define(key,comment,dst_env,src_env):
    # Define (or undefine) key in dst_env to match key in src_env if it is in the src_env.
@@ -558,10 +566,10 @@ def find_sys_regex_path(cfg_ctx):
    if cfg_ctx.is_defined("HAVE_REGEX_H"):
       cc_path = cfg_ctx.env.CC
       # Logs.pprint("RED","cc_path {{{!s}}}".format(cc_path))
-      args = [cc_path[0], "-E"]
-      if "clang" in cc_path[0]:
-         # clang needs a "-" argument to tell it to read from stdin.
-         args += "-"
+      args = [cc_path[0], "-E", "-"] # Both clang and gcc need a "-" argument to say to read from stdin.
+      # if "clang" in cc_path[0]:
+      #    # clang needs a "-" argument to tell it to read from stdin.
+      #    args += "-"
       # GAH!  The type of input and output of the Popen depens on how streams have been opened, and I don't want to figure that out...
       try:
          proc = Utils.subprocess.Popen(args,stdin=Utils.subprocess.PIPE,stderr=Utils.subprocess.PIPE,stdout=Utils.subprocess.PIPE)
@@ -649,29 +657,6 @@ def handle_c_defines(cfg,do_yes_actions,list_of_cdefs,platform_env):
          msg = "Unexpected action type for C #define {:s}"
          Logs.pprint("RED",msg.format(cdef_name))
 
-def handle_variant(cfg,variant_yes,variant_no,list_of_defines,platform_env):
-   # Only one of {variant_yes,variant_no} will be true for any particular env.
-   dbg_this_cfg = (debug_build_config_envs > 0) or (cfg.env.VARIANT == debug_specific_config_env)
-   if variant_yes:
-      for t in list_of_defines:
-         if t[1]:
-            # Copy any definition from the platform_env to the current one.
-            copy_define(t[0],t[2],cfg.env,platform_env)
-         else:
-            # Define to enable the variant
-            if 3 == len(t):
-               cfg.define(t[0],1,comment=t[2])
-            elif 5 == len(t):
-               # define to a specific value.
-               cfg.define(t[0],t[3],comment=t[2],quote=t[4])
-   elif variant_no:
-      for t in list_of_defines:
-         if t[1] or 3 == len(t): 
-            cfg.undefine(t[0],comment=t[2])
-         elif 5 == len(t):
-            # required define to a specific value.
-            cfg.define(t[0],t[3],comment=t[2],quote=t[4])
-
 def gather_env_for_variant(cfg):
    # Figure out the various DEFINES for cfg's current variant given both
    # what the variant requires and what is available from the platform.
@@ -688,11 +673,10 @@ def gather_env_for_variant(cfg):
    platform_env = cfg.all_envs[cfg.all_envs[""].PLATSYS]
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_all_variants variant {{{:s}}}".format(cfg.env.VARIANT))
-   # handle_variant(cfg,True,False,defines_for_all_variants,platform_env)
    handle_c_defines(cfg,True,cdefs_for_all_variants,platform_env)
    #-------------------------------------------------- NLS
    if cfg.env.variant_nls:
-      if not ("HAVE_LIBINTL_H" in platform_env) or "darwin" == platsys:
+      if not cdef_is_in_env("HAVE_LIBINTL_H",platform_env) or "darwin" == platsys:
          # We need gettext and it isn't available.
          if dbg_this_cfg:
             Logs.pprint("RED","====== variant {{{:s}}} not viable (no LIBINTL_H)".format(cfg.env.VARIANT))
@@ -709,7 +693,7 @@ def gather_env_for_variant(cfg):
    cdfwc = cdefs_for_wide_characters
    if cfg.env.variant_wc:
       # We need wide character support, either <wchar.h> or <libutf8.h>, but not both at the same time.
-      if ("HAVE_WCHAR_H" not in platform_env) or ("HAVE_WCTYPE_H" not in platform_env):
+      if not cdef_is_in_env("HAVE_WCHAR_H",platform_env) or not cdef_is_in_env("HAVE_WCTYPE_H",platform_env):
          if dbg_this_cfg:
             Logs.pprint("RED","====== variant {{{:s}}} not viable (no WCHAR_H or WCTYPE_H)".format(cfg.env.VARIANT))
          cfg.env.viable = False
@@ -735,13 +719,17 @@ def gather_env_for_variant(cfg):
       Logs.pprint(dbg_colour,"====== Handling defines_for_multibyte variant {{{:s}}}".format(cfg.env.VARIANT))
    handle_c_defines(cfg,cfg.env.variant_mb,cdefs_for_multibyte,platform_env)
    #-------------------------------------------------- TI/RI system regex compatibility
+   if cfg.env.variant_ri and not cdef_is_in_env("HAVE_REGEX_H",platform_env):
+      if dbg_this_cfg:
+         Logs.pprint("RED","====== variant {{{:s}}} not viable (no <regex.h>)".format(cfg.env.VARIANT))
+      cfg.env.viable = False
+      return
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_regex variant {{{:s}}}".format(cfg.env.VARIANT))
    handle_c_defines(cfg,cfg.env.variant_ti,cdefs_for_regex,platform_env)
    #--------------------------------------------------
    if dbg_this_cfg:
       Logs.pprint(dbg_colour,"====== Handling defines_for_alloca variant {{{:s}}}".format(cfg.env.VARIANT))
-   # handle_variant(cfg,(cfg.env.build_default_with_alloca>0),(cfg.env.build_default_with_alloca<0),defines_for_alloca,platform_env)
    handle_c_defines(cfg,(cfg.env.build_default_with_alloca>0),cdefs_for_alloca,platform_env)
    #--------------------------------------------------
    if dbg_this_cfg:
@@ -919,7 +907,7 @@ def configure(cfg):
    # The cfg.define() and cfg.undefine() methods manage both DEFINES and define_key lists,
    # so these will go into config.h (or nowhere) not the compiler command line.
    # Note that for FreeBSD, alloca() is part of the standard C library, it can be used without the header.
-   if Options.options.with_alloca and ("freebsd" == platsys or "HAVE_ALLOCA_H" in cfg.env):
+   if Options.options.with_alloca and ("freebsd" == platsys or cfg.is_defined("HAVE_ALLOCA_H")):
       if debug_build_config_envs > 0 or (None != debug_specific_config_env):
          Logs.pprint("YELLOW","attempting to set TRE_USE_ALLOCA")
       cfg.define("TRE_USE_ALLOCA",1)
@@ -998,13 +986,15 @@ def configure(cfg):
          'char *foo = gettext("msgid");'),
       ("HAVE_LIBINTL_H", True, "HAVE_DCGETTEXT", False, "Checking for function dcgettext()",
          'char *foo = dcgettext("domain","msgid",1);'),
+      ("HAVE_REGEX_H",   True, "HAVE_REG_ERRCODE_T", False, "Checking for type reg_errcode_t",
+         "reg_errcode_t foo;"),
    ]
    for fntest in fn_or_mac_list:
       if debug_build_config_envs > 0 or (None != debug_specific_config_env):
          Logs.pprint("YELLOW","Considering fn or mac {{{:s}}}".format(fntest[2]))
       if (None == fntest[0] or
-          (fntest[1] and (fntest[0] in cfg.env)) or
-          (not fntest[1] and not fntest[0] in cfg.env)):
+          (fntest[1] and cfg.is_defined(fntest[0])) or
+          (not fntest[1] and not cfg.is_defined(fntest[0]))):
          if debug_build_config_envs > 0 or (None != debug_specific_config_env):
             Logs.pprint("YELLOW","prereqs OK for fn or mac {{{:s}}}".format(fntest[2]))
          cfg.check(features=feat,define_name=fntest[2],mandatory=fntest[3],msg=fntest[4],fragment=fn_or_mac_frag.format(fntest[5]))
