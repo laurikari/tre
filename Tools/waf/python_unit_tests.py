@@ -130,6 +130,7 @@ class ensure_python_venv(Task.Task):
       # The self.outputs[] nodes correspond to the self.inputs[] nodes after skipping the python executable at the start.
       if None != self.inputs:
          # Copy the latest build of the extensions into the venv's site-packages.
+         use_lib64 = bld_env["VENV_USE_LIB64"]
          for ndx in range(len(self.inputs)):
             bld_ext_node = self.inputs[ndx]
             pkg_ext_node = self.outputs[ndx+1]
