@@ -6,7 +6,7 @@ else
 agrep_dirs =
 endif
 
-SUBDIRS = include lib $(agrep_dirs) tests utils po m4
+SUBDIRS = local_includes lib $(agrep_dirs) tests utils po m4
 
 EXTRA_DIST = \
 	LICENSE \

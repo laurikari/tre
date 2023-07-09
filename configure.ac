@@ -520,12 +520,12 @@ AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 dnl Output files
-AC_CONFIG_HEADERS([config.h include/tre/tre-config.h])
+AC_CONFIG_HEADERS([config.h local_includes/tre-config.h])
 AC_CONFIG_FILES([
 Makefile
 doc/Makefile
 doc/agrep.1
-include/Makefile
+local_includes/Makefile
 lib/Makefile
 m4/Makefile
 po/Makefile.in
