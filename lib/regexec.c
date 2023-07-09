@@ -45,7 +45,6 @@ char *alloca ();
 #include <limits.h>
 
 #include "tre-internal.h"
-#include "tre.h"
 #include "xmalloc.h"
 
 

@@ -14,7 +14,6 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "tre.h"
 #include "tre-internal.h"
 #include "xmalloc.h"
 

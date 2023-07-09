@@ -23,7 +23,7 @@ def build(bld):
    # tre.h includes the tre-config.h header file, but tre-config.h is in the build directory.
    # The install_files() method uses "find_resource" on any paths that are not Nodes, so it fails to find
    # the tre-config.h file in order to install it.  Make sure we pass it in as a Node to work around this.
-   cfg_header_node = bld.path.find_or_declare(bld.path.get_bld().abspath() + "/tre/tre-config.h")
+   cfg_header_node = bld.path.find_or_declare(bld.path.get_bld().abspath() + "/tre-config.h")
    # Logs.pprint("RED","tre-config node type: {!s} abspath {{{:s}}}".format(type(cfg_header_node),cfg_header_node.abspath()))
-   header_list = ["tre/tre.h","tre/regex.h",cfg_header_node]
+   header_list = ["tre.h","regex.h",cfg_header_node]
    bld.install_files("${PREFIX}/include/tre",header_list)

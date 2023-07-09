@@ -62,7 +62,8 @@ def configure(cfg):
                   cfg.env[DEFKEYS].append(k)
                   cfg.env.DEFINES.append(d)
       dname = ((cfg.env.VARIANT + '/') if len(cfg.env.VARIANT) > 0 else '')
-      dname += cfg.path.parent.get_bld().path_from(cfg.bldnode) + "/include/tre"
+      incdir = "/local_includes"
+      dname += cfg.path.parent.get_bld().path_from(cfg.bldnode) + incdir
       if debug_lib_tre_config:
          Logs.pprint("YELLOW","cfg.bldnode {:s}".format(cfg.bldnode.abspath()))
          Logs.pprint("YELLOW","cfg.path.get_bld {:s}".format(cfg.path.parent.get_bld().abspath()))
@@ -75,9 +76,9 @@ def configure(cfg):
       cfg.env.DEFINES = top_defines
       cfg.env[DEFKEYS] = top_defkeys
       # Set up INCLUDES_LIBTRE for this variant, so we can say use=["LIBTRE",...] to get the include paths.
-      # Some of the needed includes are in the build directory, some are in the source directory...
+      # It's a mess because some of the needed headers are in the build directory, some are in the source
+      # directory, some of them include others, ...
       bld_parent_path = cfg.path.parent.get_bld().abspath() + '/' + cfg.env.VARIANT
-      incdir = "/include/tre"
       incl_list = [bld_parent_path+incdir,                     # for tre-config.h
                    cfg.path.parent.get_src().abspath()+incdir, # for tre.h
                    bld_parent_path]                            # for config.h

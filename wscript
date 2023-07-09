@@ -1170,7 +1170,7 @@ def build(bld):
    # Build the actual library.
    bld.recurse("lib")
    # Set up the info for header installation.
-   bld.recurse("include")
+   bld.recurse("local_includes")
    # Build agrep if requested (it won't build unless approximate matching is enabled).
    opt_agrep = normalize_option(Options.options.enable_agrep,0)
    if bld.env.variant_ap and (opt_agrep > 0 or (opt_agrep == 0 and bld.env.build_default_enable_agrep > 0)):

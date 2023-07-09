@@ -19,8 +19,6 @@ def configure(cfg):
    # Check for the headers in agrep that are not already handled at the top level.
    cfg.check(features="c cprogram",header_name="locale.h",mandatory=True)
    cfg.check(features="c cprogram",header_name="fcntl.h",mandatory=True)
-   # agrep needs to include stuff from the TRE lib directory.
-   cfg.env["INCLUDES_AGREP"] = ["..","../lib"]
    # datarootdir ${prefix}/share
    if "freebsd" == cfg.env.PLATSYS or "linux" == cfg.env.PLATSYS:
       cfg.env["DEFINES_AGREP"] = ['LOCALEDIR=\"/usr/local/share/locale\"']

@@ -48,14 +48,6 @@ def configure(cfg):
    cfg.load("python")
    cfg.check_python_headers()
    # cfg.test_pyext("c")
-   # The python extension needs to include tre.h, but we may not
-   # have it in the system or the build envrionment like setup.py does,
-   # so get it from the TRE lib directory by:
-   # 1) setting a command line define to indicate building with waf PYEXT,
-   cfg.env.append_unique("DEFINES_PYEXT","HAVE_PYEXT")
-   # 2) adding a command line include to PYEXT,
-   cfg.env.append_unique("INCLUDES_PYEXT","../lib")
-   # 3) checking for HAVE_PYEXT in the source file and including "tre.h" instead of <tre/tre.h>.
    #========== testing --> make sure we have a virtual env set up in the build directory.
    # PYTHON_VERSION' '3.9' lib/python3.9/site-packages
    for cfg_key in cfg.all_envs:
