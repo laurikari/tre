@@ -218,7 +218,7 @@ PyTreMatch_groups(TreMatchObject *self, PyObject *dummy)
 }
 
 static PyObject *
-PyTreMatch_groupi(PyObject *obj, long gn)
+PyTreMatch_groupi(PyObject *obj, Py_ssize_t gn)
 {
   TreMatchObject *self = (TreMatchObject*)obj;
   PyObject *result;
@@ -583,7 +583,7 @@ static PyTypeObject TrePatternType = {
 };
 
 static TrePatternObject *
-newTrePatternObject()
+newTrePatternObject(void)
 {
   TrePatternObject *self;
 
