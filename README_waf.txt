@@ -1,7 +1,7 @@
 Introduction
 ============
 
-This file documents the work in progress as of 2023/06/18 for adding
+This file documents the work in progress as of 2023/07/08 for adding
 "waf" (an alternate build system, see https://waf.io) to the TRE
 project.
 
@@ -10,13 +10,12 @@ I started, but as I did testing I found myself doing a lot of repetitive
 actions to get clean build and test environments.  Since I had good
 results using "waf" for testing builds in my own projects, I thought I'd
 try using it in a "testing only" way for TRE, and then I got kinda
-carried away :).  However, the waf build scripts (wscript files) do not
-yet handle installation.  The GNU autotools remain the recommended way
+carried away :).  However, the GNU autotools remain the recommended way
 to build and install TRE if you are not doing TRE development. 
 
 The waf build system is based on Python, and if waf was the only way to
 build it, it would add a dependency on Python to this project.  However,
-waf can use any version of Python later than 3.4, and since one of the
+waf can use any version of Python later than 3.5, and since one of the
 features of this project is a Python extension, the dependency does not
 seem too onerous.
 
@@ -34,7 +33,7 @@ What the waf build system does do for TRE developement is:
      control much less confusing.
 
    + It works on multiple platforms without further depenencies.
-     As of 2023/06/18, it builds and tests successfully on Linux,
+     As of 2023/07/08, it builds and tests successfully on Linux,
      FreeBSD, and MacOS.  (MacOS does need the Xcode command line tools,
      but does not need an xcode project file.)
 
@@ -55,10 +54,12 @@ The steps needed to build and test with waf are:
       this file).
 
    2) In the cloned or unpacked directory do:
-      ./waf configure
+         ./waf configure
 
    3) then to build and test do:
-      ./waf
+         ./waf
+      or
+         ./waf build
 
 This builds and tests *multiple* configurations rather than just one
 like the GNU autotools do with "./configure;make".  This is very
@@ -90,8 +91,9 @@ features.  The features that are (currently) selectable are:
    - ap (or ex)   -- APproximate matching (or EXact)
    - wc (or nc)   -- Wide Character support (32-bit) (or Narrow (8-bit))
    - mb (or sb)   -- MultiByte characters (or SingleByte)
+   - ti (or ri)   -- TRE Interface or system Regex.h Interface
 
-MultiByte requires Wide Character, so there are 12 viable combinations
+MultiByte requires Wide Character, so there are 24 viable combinations
 of selected features.
 
 National Language Support on MacOS currently depends on Objective-C
@@ -101,13 +103,13 @@ extension for clang versions 14.0 to 14.2, but is has been fixed in
 14.3.)
 
 As an example of where the build results end up, for FreeBSD with
-nls, ap, wc, and mb features selected, the build results are in:
+nls, ap, wc, mb, and ti features selected, the build results are in:
 
-   build/freebsd/nls/ap/wc/mb
+   build/freebsd/nls/ap/wc/mb/ti
 
-or for MacOS with sls, ap, wc, and mb they are in:
+or for MacOS with sls, ap, wc, mb, and ti they are in:
 
-   build/darwin/sls/ap/wc/mb
+   build/darwin/sls/ap/wc/mb/ti
 
 Installing
 ==========
@@ -116,10 +118,10 @@ This would normally be a simple command:
 
    ./waf install
 
-but at this time (2023/06/18) it is still not recommended.  It will
+but at this time (2023/07/08) it is still not recommended.  It will
 currently attempt to installl exactly one of the viable variations
-but no effort has been make to ensure that it installs the right
-things in the right places.
+but it chooses a "default" configuration of the selectable features
+and that may not be the configuration you want.
 
 Cleaning
 ========
@@ -133,7 +135,7 @@ remove the configuration information, and it has not been tested to
 see if it removes everything it should remove and leaves everything
 it should leave.
 
-If you want to completely clean up after experimenting with it, just
+If you want to completely clean up after experimenting with waf, just
 remove the entire build tree.  The build tree includes the configuration
 information, so if you remove the entire tree you will have to configure
 waf again before further building.
@@ -146,9 +148,9 @@ more functional "install" once I have sorted out the outstanding PRs.
 
 I'm not a big user of Windows, but waf does work on that platform
 (again, needing only python and compiler tools, no IDE).  However, the
-windows build of TRE using waf has not been tried at all.  I will look
-at the build and test situation on Windows after the "install" on other
-platforms, but will probably leave installation on Windows to someone
-else.
+windows build of TRE using waf has not been tried at all, even to see if
+it configures and builds successfully.  I will look at the build and
+test situation on Windows after the "install" on other platforms, but
+will probably leave installation on Windows to someone else.
 
 Tom Rushworth <tbr@acm.org>
