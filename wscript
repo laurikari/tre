@@ -848,6 +848,7 @@ def configure(cfg):
    # file will remove the named defines from the DEFINES list, leaving only the ones meant
    # for the compiler command line.
    cfg.env.append_unique("DEFINES","HAVE_CONFIG_H=1") # no entry in the list of names, so this ends up on the compiler command line.
+   cfg.env.append_unique("DEFINES","USE_LOCAL_TRE_H=1") # no entry in the list of names, so this ends up on the compiler command line.
    # ================= Platform specific feature availability
    # Get a platform specific env for discovering what the platform has available.
    # It is derived from the original, so it has all the values set up above.

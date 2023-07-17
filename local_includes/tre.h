@@ -9,13 +9,13 @@
 #ifndef TRE_H
 #define TRE_H 1
 
-#ifdef USE_INSTALLED_TRE_H
-/* Use the header in the same directory as this file if there is one. */
-#include "tre-config.h"
-#else
+#ifdef USE_LOCAL_TRE_H
 /* Make certain to use the header(s) from the TRE package that this
    file is part of by giving the full path to the header from this directory. */
 #include "../local_includes/tre-config.h"
+#else
+/* Use the header in the same directory as this file if there is one. */
+#include "tre-config.h"
 #endif
 
 #ifdef HAVE_SYS_TYPES_H

@@ -13,16 +13,16 @@
 #ifndef TRE_REXEX_H
 #define TRE_REGEX_H 1
 
-#ifdef USE_INSTALLED_TRE_H
-/* Use the header(s) from an installed version of the TRE package
-   (so that this application matches the installed libtre),
-   not the one(s) in the local_includes directory. */
-#include <tre/tre.h>
-#else
+#ifdef USE_LOCAL_TRE_H
 /* Use the header(s) from the TRE package that this file is part of.
    (Yes, this file is in local_include too, but the explict path
    means there is no way to get a system tre.h by accident.) */
 #include "../local_includes/tre.h"
+#else
+/* Use the header(s) from an installed version of the TRE package
+   (so that this application matches the installed libtre),
+   not the one(s) in the local_includes directory. */
+#include <tre/tre.h>
 #endif
 
 #ifndef TRE_USE_SYSTEM_REGEX_H

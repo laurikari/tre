@@ -101,6 +101,9 @@ dnl Checks for headers, functions, types, and macros
 AC_DEFINE(_GNU_SOURCE, 1, [ Define to enable GNU extensions in glibc ])
 AC_HEADER_STDC
 
+dnl Make sure locally configured headers are used (this adds the #define to config.h).
+AC_DEFINE(USE_LOCAL_TRE_H, 1, [ Define to ensure locally configured headers are used ])
+
 AC_ARG_WITH(alloca,
   AC_HELP_STRING(
     [--without-alloca],
