@@ -115,6 +115,52 @@ environment variable.  The default color is red.
 Only print a count of matching records per each input file,
 suppressing normal output.
 .TP
+.BI \-m " NUM" "\fR,\fP \-\^\-max\-count=" NUM
+Stop reading a file after
+.I NUM
+matching lines.
+If
+.I NUM
+is zero,
+.B agrep
+stops right away without reading input.
+A
+.I NUM
+of \-1 is treated as infinity and
+.B agrep
+does not stop; this is the default.
+If the input is standard input from a regular file,
+and
+.I NUM
+matching lines are output,
+.B agrep
+ensures that the standard input is positioned to just after the last
+matching line before exiting, regardless of the presence of trailing
+context lines.
+This enables a calling process to resume a search.
+When
+.B agrep
+stops after
+.I NUM
+matching lines, it outputs any trailing context lines.
+When the
+.B \-c
+or
+.B \-\^\-count
+option is also used,
+.B agrep
+does not output a count greater than
+.IR NUM .
+When the
+.B \-v
+or
+.B \-\^\-invert\-match
+option is also used,
+.B agrep
+stops after outputting
+.I NUM
+non-matching lines.
+.TP
 .BR \-h ", " \-\^\-no\-filename
 Suppress the prefixing filename on output when multiple files are
 searched.
