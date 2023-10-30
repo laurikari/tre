@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+#
+#   tests/wscript - part of TRE
+#   test programs waf build script.
+#
+#   This software is released under a BSD-style license.
+#   See the file LICENSE for details and copyright.
+#
+
+from waflib import Logs,Options
+
+import lib_unit_tests
+
+def options(opt):
+   pass
+
+def configure(cfg):
+   if Options.options.log_wscripts:
+      Logs.pprint('CYAN','Configuring in {:s}, VARIANT{{{!s}}}'.format(cfg.path.abspath(),cfg.env["VARIANT"]))
+      # Logs.pprint('NORMAL','Configuring in {0:s}'.format(cfg.path.abspath()))
+   # datarootdir ${prefix}/share
+   if "freebsd" == cfg.env.PLATSYS:
+      # could use -Wno-invalid-source-encoding in CFLAGS_TESTS
+      for cfg_key in cfg.all_envs:
+         if "" == cfg_key:
+            continue
+         cfg.setenv(cfg_key)
+         if cfg.env.variant_nls:
+            # cfg.env["DEFINES_TESTS"] = ['LOCALEDIR=\"/usr/local/share/locale\"','SRC_IN_UTF_8']
+            cfg.env["DEFINES_TESTS"] = ['LOCALEDIR=\"/usr/local/share/locale\"']
+            cfg.env["LIBPATH_TESTS"] = ["/usr/local/lib"]
+            cfg.env["LIB_TESTS"] = ["intl"]
+      cfg.setenv("")
+
+debug_test_builds = False
+
+def build(bld):
+   if Options.options.log_wscripts:
+      Logs.pprint('NORMAL','Building in {0:s}, VARIANT{{{1:s}}}'.format(bld.path.abspath(),bld.env["VARIANT"]))
+   if bld.env.BUILD_TESTS and bld.changeable_task_group:
+      # Build and run the tests.
+      bld.set_group('test_tasks')
+      # Some of the needed includes are in the build directory, some are in the source directory...
+      if debug_test_builds:
+         Logs.pprint("CYAN","src.parent={{{:s}}}".format(bld.path.get_src().parent.abspath()))
+         Logs.pprint("CYAN","src.parent.find_node('lib')={{{:s}}}".format(bld.path.get_src().parent.find_node("lib").abspath()))
+         Logs.pprint("CYAN","bld.parent={{{:s}}}".format(bld.path.parent.abspath()))
+         Logs.pprint("CYAN","bld.parent.get_bld()={{{:s}}}".format(bld.path.parent.get_bld().abspath()))
+      incl_list = [bld.path.get_src().parent.find_node("lib").abspath()] # for xmalloc.h
+      use_list = ["TESTS","LIBTRE","static_libtre"]
+      # 1
+      retest_node = bld.path.find_node('retest.c')
+      # some non-UTF-8 in the output breaks showing the results...
+      bld(features='c cprogram lib_unit_test',source=[retest_node],target="retest",use=use_list,
+          includes=incl_list,DEBUG_ME=debug_test_builds)
+      # 2
+      strtest_node = bld.path.find_node('test-str-source.c')
+      bld(features='c cprogram lib_unit_test',source=[strtest_node],target="strtest",use=use_list,
+          includes=incl_list,DEBUG_ME=debug_test_builds)
+      # 3 -- This takes a long time (and at the moment runs out of swap space), skip it.
+      randtest_node = bld.path.find_node('randtest.c')
+      # bld(features='c cprogram lib_unit_test',source=[randtest_node],target="randtest",use=use_list,
+      #     includes=incl_list,DEBUG_ME=debug_test_builds)
+      # 4
+      benchtest_node = bld.path.find_node('bench.c')
+      # bench.c needs the math library (for sqrt) under linux, just leave it out for now.
+      # The bench program needs at least a "-t N" command line argument where 1 <= N <= 9.
+      # bld(features='c cprogram lib_unit_test',source=[benchtest_node],target="benchtest",use=use_list,lib=["m"],
+      #     includes=incl_list,DEBUG_ME=debug_test_builds)
+      if "AGREP_NODE" in bld.env: # agrep built.
+         bld.recurse("agrep")
+      # Go back to the regular task group
+      bld.set_group('build_tasks')

@@ -1,5 +1,7 @@
 #! /bin/sh
 
+tbr_logfile=/tmp/tbr_agrep_test
+echo '##################################' >> ${tbr_logfile}
 set -e
 
 agrep="$top_builddir/src/agrep"
@@ -47,8 +49,29 @@ EOF
 agrep $extra $arg $input
 EOF
       set +e
+      # Disable globbing in case there are '*' characters in $arg
+      # This bug was discovered and reported in PR#87 by Vogtinator
+      # on 2022/10/11.  The fix suggested in the PR was to remove
+      # the line in tests/agrep/exitstatus.args that contained the
+      # '*' character and modify the exitstatus.OK file to match.
+      # As Vogtinator pointed out, avoiding the glob expansion is
+      # not easy (there may be multiple shell arguments in a line
+      # from any of the .args files so escaping the glob character
+      # becomes very difficult and error prone).  However, bash
+      # shells from 4.4+ and most Almquist shells (e.g. FreeBSD 'sh',
+      # Linux 'ash', Debian 'dash', Busybox 'sh', etc.), have a
+      # 'noglob' or 'set -/+f' option for disabling globbing.  If
+      # this shell script is failing on the 'set -f' below, remove
+      # if and the corresponding 'set +f', then remove the line
+      # containing the '.*' from exitstatus.args, and the lines
+      # produced by that .args line from existatus.ok.  It doesn't
+      # seem worth the effort to check the shell version here, because
+      # the Almquist shells don't have an easy way to determine the
+      # version of the running instance.
+      set -f
       $agrep $extra $arg $input >> $out
       status=$?
+      set +f
       set -e
       cat >> $out <<EOF
 
@@ -63,8 +86,10 @@ EOF
 agrep $extra $arg < $input
 EOF
       set +e
+      set -f
       $agrep $extra $arg < $input >> $out
       status=$?
+      set +f
       set -e
       cat >> $out <<EOF
 

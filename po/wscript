@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+#
+#   po/wscript - part of TRE
+#   TRE natural language translations
+#
+#   This software is released under a BSD-style license.
+#   See the file LICENSE for details and copyright.
+#
+
+import sys,os,venv,shutil
+# The ugly hack below for intltool needs to compare files and operate on waf Node objects.
+import filecmp
+from waflib import Logs,Options,Node
+from waflib.Task import Task
+
+
+def options(opt):
+   pass
+
+def configure(cfg):
+   if Options.options.log_wscripts:
+      Logs.pprint('CYAN','Configuring in {0:s}, VARIANT{{{1:s}}}'.format(cfg.path.abspath(),cfg.env['VARIANT']))
+      # Logs.pprint('NORMAL','Configuring in {0:s}'.format(cfg.path.abspath()))
+   # waf version 3-2.0.25 checks for:
+   #    - the "msgfmt' program to implement the "intltool_po" feature, and
+   #    - the "intltool-merge" program to implement the "intltool_in" feature.
+   # We're only using the "intltool_po" feature here, and some systems don't
+   # install both together, so the stock waf release has been modified to skip the
+   # check(s) for unused features (see waflib/Tools/intltool.py, fn configure()).
+   platsys = cfg.env['PLATSYS']
+   if "linux" == platsys or "freebsd" == platsys:
+      # Ugly ugly UGLY hack to simplify configuration on Linux for internationalization.
+      hacked_intltool_node = cfg.path.parent.find_node("Tools/waf/intltool.py")
+      # Logs.pprint("RED","hacked intltool.py type {!s}".format(type(hacked_intltool_node)))
+      stock_intltool_node = cfg.path.parent.ant_glob(".waf3-2.0.25-*/waflib/Tools/intltool.py")
+      if list == type(stock_intltool_node) and len(stock_intltool_node) > 0:
+         stock_intltool_node = stock_intltool_node[0]
+      # Logs.pprint("RED","stock intltool.py type {!s}".format(type(stock_intltool_node)))
+      if isinstance(stock_intltool_node,type(hacked_intltool_node)):
+         # We've found the stock intltool file, check to see if it needs to be replaced.
+         if not filecmp.cmp(stock_intltool_node.abspath(),hacked_intltool_node.abspath()):
+            # It does.
+            Logs.pprint("RED","hacking stock intltool.")
+            stock_intltool_node.write(hacked_intltool_node.read())
+      #    else:
+      #       Logs.pprint("RED","stock intltool already hacked.")
+      # else:
+      #    Logs.pprint("RED","stock intltool wrong type check.")
+   cfg.env.intltool_features = ["intltool_po"]
+   cfg.load("intltool")
+
+def build(bld):
+   if Options.options.log_wscripts or True:
+      Logs.pprint('NORMAL','Building in {0:s}, VARIANT{{{1:s}}}'.format(bld.path.abspath(),bld.env['VARIANT']))
+   using_venv = ("VENV_PATH" in bld.env)
+   dest_path = bld.path.get_bld().abspath()
+   bld(features="intltool_po",appname="agrep",podir=".",install_path=dest_path)
+   if bld.changeable_task_group and bld.env.BUILD_TESTS and using_venv:
+      bld.set_group('test_tasks')
+      # Go back to the regular task group
+      bld.set_group('build_tasks')

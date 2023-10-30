@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+#
+#   python/wscript - part of TRE
+#   TRE python extension waf build script.
+#
+#   This software is released under a BSD-style license.
+#   See the file LICENSE for details and copyright.
+#
+
+import sys,os,venv,shutil
+from waflib import Logs,Options
+from waflib.Task import Task
+
+import python_unit_tests
+
+debug_python_venv = False
+
+class no_lib64_symlink_EnvBuilder(venv.EnvBuilder):
+   """
+   Override the EnvBuilder code that does a symlink to avoid problems with remote filesystems (see the use in configure() below).
+   """
+
+   def __init__(self,*args,**kwargs):
+      super().__init__(*args,**kwargs)
+
+   def ensure_directories(self,env_dir):
+      # 1. Create the lib64 directory first, which stops the super().ensure_directories() from creating it as a symlink
+      lib64_path = os.path.join(env_dir,"lib64")
+      if not os.path.exists(lib64_path):
+         os.makedirs(lib64_path)
+      # 2. Use super().ensure_directories(env_dir) to do the rest of the work.
+      context = super().ensure_directories(env_dir)
+      # 3. Copy everything below lib to lib64.
+      shutil.copytree(os.path.join(env_dir,"lib"),lib64_path,dirs_exist_ok=True)
+      # return the super's return value
+      return context
+
+def options(opt):
+   opt.load("python")
+
+def configure(cfg):
+   if Options.options.log_wscripts:
+      Logs.pprint('CYAN','Configuring in {0:s}, VARIANT{{{1:s}}}'.format(cfg.path.abspath(),cfg.env['VARIANT']))
+   # Force loading python3 instead of python
+   if "windows" != cfg.env.PLATSYS:
+      cfg.find_program("python3",var="PYTHON")
+   cfg.load("python")
+   cfg.check_python_headers()
+   # cfg.test_pyext("c")
+   #========== testing --> make sure we have a virtual env set up in the build directory.
+   # PYTHON_VERSION' '3.9' lib/python3.9/site-packages
+   for cfg_key in cfg.all_envs:
+      if "" == cfg_key or cfg.all_envs[""].PLATSYS == cfg_key:
+         # Skip the original env, and the platform specific one.  All we want here is the variants.
+         continue
+      var_env = cfg.all_envs[cfg_key]
+      cfg.setenv(cfg_key)
+      if not cfg.env.viable:
+         # We aren't building libtre here, so there is no point in looking at the python extension.
+         continue
+      if not cfg.env.variant_ap or not cfg.env.variant_ti:
+         # The python extension needs approximate matching and the TRE native interface (not the system regex interface).
+         # We can still build libtre but the python extension won't work.
+         cfg.env.viable_python_ext = False
+         continue
+      cfg.env.viable_python_ext = True
+   cfg.setenv("")
+   # Turn off install of .pyc and .pyo files (and hence building them) since we're not
+   # building anything with python source, only testing with it.
+   cfg.env.PYC = 0
+   cfg.env.PYO = 0
+
+def build(bld):
+   if not bld.env.viable_python_ext:
+      if Options.options.log_wscripts:
+         msg = "Skipping build in {:s}, VARIANT{{{:s}}} (python extension not viable in variant)"
+         Logs.pprint("NORMAL",msg.format(bld.path.abspath(),bld.env['VARIANT']))
+      return
+   if Options.options.log_wscripts:
+      Logs.pprint('NORMAL','Building in {:s}, VARIANT{{{:s}}}'.format(bld.path.abspath(),bld.env['VARIANT']))
+   tre_py_nodes = bld.path.ant_glob('*.c')
+   # The "pyext" feature will modify the final component of the path as needed (e.g. adding the PYTAG).
+   py_ext_path = "tre"
+   # Use the static libtre for the python extension, so we only have to install one library for testing.
+   tre_python = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext_path,name="tre_python",use=["LIBTRE","static_libtre"])
+   # FIXME: Any particular variant will be either 32 or 64-bit, but there is only one exentsion per variant.
+   # if sys.maxsize > 2**32 and "windows" != bld_env.PLATSYS:
+   #    # Just build it again for lib64, because it is too complicated to figure out where python is going to look for it.
+   #    py_ext_path64 = "tre64"
+   #    tre_python64 = bld(features=["c","cshlib","pyext"],source=tre_py_nodes,target=py_ext_path64,
+   #                       name="tre_python64",use=["LIBTRE","static_libtre"])
+   if bld.changeable_task_group and bld.env.BUILD_TESTS:
+      debug_unit_test = False
+      # Build and run the tests.
+      tre_python.post() # So we can get the link_task.outputs[0]
+      # Logs.pprint("YELLOW","tre_python.tasks = {!s}".format(tre_python.tasks))
+      # Logs.pprint("YELLOW","type(tre_python.link_task) = {!s}".format(type(tre_python.link_task)))
+      # Logs.pprint("YELLOW","tre_python.link_task = {!s}".format(tre_python.link_task))
+      # Logs.pprint("YELLOW","type(tre_python.link_task.outputs[0]) = {!s}".format(type(tre_python.link_task.outputs[0])))
+      # Logs.pprint("YELLOW","tre_python.link_task.outputs[0] = {!s}".format(tre_python.link_task.outputs[0]))
+      py_ext_node = tre_python.link_task.outputs[0] # the extension node
+      test_node = bld.path.find_node("example.py")
+      # Put the tests in a different group from the build targets to avoid having to figure out indirect dependencies.
+      bld.set_group('test_tasks')
+      # bld.DEBUG_PATH = debug_unit_test
+      bld(features="python_unit_test",source=[test_node],extensions_to_test=[py_ext_node],DEBUG_ME=debug_unit_test,install_path=None)
+      # Go back to the regular task group
+      bld.set_group('build_tasks')

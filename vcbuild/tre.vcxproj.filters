@@ -17,10 +17,10 @@
     <ClInclude Include="..\include\tre\tre.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\tre\tre-config.h">
+    <ClInclude Include="..\win32\tre-config.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\lib\regex.h">
+    <ClInclude Include="..\include\tre\regex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\lib\tre-ast.h">

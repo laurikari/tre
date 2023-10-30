@@ -19,7 +19,7 @@
 
 #include <limits.h>
 #include <ctype.h>
-#include "tre.h"
+#include "../local_includes/tre.h"
 
 #ifdef TRE_DEBUG
 #include <stdio.h>

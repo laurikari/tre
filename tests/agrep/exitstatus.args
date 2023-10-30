@@ -4,6 +4,8 @@ this-wont-be-found
 -v this-wont-be-found
 .
 -v .
+# An error that gives exit status 1
+-e \)
 # Some errors which should give exit status 2.
 -d .* dummy
 -d {1 dummy

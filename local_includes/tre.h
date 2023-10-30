@@ -9,7 +9,14 @@
 #ifndef TRE_H
 #define TRE_H 1
 
+#ifdef USE_LOCAL_TRE_H
+/* Make certain to use the header(s) from the TRE package that this
+   file is part of by giving the full path to the header from this directory. */
+#include "../local_includes/tre-config.h"
+#else
+/* Use the header in the same directory as this file if there is one. */
 #include "tre-config.h"
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27,6 +34,25 @@
 #define tre_regexec  regexec
 #define tre_regerror regerror
 #define tre_regfree  regfree
+/* The GNU C regex has a number of refinements to the POSIX standard for the
+   formal parameter list of the regexec() function, and some of those fail to
+   compile when using LLVM.  The refinements seem to be opt-out rather than
+   opt-in when using a recent gcc, and they produce a warning when TRE tries
+   to mimic the API without the refinements.  The TRE code still works but
+   the warnings are distracting, so try to #define a flag to indicate when to 
+   add the refinements to TRE's parameter list too. */
+#ifdef __GNUC__
+/* Try to test something that looks pretty REGEX specific and hope we don't
+   need a zillion different platform+compiler specific tests to deal with this. */
+#ifdef _REGEX_NELTS
+/* Define a TRE specific flag here so that:
+   1) there is only one place where code has to be changed if the test above is not adequate, and
+   2) the flag can be used in any other parts of the TRE source that might be affected by the
+      GNUC refinements.
+   Note that this flag is only defined when all of TRE_USE_SYSTEM_REGEX_H, __GNUC__, and _REGEX_NELTS are defined. */
+#define TRE_USE_GNUC_REGEXEC_FPL 1
+#endif
+#endif
 #endif /* TRE_USE_SYSTEM_REGEX_H */
 
 #ifdef __cplusplus
@@ -47,17 +73,28 @@ typedef int reg_errcode_t;
 #define REG_LITERAL 0x1000
 #endif
 
+/* Extra tre_regcomp() return error codes. */
+#define REG_BADMAX REG_BADPAT
+
 /* Extra tre_regcomp() flags. */
 #ifndef REG_BASIC
 #define REG_BASIC	0
 #endif /* !REG_BASIC */
 #define REG_RIGHT_ASSOC (REG_LITERAL << 1)
+#ifdef REG_UNGREEDY
+/* We're going to use TRE code, so we need the TRE define (dodge problem in MacOS). */
+#undef REG_UNGREEDY
+#endif
 #define REG_UNGREEDY    (REG_RIGHT_ASSOC << 1)
 
 #define REG_USEBYTES    (REG_UNGREEDY << 1)
 
 /* Extra tre_regexec() flags. */
 #define REG_APPROX_MATCHER	 0x1000
+#ifdef REG_BACKTRACKING_MATCHER
+/* We're going to use TRE code, so we need the TRE define (dodge problem in MacOS). */
+#undef REG_BACKTRACKING_MATCHER
+#endif
 #define REG_BACKTRACKING_MATCHER (REG_APPROX_MATCHER << 1)
 
 #else /* !TRE_USE_SYSTEM_REGEX_H */
@@ -93,7 +130,8 @@ typedef enum {
   REG_BADBR,		/* Invalid content of {} */
   REG_ERANGE,		/* Invalid use of range operator */
   REG_ESPACE,		/* Out of memory.  */
-  REG_BADRPT            /* Invalid use of repetition operators. */
+  REG_BADRPT,		/* Invalid use of repetition operators. */
+  REG_BADMAX,		/* Maximum repetition in {} too large */
 } reg_errcode_t;
 
 /* POSIX tre_regcomp() flags. */
@@ -107,7 +145,6 @@ typedef enum {
 #define REG_LITERAL	(REG_NOSUB << 1)
 #define REG_RIGHT_ASSOC (REG_LITERAL << 1)
 #define REG_UNGREEDY    (REG_RIGHT_ASSOC << 1)
-
 #define REG_USEBYTES    (REG_UNGREEDY << 1)
 
 /* POSIX tre_regexec() flags. */
@@ -135,9 +172,16 @@ typedef enum {
 extern int
 tre_regcomp(regex_t *preg, const char *regex, int cflags);
 
+#ifdef TRE_USE_GNUC_REGEXEC_FPL
+extern int
+tre_regexec(const regex_t *preg, const char *string,
+	size_t nmatch, regmatch_t pmatch[_Restrict_arr_ _REGEX_NELTS (nmatch)],
+	int eflags);
+#else
 extern int
 tre_regexec(const regex_t *preg, const char *string, size_t nmatch,
 	regmatch_t pmatch[], int eflags);
+#endif
 
 extern int
 tre_regcompb(regex_t *preg, const char *regex, int cflags);

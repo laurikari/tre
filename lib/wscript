@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+#
+#   lib/wscript - part of TRE
+#   TRE library waf build script.
+#
+#   This software is released under a BSD-style license.
+#   See the file LICENSE for details and copyright.
+#
+
+from waflib import Logs,Options
+
+def options(opt):
+   pass
+
+debug_lib_tre_config = False
+debug_lib_tre_include = False
+
+def configure(cfg):
+   if Options.options.log_wscripts:
+      Logs.pprint('CYAN','Configuring in {0:s}, VARIANT{{{1:s}}}'.format(cfg.path.abspath(),cfg.env['VARIANT']))
+      # Logs.pprint('NORMAL','Configuring in {0:s}'.format(conf.path.abspath()))
+   # Extract a subset of the config values for the library config.
+   for vpair in cfg.variant_name_path_list:
+      cfg_key = vpair[1]
+      cfg.setenv(cfg_key)
+      if not cfg.env.viable:
+         continue
+      # FIXME This is a terrible way to do this, find something better
+      DEFKEYS="define_key"
+      # Save whatever defines are in cfg.env so we can restore them later
+      top_defines = cfg.env.DEFINES
+      top_defkeys = cfg.env[DEFKEYS]
+      subset_keys = {
+         "HAVE_LIBUTF8_H",
+         "HAVE_REG_ERRCODE_T",
+         "HAVE_WCHAR_H",
+         "HAVE_SYS_TYPES_H",
+         "TRE_APPROX",
+         "TRE_MULTIBYTE",
+         "TRE_WCHAR",
+         "TRE_WTYPE",
+         "TRE_VERSION",
+         "TRE_VERSION_1",
+         "TRE_VERSION_2",
+         "TRE_VERSION_3"
+      }
+      cfg.env.DEFINES = []
+      cfg.env[DEFKEYS] = []
+      for k in top_defkeys:
+         if debug_lib_tre_config:
+            Logs.pprint("CYAN","top level key {{{:s}}}".format(k))
+         if k in subset_keys:
+            if debug_lib_tre_config:
+               Logs.pprint("GREEN","top level key {{{:s}}} is in subset".format(k))
+            for d in top_defines:
+               if debug_lib_tre_config:
+                  Logs.pprint("NORMAL","   looking at top level define {{{:s}}}".format(d))
+               if d.startswith(k+'='):
+                  if debug_lib_tre_config:
+                     Logs.pprint("RED","   got one: '{:s}'".format(d))
+                  cfg.env[DEFKEYS].append(k)
+                  cfg.env.DEFINES.append(d)
+      dname = ((cfg.env.VARIANT + '/') if len(cfg.env.VARIANT) > 0 else '')
+      incdir = "/local_includes"
+      dname += cfg.path.parent.get_bld().path_from(cfg.bldnode) + incdir
+      if debug_lib_tre_config:
+         Logs.pprint("YELLOW","cfg.bldnode {:s}".format(cfg.bldnode.abspath()))
+         Logs.pprint("YELLOW","cfg.path.get_bld {:s}".format(cfg.path.parent.get_bld().abspath()))
+         Logs.pprint("YELLOW","--------- {:s}".format(cfg.path.parent.get_bld().path_from(cfg.bldnode)))
+         Logs.pprint("CYAN","--------- {:s}".format(dname))
+      fname = dname + "/tre-config.h"
+      cfg.write_config_header(configfile=fname,top=True,remove=False)
+      if debug_lib_tre_config:
+         Logs.pprint("GREEN","Finished {:s} for TRE regex package.".format(fname))
+      cfg.env.DEFINES = top_defines
+      cfg.env[DEFKEYS] = top_defkeys
+      # Set up INCLUDES_LIBTRE for this variant, so we can say use=["LIBTRE",...] to get the include paths.
+      # It's a mess because some of the needed headers are in the build directory, some are in the source
+      # directory, some of them include others, ...
+      bld_parent_path = cfg.path.parent.get_bld().abspath() + '/' + cfg.env.VARIANT
+      incl_list = [bld_parent_path+incdir,                     # for tre-config.h
+                   cfg.path.parent.get_src().abspath()+incdir, # for tre.h
+                   bld_parent_path]                            # for config.h
+      if debug_lib_tre_include:
+         Logs.pprint("PINK","variant {:s} INCLUDES_LIBTRE={!s}".format(cfg.env.VARIANT,incl_list))
+      cfg.env["INCLUDES_LIBTRE"] = incl_list
+   cfg.setenv("")
+
+def build(bld):
+   if Options.options.log_wscripts:
+      Logs.pprint('NORMAL','Building in {:s}, VARIANT{{{:s}}}'.format(bld.path.abspath(),bld.env.VARIANT))
+   debug_install = False # bld.cmd.startswith("install")
+   # If we're not building for approximate matching, we need to exclude the entire approximate source code file.
+   excl_list = [] if bld.env.variant_ap else ["tre-match-approx.c"]
+   lib_nodes = bld.path.ant_glob("*.c",excl=excl_list)
+   # Normally we would use a 'source=lib_nodes' keyword argument directly in the
+   # library targets, but if we do that for both styles of library, waf builds the
+   # objects twice, once for each library.  Instead, we build the objects once,
+   # explicitly, and then use the objects for both libraries.
+   # It might be better to do them completely separately for darwin.
+   # We use a distinct target path here to avoid confusion as to which one is
+   # being used when other targets are linking to one of the libraries.
+   bld.objects(features=['c'],source=lib_nodes,target="lib_objects",use=["LIBTRE"])
+   # Build a static TRE library (we need a distinct name to avoid target collision)
+   # This builds libtre.a on a unix-like system (adds lib to target name).
+   # The steps required to build things are ususally deduced from the souce list,
+   # but since we have no sources here (only objects), we need to supply the features
+   # so waf can find the steps from those.
+   if debug_install:
+      Logs.pprint("CYAN","building static lib")
+   # The waf system won't install a static library unless it is given an install_path.
+   bld.stlib(features=['c','cstlib'],target="static/tre",name="static_libtre",use="lib_objects",install_path="${LIBDIR}",
+             DEBUG_ME=debug_install)
+   # Build a dynamic TRE library (we need a distinct name to avoid target collision)
+   # This builds libtre.so on a unix-like system (adds lib to target name).
+   if debug_install:
+      Logs.pprint("CYAN","building dynamic lib")
+   bld.shlib(features=['c','cshlib'],target="dynamic/tre",name="dynamic_libtre",use="lib_objects",DEBUG_ME=debug_install)
+   if debug_install:
+      Logs.pprint("CYAN","finished libs")

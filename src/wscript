@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+#
+#   src/wscript - part of TRE
+#   agrep waf build script.
+#
+#   This software is released under a BSD-style license.
+#   See the file LICENSE for details and copyright.
+#
+
+from waflib import Logs,Options
+
+def options(opt):
+   pass
+
+def configure(cfg):
+   if Options.options.log_wscripts:
+      Logs.pprint('CYAN','Configuring in {:s}, VARIANT{{{:s}}}'.format(cfg.path.abspath(),cfg.env['VARIANT']))
+   # Check for the headers in agrep that are not already handled at the top level.
+   cfg.check(features="c cprogram",header_name="locale.h",mandatory=True)
+   cfg.check(features="c cprogram",header_name="fcntl.h",mandatory=True)
+   # datarootdir ${prefix}/share
+   if "freebsd" == cfg.env.PLATSYS or "linux" == cfg.env.PLATSYS:
+      cfg.env["DEFINES_AGREP"] = ['LOCALEDIR=\"/usr/local/share/locale\"']
+      cfg.env["LIBPATH_AGREP"] = ["/usr/local/lib"]
+   if "freebsd" == cfg.env.PLATSYS:
+      # On debian, ubuntu, linux mint the libintl functions are part of the base C runtime (glibc) (i.e. we only need this for freebsd).
+      cfg.env["LIB_AGREP"] = ["intl"]
+
+def build(bld):
+   if Options.options.log_wscripts:
+      Logs.pprint("NORMAL","Building in {:s}, VARIANT{{{:s}}}".format(bld.path.abspath(),bld.env['VARIANT']))
+   agrep_nodes = bld.path.ant_glob("*.c")
+   # Use the static libtre for agrep
+   agrep_task_gen = bld.program(source=agrep_nodes,target="agrep",use=["AGREP","LIBTRE","static_libtre"])
+   # If we want an agrep that uses the dynamic library instead:
+   # bld.program(source=agrep_nodes,target="agrep",use=["AGREP","LIBTRE","dynamic_libtre"])
+   if bld.changeable_task_group and bld.env.BUILD_TESTS:
+      # Prepare for building and running tests
+      agrep_task_gen.post() # So we can get the link_task.outputs[0]
+      bld.env.AGREP_NODE = agrep_task_gen.link_task.outputs[0] # the specific agrep variant we will want to test

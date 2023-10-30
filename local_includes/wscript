@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+#
+#   include/wscript - part of TRE
+#   include (headers) waf build script.
+#
+#   This software is released under a BSD-style license.
+#   See the file LICENSE for details and copyright.
+#
+
+from waflib import Logs,Options
+
+def options(opt):
+   pass
+
+def configure(cfg):
+   if Options.options.log_wscripts:
+      Logs.pprint('CYAN','Configuring in {:s}, VARIANT{{{:s}}}'.format(cfg.path.abspath(),cfg.env['VARIANT']))
+
+def build(bld):
+   if Options.options.log_wscripts:
+      Logs.pprint("NORMAL","Building in {:s}, VARIANT{{{:s}}}".format(bld.path.abspath(),bld.env['VARIANT']))
+   # tre.h includes the tre-config.h header file, but tre-config.h is in the build directory.
+   # The install_files() method uses "find_resource" on any paths that are not Nodes, so it fails to find
+   # the tre-config.h file in order to install it.  Make sure we pass it in as a Node to work around this.
+   cfg_header_node = bld.path.find_or_declare(bld.path.get_bld().abspath() + "/tre-config.h")
+   # Logs.pprint("RED","tre-config node type: {!s} abspath {{{:s}}}".format(type(cfg_header_node),cfg_header_node.abspath()))
+   header_list = ["tre.h","regex.h",cfg_header_node]
+   bld.install_files("${PREFIX}/include/tre",header_list)

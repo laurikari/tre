@@ -40,6 +40,8 @@ You will need the following tools installed on your system:
   - libtool
   - zip (optional)
 
+If you choose to use the "waf" build system you will need python 3.5
+or above.  See the file "README_waf.txt" for more information.
 
 Building
 --------
@@ -255,43 +257,45 @@ These are other features I'm planning to implement real soon now:
 
 * Perl-compatible syntax
   * `[:^class:]`  
-  *  Matches anything but the characters in class. Note that
-  *  [^[:class:]] works already, this would be just a
-  *  convenience shorthand.
-  * 
+    Matches anything but the characters in class. Note that
+    `[^[:class:]]` works already, this would be just a
+    convenience shorthand.
+
   * `\A`  
-  * Match only at beginning of string
-  * 
+    Match only at beginning of string
+
   * `\Z`  
-  * Match only at end of string, or before newline at the end
-  * 
+    Match only at end of string, or before newline at the end
+
   * `\z`  
-  * Match only at end of string
-  * 
+    Match only at end of string
+
   * `\l`  
-  * Lowercase next char (think vi)
-  * 
+    Lowercase next char (think vi)
+
   * `\u`  
-  * Uppercase next char (think vi)
-  * 
+    Uppercase next char (think vi)
+
   * `\L`  
-  * Lowercase till \E (think vi)
-  * 
+    Lowercase till \E (think vi)
+
   * `\U`  
-  * Uppercase till \E (think vi)
-  * 
+    Uppercase till \E (think vi)
+
   * `(?=pattern)`  
-  * Zero-width positive look-ahead assertions.
-  * 
+    Zero-width positive look-ahead assertions.
+
   * `(?!pattern)`  
-  * Zero-width negative look-ahead assertions.
-  * 
+    Zero-width negative look-ahead assertions.
+
   * `(?<=pattern)`  
-  * Zero-width positive look-behind assertions.
-  * 
+    Zero-width positive look-behind assertions.
+
   * `(?<!pattern)`
-  * Zero-width negative look-behind assertions.
+    Zero-width negative look-behind assertions.
 
 Documentation especially for the nonstandard features of TRE, such
 as approximate matching, is a work in progress (with "progress"
-loosely defined...)
+loosely defined...)  If you want to find an extension to use, reading
+the `include/tre/tre.h` header might provide some additional hints if
+you are comfortable with C source code.

@@ -11,7 +11,8 @@ import shutil
 
 version = "0.8.0"
 data_files = []
-include_dirs = ["../lib"]
+include_dirs = ["../local_includes"]
+library_dirs = ["../lib/.libs"]
 libraries = ["tre"]
 
 if sys.platform == "win32":
@@ -31,8 +32,10 @@ setup(name = "tre",
       data_files = data_files,
       ext_modules = [Extension("tre",
                                sources = ["tre-python.c"],
-                               define_macros = [("HAVE_CONFIG_H", None)],
+                               define_macros = [("HAVE_CONFIG_H", None),
+                                                ("USE_LOCAL_TRE_H",1)],
                                include_dirs = include_dirs,
+                               library_dirs = library_dirs,
                                libraries = libraries
                                ),
                      ],

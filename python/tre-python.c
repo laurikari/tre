@@ -1,11 +1,24 @@
 /*
   tre-python.c - TRE Python language bindings
 
-  This sotfware is released under a BSD-style license.
+  This software is released under a BSD-style license.
   See the file LICENSE for details and copyright.
 
   The original version of this code was contributed by
   Nikolai Saoukh <nms+python@otdel1.org>.
+
+  It was introduced to the TRE repository by PR#49,
+  written by Hannu Väisänen <Hannu.Vaisanen@uef.fi>.
+  The code was present in the main repository but the
+  PR was not marked as merged.
+
+  The timeline is a bit tangled, but PR#19 Brian A. Jones
+  (github bjones1) introduced releasing the GIL during a
+  compile or match as well as fixes to setup.py and updated
+  documentation.
+
+  Further updates for python versions 3.9+ and more
+  error checking in 20023/03 by Tom Rushworth <tbr@acm.org>
 
 */
 
@@ -13,7 +26,23 @@
 #include "Python.h"
 #include "structmember.h"
 
+#ifdef USE_LOCAL_TRE_H
+/* Make certain to use the header(s) from the TRE package that this
+   file is part of by giving the full path to the header from this directory. */
+#include "../local_includes/tre.h"
+#else
+/* Use the header(s) from an installed version of the TRE package
+   (so that this extension matches the installed libtre),
+   not the one(s) in the local_includes directory. */
 #include <tre/tre.h>
+#endif
+
+/* Define this if you want to release the GIL during compilation or searching.
+   This builds and runs, but has not been tested with a multi-threaded test case.
+   However, both compiling and searching make a private copy of the string they
+   are operating on, so only the match results can possibly have problems if the
+   search string gets modified by another thread. */
+/* #define FUTURE_RELEASE_GIL 1 */
 
 #define	TRE_MODULE	"tre"
 
@@ -86,9 +115,9 @@ TreFuzzyness_repr(PyObject *obj)
   TreFuzzynessObject *self = (TreFuzzynessObject*)obj;
   PyObject *o;
 
-  o = PyString_FromFormat("%s(delcost=%d,inscost=%d,maxcost=%d,subcost=%d,"
+  o = PyUnicode_FromFormat("%s(delcost=%d,inscost=%d,maxcost=%d,subcost=%d,"
 			  "maxdel=%d,maxerr=%d,maxins=%d,maxsub=%d)",
-			  self->ob_type->tp_name, self->ap.cost_del,
+			  Py_TYPE(self)->tp_name, self->ap.cost_del,
 			  self->ap.cost_ins, self->ap.max_cost,
 			  self->ap.cost_subst, self->ap.max_del,
 			  self->ap.max_err, self->ap.max_ins,
@@ -118,8 +147,7 @@ static PyMemberDef TreFuzzyness_members[] = {
 };
 
 static PyTypeObject TreFuzzynessType = {
-  PyObject_HEAD_INIT(NULL)
-  0,			        /* ob_size */
+  PyVarObject_HEAD_INIT(NULL,0)
   TRE_MODULE ".Fuzzyness",	/* tp_name */
   sizeof(TreFuzzynessObject),	/* tp_basicsize */
   0,			        /* tp_itemsize */
@@ -193,7 +221,7 @@ PyTreMatch_groups(TreMatchObject *self, PyObject *dummy)
 }
 
 static PyObject *
-PyTreMatch_groupi(PyObject *obj, int gn)
+PyTreMatch_groupi(PyObject *obj, Py_ssize_t gn)
 {
   TreMatchObject *self = (TreMatchObject*)obj;
   PyObject *result;
@@ -220,7 +248,7 @@ PyTreMatch_group(TreMatchObject *self, PyObject *grpno)
   PyObject *result;
   long gn;
 
-  gn = PyInt_AsLong(grpno);
+  gn = PyLong_AsLong(grpno);
 
   if (PyErr_Occurred())
     return NULL;
@@ -277,8 +305,7 @@ static PySequenceMethods TreMatch_as_sequence_methods = {
 };
 
 static PyTypeObject TreMatchType = {
-  PyObject_HEAD_INIT(NULL)
-  0,			        /* ob_size */
+  PyVarObject_HEAD_INIT(NULL,0)
   TRE_MODULE ".Match",		/* tp_name */
   sizeof(TreMatchObject),	/* tp_basicsize */
   0,			        /* tp_itemsize */
@@ -328,26 +355,61 @@ static PyObject *
 PyTrePattern_search(TrePatternObject *self, PyObject *args)
 {
   PyObject *pstring;
+  Py_ssize_t num_codepoints = 0;
+  int codepoint_kind = PyUnicode_1BYTE_KIND;
+  void const *src = NULL;
+#ifdef TRE_WCHAR
+  Py_UCS4 *ucs_mstring = NULL;
+#else
+  Py_UCS1 *ucs_mstring = NULL;
+#endif
   int eflags = 0;
   TreMatchObject *mo;
   TreFuzzynessObject *fz;
   size_t nsub;
   int rc;
   regmatch_t *pm;
-  char *targ;
-  size_t tlen;
 
   if (PyTuple_Size(args) > 0 && PyUnicode_Check(PyTuple_GetItem(args, 0)))
     {
+      /* First object in tuple is a Unicode object or an instance of a
+         Unicode subtype (i.e. a Python str). */
       if (!PyArg_ParseTuple(args, "UO!|i:search", &pstring, &TreFuzzynessType,
 			&fz, &eflags))
-      return NULL;
+        return NULL;
+      /* Since the user may pass in any string value, the object may have 1-byte, 2-byte, or 4-byte codepoints.
+         The simplest way to deal with this is to convert to a buffer of 4-byte codepoints.
+         Having a separate buffer also allows us to release the GIL without worrying about the input argument
+         being modified by another thread while we are using it, so it is worth doing even if the
+         input arg already has 4-byte codepoints. */
+      /* For python versions <= 3.9 we may need PyUnicode_READY(pstring), but the fn is deprecated in 3.10. */
+      num_codepoints = PyUnicode_GET_LENGTH(pstring); // number of codepoints
+      codepoint_kind = PyUnicode_KIND(pstring);
+#ifndef TRE_WCHAR
+      if (PyUnicode_1BYTE_KIND != codepoint_kind)
+        {
+          /* Without wchar_t we cannot handle any of the larger codepoint sizes. */
+          PyErr_SetString(PyExc_ValueError, "In search(), this build of TRE does not support characters with codepoints that cannot fit in a byte.");
+          return NULL;
+        }
+#endif
+      /* Since the Unicode objects have an internal codepoint buffer, we can copy from it directly. */
+      src = PyUnicode_DATA(pstring);
+    }
+  else if (PyTuple_Size(args) > 0 && PyBytes_Check(PyTuple_GetItem(args, 0)))
+    {
+      /* First object in tuple is bytes type object. */
+      if (!PyArg_ParseTuple(args, "SO!|i:search", &pstring, &TreFuzzynessType,
+			&fz, &eflags))
+        return NULL;
+      num_codepoints = PyBytes_GET_SIZE(pstring);
+      codepoint_kind = PyUnicode_1BYTE_KIND;
+      src = PyBytes_AS_STRING(pstring); // We are certain of pstring's type, so we don't need error checking
     }
   else
     {
-      if (!PyArg_ParseTuple(args, "SO!|i:search", &pstring, &TreFuzzynessType,
-			&fz, &eflags))
-      return NULL;
+      PyErr_SetString(PyExc_ValueError, "In search(), argument is not str or bytes");
+      return(NULL);
     }
 
   mo = newTreMatchObject();
@@ -363,28 +425,83 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
     }
 
   mo->am.nmatch = nsub;
-  mo->am.pmatch = pm;
+  mo->am.pmatch = pm; /* Let mo hold onto pm. */
 
-  if (PyUnicode_Check(pstring))
-    {
-      Py_ssize_t len = PyUnicode_GetSize(pstring);
-      wchar_t *buf = calloc(sizeof(wchar_t), len);
-      if(!buf)
-        {
-          Py_DECREF(mo);
-          return PyErr_NoMemory();
-        }
-      PyUnicode_AsWideChar(pstring, buf, len);
-      rc = tre_regawnexec(&self->rgx, buf, len, &mo->am, fz->ap, eflags);
-      free(buf);
-    }
-  else
-    {
-      targ = PyString_AsString(pstring);
-      tlen = PyString_Size(pstring);
+#ifdef TRE_WCHAR
+  /* Just to complicate life, wchar_t is usually 2 bytes on Windows systems, and 4 bytes on POSIX sytems.
+     This whole scheme is going to fail for a 2-byte wchar_t TRE library, so generate a compile error
+     instead of building successfully but failing later.  This generates no code if it compiles. */
+  ((void)sizeof(char[1 - 2*!!(4!=sizeof(wchar_t))]));  // This bit of hocus-pocus is from the Linux BUILD_BUG_ON() macro
+#endif
 
-      rc = tre_reganexec(&self->rgx, targ, tlen, &mo->am, fz->ap, eflags);
+  /* Allocate then copy the src codepoints into ucs_mstring. */
+#ifdef TRE_WCHAR
+  ucs_mstring = (Py_UCS4 *) calloc(sizeof(Py_UCS4), num_codepoints+1);
+#else
+  ucs_mstring = (Py_UCS1 *) calloc(sizeof(Py_UCS1), num_codepoints+1);
+#endif
+  if (NULL == ucs_mstring)
+    {
+      Py_DECREF(mo);
+      return PyErr_NoMemory();
     }
+  switch (codepoint_kind)
+    {
+#ifdef TRE_WCHAR
+#if PY_MAJOR_VERSION >= 3 && (PY_MINOR_VERSION >= 3 && PY_MINOR_VERSION < 10)
+      case PyUnicode_WCHAR_KIND: // CAUTION: WCHAR_KIND, deprecated in 3.10, removed in 3.12
+        for (int cpx = 0; cpx < num_codepoints; cpx++)
+          {
+            ucs_mstring[cpx] = ((wchar_t *) src)[cpx];
+          }
+        break;
+#endif
+#endif
+      case PyUnicode_1BYTE_KIND:
+#ifdef TRE_WCHAR
+        for (int cpx = 0; cpx < num_codepoints; cpx++)
+          {
+            ucs_mstring[cpx] = ((Py_UCS1 *) src)[cpx];
+          }
+#else /* !TRE_WCHAR */
+        memcpy(ucs_mstring,src,num_codepoints*sizeof(Py_UCS1));
+#endif
+        break;
+#ifdef TRE_WCHAR
+      case PyUnicode_2BYTE_KIND:
+        for (int cpx = 0; cpx < num_codepoints; cpx++)
+          {
+            ucs_mstring[cpx] = ((Py_UCS2 *) src)[cpx];
+          }
+        break;
+      case PyUnicode_4BYTE_KIND:
+        memcpy(ucs_mstring,src,num_codepoints*sizeof(Py_UCS4));
+        break;
+#endif
+      default:
+        PyErr_Format(PyExc_ValueError, "In search(), argument is unrecognized codepoint kind (%d)",codepoint_kind);
+        Py_DECREF(mo);
+        free(ucs_mstring);
+        return(NULL);
+    }
+  /* Terminate ucs_mstring for paranoia's sake (len _should_ take care of it, but this is cheap, so...). */
+  ucs_mstring[num_codepoints] = 0; 
+  // Introduced by PR#19.
+  // The matching process can be slow. So, let other Python threads
+  // run in parallel by releasing the GIL. See
+  // https://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code.
+#ifdef FUTURE_RELEASE_GIL
+  Py_BEGIN_ALLOW_THREADS
+#endif
+#ifdef TRE_WCHAR
+  rc = tre_regawnexec(&self->rgx, (wchar_t const *) ucs_mstring, num_codepoints, &mo->am, fz->ap, eflags);
+#else
+  rc = tre_reganexec(&self->rgx, (char const *) ucs_mstring, num_codepoints, &mo->am, fz->ap, eflags);
+#endif
+#ifdef FUTURE_RELEASE_GIL
+  Py_END_ALLOW_THREADS
+#endif
+  free(ucs_mstring);
 
   if (PyErr_Occurred())
     {
@@ -395,6 +512,9 @@ PyTrePattern_search(TrePatternObject *self, PyObject *args)
   if (rc == REG_OK)
     {
       Py_INCREF(pstring);
+      /* The match object does not access the original string directly,
+         it only provides index values for the user to use, so there is
+         no need to worry about the size of the codepoints in that string. */
       mo->targ = pstring;
       Py_INCREF(fz);
       mo->fz = fz;
@@ -433,8 +553,7 @@ PyTrePattern_dealloc(TrePatternObject *self)
 }
 
 static PyTypeObject TrePatternType = {
-  PyObject_HEAD_INIT(NULL)
-  0,			        /* ob_size */
+  PyVarObject_HEAD_INIT(NULL,0)
   TRE_MODULE ".Pattern",	/* tp_name */
   sizeof(TrePatternObject),	/* tp_basicsize */
   0,			        /* tp_itemsize */
@@ -467,7 +586,7 @@ static PyTypeObject TrePatternType = {
 };
 
 static TrePatternObject *
-newTrePatternObject()
+newTrePatternObject(void)
 {
   TrePatternObject *self;
 
@@ -482,47 +601,138 @@ static PyObject *
 PyTre_ncompile(PyObject *self, PyObject *args)
 {
   TrePatternObject *rv;
-  PyUnicodeObject *upattern = NULL;
-  char *pattern = NULL;
-  int pattlen;
+  PyObject *pattern = NULL;
+  // char *pattern = NULL;
+  int codepoint_kind = PyUnicode_1BYTE_KIND;
+  Py_ssize_t pat_len = 0;
   int cflags = 0;
   int rc;
+  void const *src = NULL;
+#ifdef TRE_WCHAR
+  Py_UCS4 *ucs_pattern = NULL;
+#else
+  Py_UCS1 *ucs_pattern = NULL;
+#endif
 
   if (PyTuple_Size(args) > 0 && PyUnicode_Check(PyTuple_GetItem(args, 0)))
     {
-      if (!PyArg_ParseTuple(args, "U|i:compile", &upattern, &cflags))
+      /* First object in tuple is a Unicode object or an instance of a
+         Unicode subtype (i.e. a Python str). */
+      if (!PyArg_ParseTuple(args, "U|i:search", &pattern, &cflags))
         return NULL;
+      /* Since the user may pass in any string value, the object may have 1-byte, 2-byte, or 4-byte codepoints.
+         The simplest way to deal with this is to convert to a buffer of 4-byte codepoints.
+         Having a separate buffer also allows us to release the GIL without worrying about the input argument
+         being modified by another thread while we are using it, so it is worth doing even if the
+         input arg already has 4-byte codepoints. */
+      /* For python versions <= 3.9 we may need PyUnicode_READY(pattern), but the fn is deprecated in 3.10. */
+      codepoint_kind = PyUnicode_KIND(pattern);
+      pat_len = PyUnicode_GET_LENGTH(pattern); // number of codepoints
+#ifndef TRE_WCHAR
+      if (PyUnicode_1BYTE_KIND != codepoint_kind)
+        {
+          /* Without wchar_t we cannot handle any of the larger codepoint sizes. */
+          PyErr_SetString(PyExc_ValueError, "In compile(), this build of TRE does not support characters with codepoints that cannot fit in a byte.");
+          return NULL;
+        }
+#endif
+      /* Since the Unicode objects have an internal codepoint buffer, we can copy from it directly. */
+      src = PyUnicode_DATA(pattern);
+    }
+  else if (PyTuple_Size(args) > 0 && PyBytes_Check(PyTuple_GetItem(args, 0)))
+    {
+      /* First object in tuple is bytes type object. */
+      if (!PyArg_ParseTuple(args, "SO!|i:search", &pattern, &cflags))
+        return NULL;
+      codepoint_kind = PyUnicode_1BYTE_KIND;
+      pat_len = PyBytes_GET_SIZE(pattern);
+      src = PyBytes_AS_STRING(pattern); // We are certain of patterns's type, so we don't need error checking
     }
   else
     {
-      if (!PyArg_ParseTuple(args, "s#|i:compile", &pattern, &pattlen, &cflags))
-        return NULL;
+      PyErr_SetString(PyExc_ValueError, "In compile(), argument is not str or bytes");
+      return(NULL);
     }
 
   rv = newTrePatternObject();
   if (rv == NULL)
     return NULL;
 
-  if (upattern != NULL)
+#ifdef TRE_WCHAR
+  /* Just to complicate life, wchar_t is usually 2 bytes on Windows systems, and 4 bytes on POSIX sytems.
+     This whole scheme is going to fail for a 2-byte wchar_t TRE library, so generate a compile error
+     instead of building successfully but failing later.  This generates no code if it compiles. */
+  ((void)sizeof(char[1 - 2*!!(4!=sizeof(wchar_t))]));  // This bit of hocus-pocus is from the Linux BUILD_BUG_ON() macro
+#endif
+
+  /* Allocate then copy the src codepoints into ucs_pattern. */
+#ifdef TRE_WCHAR
+  ucs_pattern = (Py_UCS4 *) calloc(sizeof(Py_UCS4), pat_len+1);
+#else
+  ucs_pattern = (Py_UCS1 *) calloc(sizeof(Py_UCS1), pat_len+1);
+#endif
+  switch (codepoint_kind)
     {
-      Py_ssize_t len = PyUnicode_GetSize(upattern);
-      wchar_t *buf = calloc(sizeof(wchar_t), len);
-      if(!buf)
-        {
-          Py_DECREF(rv);
-          return PyErr_NoMemory();
-        }
-      PyUnicode_AsWideChar(upattern, buf, len);
-      rc = tre_regwncomp(&rv->rgx, buf, len, cflags);
-      free(buf);
+#ifdef TRE_WCHAR
+#if PY_MAJOR_VERSION >= 3 && (PY_MINOR_VERSION >= 3 && PY_MINOR_VERSION < 10)
+      case PyUnicode_WCHAR_KIND: // CAUTION: WCHAR_KIND, deprecated in 3.10, removed in 3.12
+        for (int cpx = 0; cpx < pat_len; cpx++)
+          {
+            ucs_pattern[cpx] = ((wchar_t *) src)[cpx];
+          }
+        break;
+#endif
+#endif
+      case PyUnicode_1BYTE_KIND:
+#ifdef TRE_WCHAR
+        for (int cpx = 0; cpx < pat_len; cpx++)
+          {
+            ucs_pattern[cpx] = ((Py_UCS1 *) src)[cpx];
+          }
+#else
+        memcpy(ucs_pattern,src,pat_len*sizeof(Py_UCS1));
+#endif
+        break;
+#ifdef TRE_WCHAR
+      case PyUnicode_2BYTE_KIND:
+        for (int cpx = 0; cpx < pat_len; cpx++)
+          {
+            ucs_pattern[cpx] = ((Py_UCS2 *) src)[cpx];
+          }
+        break;
+      case PyUnicode_4BYTE_KIND:
+        memcpy(ucs_pattern,src,pat_len*sizeof(Py_UCS4));
+        break;
+#endif
+      default:
+        PyErr_Format(PyExc_ValueError, "In compile(), argument is unrecognized or unsupported codepoint kind (%d)",codepoint_kind);
+        Py_DECREF(rv);
+        free(ucs_pattern);
+        return(NULL);
     }
-  else
-    rc = tre_regncomp(&rv->rgx, (char*)pattern, pattlen, cflags);
+  /* Terminate ucs_pattern for paranoia's sake (len _should_ take care of it, but this is cheap, so...). */
+  ucs_pattern[pat_len] = 0; 
+  // Introduced by PR#19.
+  // The compile process can be slow. So, let other Python threads
+  // run in parallel by releasing the GIL. See
+  // https://docs.python.org/2/c-api/init.html#releasing-the-gil-from-extension-code.
+#ifdef FUTURE_RELEASE_GIL
+  Py_BEGIN_ALLOW_THREADS
+#endif
+#ifdef TRE_WCHAR
+  rc = tre_regwncomp(&rv->rgx, (wchar_t const *) ucs_pattern, pat_len, cflags);
+#else
+  rc = tre_regncomp(&rv->rgx, (char const *) ucs_pattern, pat_len, cflags);
+#endif
+#ifdef FUTURE_RELEASE_GIL
+  Py_END_ALLOW_THREADS
+#endif
+  free(ucs_pattern);
 
   if (rc != REG_OK)
     {
       if (!PyErr_Occurred())
-	_set_tre_err(rc, &rv->rgx);
+        _set_tre_err(rc, &rv->rgx);
       Py_DECREF(rv);
       return NULL;
     }
@@ -534,12 +744,8 @@ static PyMethodDef tre_methods[] = {
   { "compile", PyTre_ncompile, METH_VARARGS,
     "Compile a regular expression pattern, returning a "
     TRE_MODULE ".pattern object" },
-  { NULL, NULL }
+  {NULL, NULL, 0, NULL}
 };
-
-static char *tre_doc =
-"Python module for TRE library\n\nModule exports "
-"the only function: compile";
 
 static struct _tre_flags {
   char *name;
@@ -556,40 +762,87 @@ static struct _tre_flags {
   { NULL, 0 }
 };
 
-PyMODINIT_FUNC
-inittre(void)
+static struct PyModuleDef cModPyTRE =
 {
-  PyObject *m;
+  PyModuleDef_HEAD_INIT,
+  "tre",            /* Name of module. */
+  "Python module for TRE library\n\nModule exports "
+  "the only function: compile", /* Module documentation, may be NULL. */
+  -1,               /* Size of per-interpreter state of the module, or -1 if the module keeps state in global vars. */
+  tre_methods
+};
+
+PyMODINIT_FUNC
+PyInit_tre(void)
+{
+  /* PyMODINIT_FUNC defines a function that returns PyObject* in python 3, but was void in python 2. */
+  PyObject *m = NULL;
   struct _tre_flags *fp;
 
   if (PyType_Ready(&TreFuzzynessType) < 0)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"TreFuzzynessType not ready");
+      return(NULL);
+    }
   if (PyType_Ready(&TreMatchType) < 0)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"TreMatchType not ready");
+      return(NULL);
+    }
   if (PyType_Ready(&TrePatternType) < 0)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"TrePatternType not ready");
+      return(NULL);
+    }
 
-  /* Create the module and add the functions */
-  m = Py_InitModule3(TRE_MODULE, tre_methods, tre_doc);
+  /* Create the module for Python 3 */
+  m = PyModule_Create(&cModPyTRE);
   if (m == NULL)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"PyModule_Create() failed");
+      return(NULL);
+    }
 
   Py_INCREF(&TreFuzzynessType);
   if (PyModule_AddObject(m, "Fuzzyness", (PyObject*)&TreFuzzynessType) < 0)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"PyModule_AddObject(Fuzzyness) failed");
+      return(NULL);
+    }
   Py_INCREF(&TreMatchType);
   if (PyModule_AddObject(m, "Match", (PyObject*)&TreMatchType) < 0)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"PyModule_AddObject(Match) failed");
+      return(NULL);
+    }
   Py_INCREF(&TrePatternType);
   if (PyModule_AddObject(m, "Pattern", (PyObject*)&TrePatternType) < 0)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"PyModule_AddObject(Pattern) failed");
+      return(NULL);
+    }
   ErrorObject = PyErr_NewException(TRE_MODULE ".Error", NULL, NULL);
   Py_INCREF(ErrorObject);
   if (PyModule_AddObject(m, "Error", ErrorObject) < 0)
-    return;
+    {
+      PyErr_SetString(PyExc_Exception,"PyModule_AddObject(Error) failed");
+      return(NULL);
+    }
 
   /* Insert the flags */
   for (fp = tre_flags; fp->name != NULL; fp++)
     if (PyModule_AddIntConstant(m, fp->name, fp->val) < 0)
-      return;
+      {
+        char const *mp1 = "PyModule_AddIntConstant(";
+        char const *mp2 = ") failed";
+        long len = strlen(mp1) + strlen(mp2) + strlen(fp->name) + 1;
+        char *msg = calloc(sizeof(char),len);
+        /* No point getting too fancy here.  We could check for calloc() failure, but meh. */
+        snprintf(msg,len,"%s%s%s",mp1,fp->name,mp2);
+        PyErr_SetString(PyExc_Exception,msg);
+        free(msg);
+        return(NULL);
+      }
+
+  return(m);
 }
