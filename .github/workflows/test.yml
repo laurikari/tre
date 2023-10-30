@@ -1,0 +1,43 @@
+name: Build and test tre
+
+on: 
+  push:
+    branches:
+      # Run workflow on every push
+      - '**'        # matches every branch
+
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install prerequisites
+        run: sudo apt-get install -y autoconf automake gettext libtool zip autopoint
+
+      # The test need en_US.ISO-8859-1 locale enabled
+      - name: Set locale
+        run: |
+          sudo sed -i '/en_US ISO-8859-1/s/^#//g' /etc/locale.gen
+          sudo locale-gen
+          sudo update-locale LANG=en_US.ISO-8859-1
+
+      - name: Checkout repository
+        uses: actions/checkout@v3.1.0
+
+      - name: Prepare tre
+        run: ./utils/autogen.sh
+
+      - name: Build
+        run: |
+          ./configure
+          make
+          make check
+
