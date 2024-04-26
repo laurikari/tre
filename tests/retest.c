@@ -1421,6 +1421,27 @@ main(int argc, char **argv)
   test_exec("fooabc123wxyz", 0, REG_OK, 0, 3, END);
 
   /*
+   * Test integer parser used for bounded repititions.
+   */
+
+  test_comp("a{9223372036854775808,}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{9223372036854775808}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{9223372036854775807,}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{9223372036854775807}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{2147483648,}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{2147483648}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{2147483647,}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{2147483647}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{32768,}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{32768}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{32767,}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{32767}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{256,}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{256}", REG_EXTENDED, REG_BADMAX);
+  test_comp("a{255,}", REG_EXTENDED, REG_OK);
+  test_comp("a{255}", REG_EXTENDED, REG_OK);
+
+  /*
    * Test bounded repetitions.
    */
 
