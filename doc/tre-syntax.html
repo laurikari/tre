@@ -126,16 +126,23 @@ are unsigned decimal integers between <tt>0</tt> and
 
 <ol>
 <li><tt>{</tt><i>m</i><tt>,</tt><i>n</i><tt>}</tt></li>
+<li><tt>{,</tt><i>n</i><tt>}</tt></li>
 <li><tt>{</tt><i>m</i><tt>,}</tt></li>
 <li><tt>{</tt><i>m</i><tt>}</tt></li>
+<li><tt>{,}</tt></li>
 </ol>
 
 <p>
 An atom followed by [1] matches a sequence of <i>m</i> through <i>n</i>
-(inclusive) matches of the atom.  An atom followed by [2]
-matches a sequence of <i>m</i> or more matches of the atom.  An atom
-followed by [3] matches a sequence of exactly <i>m</i> matches of the
-atom.
+(inclusive) matches of the atom.
+An atom followed by [2] matches a sequence of up to <i>n</i> matches
+of the atom.
+An atom followed by [3] matches a sequence of <i>m</i> or more matches
+of the atom.
+An atom followed by [4] matches a sequence of exactly <i>m</i> matches
+of the atom.
+An atom followed by [5] matches a sequence of zero or more matches of
+the atom.
 </p>
 
 

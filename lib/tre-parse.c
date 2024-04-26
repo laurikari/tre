@@ -635,6 +635,8 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   max = min;
   if (r < ctx->re_end && *r == CHAR_COMMA)
     {
+      if (min < 0)
+	min = 0;
       r++;
       DPRINT(("tre_parse:   max count: '%.*" STRF "'\n", REST(r)));
       max = tre_parse_int(&r, ctx->re_end);
