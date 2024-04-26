@@ -1511,6 +1511,13 @@ main(int argc, char **argv)
   test_exec("abbabbbabaabbbbbbbbbbbba", 0, REG_OK,
 	    0, 24, 0, 10, 10, 22, END);
 
+  test_comp("^((a{1,2})?x)*y", REG_EXTENDED | REG_NOSUB, REG_OK);
+  test_exec("y", 0, REG_OK, END);
+  test_exec("xy", 0, REG_OK, END);
+  test_exec("axy", 0, REG_OK, END);
+  test_exec("aaxy", 0, REG_OK, END);
+  test_exec("aaaxy", 0, REG_NOMATCH, END);
+
   /* Test repeating something that has submatches inside. */
   test_comp("(a){0,5}", REG_EXTENDED, 0);
   test_exec("", 0, REG_OK, 0, 0, -1, -1, END);
