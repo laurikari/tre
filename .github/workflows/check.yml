@@ -1,0 +1,60 @@
+name: Build and run tests
+
+on: [ push, pull_request, workflow_dispatch ]
+
+jobs:
+  ubuntu:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+    - name: Prepare
+      run: |
+        sudo sed -i -e '/en_US/s/^# *//' /etc/locale.gen
+        sudo locale-gen
+        sudo update-locale LANG=en_US.UTF-8
+        sudo apt-get update
+        sudo apt-get install -y autoconf automake autopoint gettext libtool
+    - name: Check out
+      uses: actions/checkout@v4
+    - name: Configure
+      run: |
+        ./utils/autogen.sh
+        ./configure --enable-debug
+    - name: Build
+      run: make
+    - name: Run tests
+      run: make check
+    - name: Run distribution tests
+      run: make distcheck
+    - name: Upload logs
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: tre-ubuntu-logs
+        path: ./**/*.log
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+    - name: Prepare
+      run: |
+        brew update
+        brew install autoconf automake gettext libtool
+    - name: Check out
+      uses: actions/checkout@v4
+    - name: Configure
+      run: |
+        ./utils/autogen.sh
+        ./configure --enable-debug
+    - name: Build
+      run: make
+    - name: Run tests
+      run: make check
+    - name: Run distribution tests
+      run: make distcheck
+    - name: Upload logs
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: tre-macos-logs
+        path: ./**/*.log
