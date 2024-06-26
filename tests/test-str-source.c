@@ -15,7 +15,7 @@
 #include <string.h>
 /* look for getopt in order to use a -o option for output. */
 #include <unistd.h>
-#include "regex.h"
+
 #include "tre-internal.h"
 
 static FILE *output_fd = NULL;

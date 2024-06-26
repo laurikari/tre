@@ -43,7 +43,6 @@
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H */
-#include <regex.h>
 
 #ifdef TRE_VERSION
 #define HAVE_REGNEXEC 1
@@ -53,6 +52,7 @@
 #define xmalloc malloc
 #define xfree free
 #endif /* !TRE_VERSION */
+
 #include "tre-internal.h"
 
 #ifdef WRETEST
