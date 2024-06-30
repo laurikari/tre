@@ -607,7 +607,8 @@ main(int argc, char **argv)
 #ifdef WRETEST
   /* Need an 8-bit locale.  Or move the two tests with non-ascii
      characters to the localized internationalization tests.  */
-  if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") == NULL)
+  if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") == NULL &&
+      setlocale(LC_CTYPE, "en_US.ISO8859-1") == NULL)
     fprintf(stderr, "Could not set locale en_US.ISO-8859-1.  Expect some\n"
 		    "`Invalid or incomplete multi-byte sequence' errors.\n");
 #endif /* WRETEST */
@@ -1724,7 +1725,7 @@ main(int argc, char **argv)
 
 #if !defined(WIN32) && !defined(__OpenBSD__)
   if (setlocale(LC_CTYPE, "en_US.ISO-8859-1") != NULL ||
-      setlocale(LC_CTYPE, "en_US.ISO8859-1" /* FreeBSD seems to spell it differently */) != NULL)
+      setlocale(LC_CTYPE, "en_US.ISO8859-1") != NULL)
     {
       fprintf(output_fd,"\nTesting LC_CTYPE en_US.ISO-8859-1\n");
 #ifdef SRC_IN_ISO_8859_1
