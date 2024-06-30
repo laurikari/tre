@@ -96,6 +96,8 @@ EOF
 Exit status $status.
 EOF
     done
+
+    rm -f $input
   done
   num_tests=`expr $num_tests + 1`
   case $host_triplet in
