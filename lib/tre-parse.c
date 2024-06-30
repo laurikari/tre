@@ -958,8 +958,6 @@ tre_parse(tre_parse_ctx_t *ctx)
      call stack, and efficiency (both in lines of code and speed).  */
   while (tre_stack_num_objects(stack) > bottom && status == REG_OK)
     {
-      if (status != REG_OK)
-	break;
       symbol = tre_stack_pop_int(stack);
       switch (symbol)
 	{
@@ -1728,14 +1726,15 @@ tre_parse(tre_parse_ctx_t *ctx)
 	}
     }
 
+  if (status != REG_OK)
+    return status;
+
   /* Check for missing closing parentheses. */
   if (depth > 0)
     return REG_EPAREN;
 
-  if (status == REG_OK)
-    ctx->result = result;
-
-  return status;
+  ctx->result = result;
+  return REG_OK;
 }
 
 /* EOF */

@@ -60,7 +60,7 @@
 #define CHAR_T wchar_t
 #define L(x) (L ## x)
 
-#define MAXSTRSIZE 1024
+#define MAXSTRSIZE 8192
 static wchar_t wstr[MAXSTRSIZE];
 static wchar_t wregex[MAXSTRSIZE];
 static int woffs[MAXSTRSIZE];
@@ -530,7 +530,8 @@ test_comp(const char *re, int flags, int ret)
   cflags_global = flags;
 
 #ifdef MALLOC_DEBUGGING
-  {
+  xmalloc_configure(-1);
+  if (ret != REG_ESPACE) {
     static int j = 0;
     int i = 0;
     while (1)
@@ -550,10 +551,9 @@ test_comp(const char *re, int flags, int ret)
 #endif /* REGEX_DEBUG */
 	i++;
       }
-  }
-#else /* !MALLOC_DEBUGGING */
-  errcode = wrap_regcomp(&reobj, re, len, flags);
+  } else
 #endif /* !MALLOC_DEBUGGING */
+  errcode = wrap_regcomp(&reobj, re, len, flags);
 
 #ifdef WRETEST
 #undef re
@@ -1690,6 +1690,12 @@ main(int argc, char **argv)
   test_comp("a\\{1,256\\}", 0, REG_BADMAX);
 
 
+#define TOOLONG 2048
+  static char toolong[TOOLONG + TOOLONG + 1];
+  memset(toolong, '(', TOOLONG);
+  memset(toolong + TOOLONG, ')', TOOLONG);
+  toolong[TOOLONG + TOOLONG] = '\0';
+  test_comp(toolong, REG_EXTENDED, REG_ESPACE);
 
 
   /*
