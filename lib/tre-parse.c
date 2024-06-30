@@ -576,22 +576,35 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 }
 
 
-/* Parses a positive decimal integer.  Returns -1 if the string does not
-   contain a valid number. */
+/* Parses a positive decimal integer capped at INT_MAX.  Returns -1 if the
+   string does not contain a valid number. */
 static int
 tre_parse_int(const tre_char_t **regex, const tre_char_t *regex_end)
 {
-  int num = -1;
+  unsigned long num = 0;
+  int overflow = 0;
   const tre_char_t *r = *regex;
   while (r < regex_end && *r >= L'0' && *r <= L'9')
     {
-      if (num < 0)
-	num = 0;
-      num = num * 10 + *r - L'0';
+      if (!overflow)
+	{
+	  if (num * 10 + *r - L'0' < num)
+	    {
+	      overflow = 1;
+	    }
+	  else
+	    {
+	      num = num * 10 + *r - L'0';
+	      if (num > INT_MAX)
+		overflow = 1;
+	    }
+	}
       r++;
     }
+  if (r == *regex)
+    return -1;
   *regex = r;
-  return num;
+  return overflow ? INT_MAX : (int)num;
 }
 
 
@@ -630,7 +643,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   /* Check that the repeat counts are sane. */
   if (max >= 0 && min > max)
     return REG_BADBR;
-  if (max > RE_DUP_MAX)
+  if (min > RE_DUP_MAX || max > RE_DUP_MAX)
     return REG_BADMAX;
 
 

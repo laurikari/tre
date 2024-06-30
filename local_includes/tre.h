@@ -74,7 +74,7 @@ typedef int reg_errcode_t;
 #endif
 
 /* Extra tre_regcomp() return error codes. */
-#define REG_BADMAX REG_BADPAT
+#define REG_BADMAX REG_BADBR
 
 /* Extra tre_regcomp() flags. */
 #ifndef REG_BASIC
