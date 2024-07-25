@@ -161,7 +161,7 @@ tre_compare_items(const void *a, const void *b)
   const tre_ast_node_t *node_a = *(tre_ast_node_t * const *)a;
   const tre_ast_node_t *node_b = *(tre_ast_node_t * const *)b;
   tre_literal_t *l_a = node_a->obj, *l_b = node_b->obj;
-  int a_min = l_a->code_min, b_min = l_b->code_min;
+  long a_min = l_a->code_min, b_min = l_b->code_min;
 
   if (a_min < b_min)
     return -1;
@@ -299,7 +299,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	    {
 	      char tmp_str[64];
 	      const tre_char_t *endptr = re + 2;
-	      int len;
+	      size_t len;
 	      DPRINT(("tre_parse_bracket:  class: '%.*" STRF "'\n", REST(re)));
 	      while (endptr < ctx->re_end && *endptr != CHAR_COLON)
 		endptr++;
@@ -309,7 +309,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 #ifdef TRE_WCHAR
 		  {
 		    tre_char_t tmp_wcs[64];
-		    wcsncpy(tmp_wcs, re + 2, (size_t)len);
+		    wcsncpy(tmp_wcs, re + 2, len);
 		    tmp_wcs[len] = L'\0';
 #if defined HAVE_WCSRTOMBS
 		    {
@@ -420,7 +420,8 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   int negate = 0;
   reg_errcode_t status = REG_OK;
   tre_ast_node_t **items, *u, *n;
-  int i = 0, j, max_i = 32, curr_max, curr_min;
+  int i = 0, j, max_i = 32;
+  long curr_max, curr_min;
   tre_ctype_t neg_classes[MAX_NEG_CLASSES];
   int num_neg_classes = 0;
 
@@ -450,13 +451,13 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   /* Build a union of the items in the array, negated if necessary. */
   for (j = 0; j < i && status == REG_OK; j++)
     {
-      int min, max;
+      long min, max;
       tre_literal_t *l = items[j]->obj;
       min = l->code_min;
       max = l->code_max;
 
-      DPRINT(("item: %d - %d, class %ld, curr_max = %d\n",
-	      (int)l->code_min, (int)l->code_max, (long)l->u.class, curr_max));
+      DPRINT(("item: %ld - %ld, class %ld, curr_max = %ld\n",
+	      l->code_min, l->code_max, (long)l->u.class, curr_max));
 
       if (negate)
 	{
@@ -464,7 +465,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	    {
 	      /* Overlap. */
 	      curr_max = MAX(max + 1, curr_max);
-	      DPRINT(("overlap, curr_max = %d\n", curr_max));
+	      DPRINT(("overlap, curr_max = %ld\n", curr_max));
 	      l = NULL;
 	    }
 	  else
@@ -489,7 +490,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
       if (l != NULL)
 	{
 	  int k;
-	  DPRINT(("creating %d - %d\n", (int)l->code_min, (int)l->code_max));
+	  DPRINT(("creating %ld - %ld\n", l->code_min, l->code_max));
 	  if (num_neg_classes > 0)
 	    {
 	      l->neg_classes = tre_mem_alloc(ctx->mem,
@@ -524,7 +525,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   if (negate)
     {
       int k;
-      DPRINT(("final: creating %d - %d\n", curr_min, (int)TRE_CHAR_MAX));
+      DPRINT(("final: creating %ld - %ld\n", curr_min, (long)TRE_CHAR_MAX));
       n = tre_ast_new_literal(ctx->mem, curr_min, TRE_CHAR_MAX);
       if (n == NULL)
 	status = REG_ESPACE;

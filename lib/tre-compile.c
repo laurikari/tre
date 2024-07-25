@@ -688,8 +688,8 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	      {
 		tre_literal_t *lit = node->obj;
 		int pos = lit->position;
-		int min = lit->code_min;
-		int max = lit->code_max;
+		long min = lit->code_min;
+		long max = lit->code_max;
 		if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
 		  {
 		    /* XXX - e.g. [ab] has only one position but two
@@ -1049,7 +1049,7 @@ tre_set_empty(tre_mem_t mem)
 }
 
 static tre_pos_and_tags_t *
-tre_set_one(tre_mem_t mem, int position, int code_min, int code_max,
+tre_set_one(tre_mem_t mem, int position, long code_min, long code_max,
 	    tre_ctype_t class, tre_ctype_t *neg_classes, int backref)
 {
   tre_pos_and_tags_t *new_set;
@@ -1338,7 +1338,7 @@ tre_compute_npfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		      return REG_ESPACE;
 		    node->lastpos = tre_set_one(mem, lit->position, 0,
 						TRE_CHAR_MAX, 0, NULL,
-						(int)lit->code_max);
+						lit->code_max);
 		    if (!node->lastpos)
 		      return REG_ESPACE;
 		  }
@@ -1361,13 +1361,13 @@ tre_compute_npfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		    node->nullable = 0;
 		    lit->position = (*nextpos)++;
 		    node->firstpos =
-		      tre_set_one(mem, lit->position, (int)lit->code_min,
-				  (int)lit->code_max, 0, NULL, -1);
+		      tre_set_one(mem, lit->position, lit->code_min,
+				  lit->code_max, 0, NULL, -1);
 		    if (!node->firstpos)
 		      return REG_ESPACE;
 		    node->lastpos = tre_set_one(mem, lit->position,
-						(int)lit->code_min,
-						(int)lit->code_max,
+						lit->code_min,
+						lit->code_max,
 						lit->u.class, lit->neg_classes,
 						-1);
 		    if (!node->lastpos)
