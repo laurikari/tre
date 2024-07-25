@@ -1694,6 +1694,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	  {
 	    int submatch_id = tre_stack_pop_int(stack);
 
+	    assert(result);
 	    if (result->submatch_id >= 0)
 	      {
 		tre_ast_node_t *n, *tmp_node;
