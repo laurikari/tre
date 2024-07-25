@@ -1880,8 +1880,8 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   parse_ctx.len = n;
   parse_ctx.cflags = cflags;
   parse_ctx.max_backref = -1;
-  /* workaround for PR#14408: use 8-bit optimizations in 8-bit mode */
-  parse_ctx.cur_max = (cflags & REG_USEBYTES) ? 1 : TRE_MB_CUR_MAX;
+  /* Use 8-bit optimizations in 8-bit mode */
+  parse_ctx.mb_cur_max = (cflags & REG_USEBYTES) ? 1 : TRE_MB_CUR_MAX;
   DPRINT(("tre_compile: parsing '%.*" STRF "'\n", (int)n, regex));
   errcode = tre_parse(&parse_ctx);
   if (errcode != REG_OK)
@@ -2021,7 +2021,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   /* If in eight bit mode, compute a table of characters that can be the
      first character of a match. */
   tnfa->first_char = -1;
-  if (TRE_MB_CUR_MAX == 1 && !tmp_ast_l->nullable)
+  if (parse_ctx.mb_cur_max == 1 && !tmp_ast_l->nullable)
     {
       int count = 0;
       tre_cint_t k;
