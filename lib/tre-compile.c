@@ -150,10 +150,10 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
   /* True for first pass (counting number of needed tags) */
   int first_pass = (mem == NULL || tnfa == NULL);
   int *regset, *orig_regset;
-  int num_tags = 0; /* Total number of tags. */
-  int num_minimals = 0;	 /* Number of special minimal tags. */
-  int tag = 0;	    /* The tag that is to be added next. */
-  int next_tag = 1; /* Next tag to use after this one. */
+  unsigned int num_tags = 0; /* Total number of tags. */
+  unsigned int num_minimals = 0;	 /* Number of special minimal tags. */
+  unsigned int tag = 0;	    /* The tag that is to be added next. */
+  unsigned int next_tag = 1; /* Next tag to use after this one. */
   int *parents;	    /* Stack of submatches the current submatch is
 		       contained in. */
   int minimal_tag = -1; /* Tag that marks the beginning of a minimal match. */
