@@ -16,6 +16,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -71,18 +72,18 @@ hash_table_new(void)
   return tbl;
 }
 
-static int
+static unsigned int
 hash_void_ptr(void *ptr)
 {
-  int hash;
-  int i;
+  unsigned int hash;
+  unsigned int i;
 
   /* I took this hash function just off the top of my head, I have
      no idea whether it is bad or very bad. */
   hash = 0;
-  for (i = 0; i < (int)sizeof(ptr)*8 / TABLE_BITS; i++)
+  for (i = 0; i < sizeof(ptr) * 8 / TABLE_BITS; i++)
     {
-      hash ^= (unsigned long)ptr >> i*8;
+      hash ^= (uintptr_t)ptr >> i * 8;
       hash += i * 17;
       hash &= TABLE_MASK;
     }
@@ -93,7 +94,7 @@ static void
 hash_table_add(hashTable *tbl, void *ptr, size_t bytes,
 	       const char *file, int line, const char *func)
 {
-  int i;
+  unsigned int i;
   hashTableItem *item, *new;
 
   i = hash_void_ptr(ptr);
