@@ -259,19 +259,19 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 			int *items_size)
 {
   const tre_char_t *re = ctx->re;
-  reg_errcode_t status = REG_OK;
+  reg_errcode_t status;
   tre_ctype_t class = (tre_ctype_t)0;
   int i = *num_items;
   int max_i = *items_size;
   int skip;
 
   /* Build an array of the items in the bracket expression. */
-  while (status == REG_OK)
+  for (;;)
     {
       skip = 0;
       if (re == ctx->re_end)
 	{
-	  status = REG_EBRACK;
+	  return REG_EBRACK;
 	}
       else if (*re == CHAR_RBRACKET && re > ctx->re)
 	{
@@ -294,14 +294,14 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	      /* XXX - Should use collation order instead of encoding values
 		 in character ranges. */
 	      if (min > max)
-		status = REG_ERANGE;
+		return REG_ERANGE;
 	    }
 	  else if (re + 1 < ctx->re_end
 		   && *re == CHAR_LBRACKET && *(re + 1) == CHAR_PERIOD)
-	    status = REG_ECOLLATE;
+	    return REG_ECOLLATE;
 	  else if (re + 1 < ctx->re_end
 		   && *re == CHAR_LBRACKET && *(re + 1) == CHAR_EQUAL)
-	    status = REG_ECOLLATE;
+	    return REG_ECOLLATE;
 	  else if (re + 1 < ctx->re_end
 		   && *re == CHAR_LBRACKET && *(re + 1) == CHAR_COLON)
 	    {
@@ -329,6 +329,8 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 #elif defined HAVE_WCSTOMBS
 		    len = wcstombs(tmp_str, tmp_wcs, 63);
 #endif /* defined HAVE_WCSTOMBS */
+		    if (len == (size_t)-1)
+		      return REG_ECTYPE;
 		  }
 #else /* !TRE_WCHAR */
 		  strncpy(tmp_str, (const char*)re + 2, len);
@@ -337,19 +339,21 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 		  DPRINT(("  class name: %s\n", tmp_str));
 		  class = tre_ctype(tmp_str);
 		  if (!class)
-		    status = REG_ECTYPE;
+		    return REG_ECTYPE;
 		  /* Optimize character classes for 8 bit character sets. */
-		  if (status == REG_OK && ctx->mb_cur_max == 1)
+		  if (ctx->mb_cur_max == 1)
 		    {
 		      status = tre_expand_ctype(ctx->mem, class, items,
 						&i, &max_i, ctx->cflags);
+		      if (status != REG_OK)
+			return status;
 		      class = (tre_ctype_t)0;
 		      skip = 1;
 		    }
 		  re = endptr + 2;
 		}
 	      else
-		status = REG_ECTYPE;
+		return REG_ECTYPE;
 	      min = 0;
 	      max = TRE_CHAR_MAX;
 	    }
@@ -359,29 +363,26 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	      if (*re == CHAR_MINUS && *(re + 1) != CHAR_RBRACKET
 		  && ctx->re != re)
 		/* Two ranges are not allowed to share and endpoint. */
-		status = REG_ERANGE;
+		return REG_ERANGE;
 	      min = max = *re++;
 	    }
 
-	  if (status != REG_OK)
-	    break;
-
 	  if (class && negate)
 	    if (*num_neg_classes >= MAX_NEG_CLASSES)
-	      status = REG_ESPACE;
+	      return REG_ESPACE;
 	    else
 	      neg_classes[(*num_neg_classes)++] = class;
 	  else if (!skip)
 	    {
 	      status = tre_new_item(ctx->mem, min, max, &i, &max_i, items);
 	      if (status != REG_OK)
-		break;
+		return status;
 	      ((tre_literal_t*)((*items)[i-1])->obj)->u.class = class;
 	    }
 
 	  /* Add opposite-case counterpoints if REG_ICASE is present.
 	     This is broken if there are more than two "same" characters. */
-	  if (ctx->cflags & REG_ICASE && !class && status == REG_OK && !skip)
+	  if (ctx->cflags & REG_ICASE && !class && !skip)
 	    {
 	      tre_cint_t cmin, ccurr;
 
@@ -396,6 +397,8 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 			ccurr = tre_toupper(min++);
 		      status = tre_new_item(ctx->mem, cmin, ccurr,
 					    &i, &max_i, items);
+		      if (status != REG_OK)
+			return status;
 		    }
 		  else if (tre_isupper(min))
 		    {
@@ -405,20 +408,19 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 			ccurr = tre_tolower(min++);
 		      status = tre_new_item(ctx->mem, cmin, ccurr,
 					    &i, &max_i, items);
+		      if (status != REG_OK)
+			return status;
 		    }
-		  else min++;
-		  if (status != REG_OK)
-		    break;
+		  else
+		    min++;
 		}
-	      if (status != REG_OK)
-		break;
 	    }
 	}
     }
   *num_items = i;
   *items_size = max_i;
   ctx->re = re;
-  return status;
+  return REG_OK;
 }
 
 static reg_errcode_t
