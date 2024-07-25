@@ -1353,7 +1353,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	      break;
 
 	    case CHAR_RPAREN:  /* end of current subexpression */
-	      if (((ctx->cflags & REG_EXTENDED) && depth > 0)
+	      if ((ctx->cflags & REG_EXTENDED && depth > 0)
 		  || (!(ctx->cflags & REG_EXTENDED) && ctx->re > ctx->re_start
 		      && *(ctx->re - 1) == CHAR_BACKSLASH))
 		{
@@ -1621,7 +1621,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 
 	      /* We are expecting an atom.  If the subexpression (or the whole
-		 regexp ends here, we interpret it as an empty expression
+		 regexp) ends here, we interpret it as an empty expression
 		 (which matches an empty string).  */
 	      if (
 #ifdef REG_LITERAL
