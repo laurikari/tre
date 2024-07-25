@@ -44,7 +44,7 @@ typedef struct {
   void *obj;             /* Pointer to actual node. */
   int nullable;
   int submatch_id;
-  int num_submatches;
+  unsigned int num_submatches;
   int num_tags;
   tre_pos_and_tags_t *firstpos;
   tre_pos_and_tags_t *lastpos;
