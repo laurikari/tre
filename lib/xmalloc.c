@@ -125,6 +125,9 @@ hash_table_add(hashTable *tbl, void *ptr, size_t bytes,
 }
 
 static void
+#if defined(__GNUC__) && __GNUC__ >= 10
+__attribute__((access(none, 2)))
+#endif
 hash_table_del(hashTable *tbl, void *ptr)
 {
   int i;
