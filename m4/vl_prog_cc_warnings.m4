@@ -30,9 +30,9 @@ EOF
         dnl GCC
         if test "$GCC" = "yes"; then
           if test -z "$ansi"; then
-            vl_cv_prog_cc_warnings="-Wall"
+            vl_cv_prog_cc_warnings="-Wall -Wextra"
           else
-            vl_cv_prog_cc_warnings="-Wall -ansi -pedantic"
+            vl_cv_prog_cc_warnings="-Wall -Wextra -ansi -pedantic"
           fi
 
         dnl Most compilers print some kind of a version string with some command
