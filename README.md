@@ -36,7 +36,7 @@ You will need the following tools installed on your system:
 
   - autoconf
   - automake
-  - gettext
+  - gettext (including autopoint)
   - libtool
   - zip (optional)
 
