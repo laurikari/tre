@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(TRE, 0.8.0)
+AC_INIT([TRE], [0.8.0])
 AC_CONFIG_SRCDIR([lib/regcomp.c])
 AC_CONFIG_AUX_DIR([utils])
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([foreign])
-AC_PREREQ(2.59)
+AC_PREREQ([2.63])
 AM_GNU_GETTEXT_VERSION(0.17)
 
 dnl Checks for programs.
@@ -22,16 +22,19 @@ AC_DEFINE_UNQUOTED(TRE_VERSION_1, $tre_version_1, [ TRE version level 1. ])
 AC_DEFINE_UNQUOTED(TRE_VERSION_2, $tre_version_2, [ TRE version level 2. ])
 AC_DEFINE_UNQUOTED(TRE_VERSION_3, $tre_version_3, [ TRE version level 3. ])
 AC_SUBST(TRE_VERSION, $tre_version)
+AC_SUBST(TRE_VERSION_1, $tre_version_1)
+AC_SUBST(TRE_VERSION_2, $tre_version_2)
+AC_SUBST(TRE_VERSION_3, $tre_version_3)
 
 dnl Options
 AC_ARG_ENABLE(profile,
-  AC_HELP_STRING([--enable-profile],
+  AS_HELP_STRING([--enable-profile],
                  [enable profiling with gprof @<:@default=disabled@:>@]),
   [ tre_profile="$enableval" ],
   [ tre_profile="no" ])
 
 AC_ARG_ENABLE(debug,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--enable-debug],
     [enable development-time debugging @<:@default=disabled@:>@]),
   [ tre_debug="$enableval" ],
@@ -53,7 +56,7 @@ else
 fi
 
 AC_ARG_ENABLE(warnings,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--disable-warnings],
     [disable C compiler warning messages @<:@default=enabled@:>@]),
   [ tre_cc_warnings="$enableval" ],
@@ -63,7 +66,7 @@ if test "$tre_cc_warnings" = "yes"; then
 fi
 
 AC_ARG_ENABLE(approx,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--disable-approx],
     [disable the approximate matching functionality @<:@default=enabled@:>@]),
   [ tre_approx="$enableval" ],
@@ -78,7 +81,7 @@ fi
 
 if test "$tre_approx" = "yes"; then
   AC_ARG_ENABLE(agrep,
-    AC_HELP_STRING([--disable-agrep],
+    AS_HELP_STRING([--disable-agrep],
       [Do not build and install the agrep tool @<:@default=install@:>@]),
     [ tre_agrep="$enableval" ],
     [ tre_agrep="yes" ])
@@ -96,16 +99,13 @@ fi
 dnl Checks for compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
-
-dnl Checks for headers, functions, types, and macros
-AC_DEFINE(_GNU_SOURCE, 1, [ Define to enable GNU extensions in glibc ])
-AC_HEADER_STDC
+AC_USE_SYSTEM_EXTENSIONS
 
 dnl Make sure locally configured headers are used (this adds the #define to config.h).
 AC_DEFINE(USE_LOCAL_TRE_H, 1, [ Define to ensure locally configured headers are used ])
 
 AC_ARG_WITH(alloca,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--without-alloca],
     [don't use alloca  @<:@default=use@:>@]),
   [ tre_use_alloca="$withval" ],
@@ -122,7 +122,7 @@ if test "$tre_use_alloca" = "yes"; then
 fi
 
 AC_ARG_ENABLE(system-abi,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--enable-system-abi],
     [try to make TRE compatible with the system \
 regex ABI  @<:@default=disabled@:>@]),
@@ -274,7 +274,7 @@ AC_CHECK_FUNCS([getopt_long],,
 
 dnl Check whether wide character support should be enabled.
 AC_ARG_ENABLE(wchar,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--disable-wchar],
     [disable the wide character (wchar_t) support   @<:@default=detect@:>@]),
   [ tre_enable_wchar="$enableval" ],
@@ -282,10 +282,10 @@ AC_ARG_ENABLE(wchar,
 
 dnl Check whether libutf8 location has been given.
 AC_ARG_WITH(libutf8,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--with-libutf8@<:@=DIR@:>@],
     [search for libutf8 from DIR/include and DIR/lib])
-AC_HELP_STRING(
+AS_HELP_STRING(
     [--without-libutf8],
     [do not use libutf8 @<:@default=use if needed@:>@]),
   [ if test "$with_val" = "no"; then
@@ -465,7 +465,7 @@ fi
 
 dnl Check for multibyte character set support
 AC_ARG_ENABLE(multibyte,
-  AC_HELP_STRING(
+  AS_HELP_STRING(
     [--disable-multibyte],
     [disable multibyte character set support @<:@default=detect@:>@]),
   [ tre_enable_multibyte="$enableval" ],
@@ -517,10 +517,7 @@ fi
 AC_SYS_LARGEFILE
 
 AM_GNU_GETTEXT([external])
-AC_LIBTOOL_TAGS([])
-AC_LIBTOOL_WIN32_DLL
-AM_DISABLE_STATIC
-AC_PROG_LIBTOOL
+LT_INIT([win32-dll, disable-static])
 
 dnl Output files
 AC_CONFIG_HEADERS([config.h local_includes/tre-config.h])
@@ -532,12 +529,14 @@ local_includes/Makefile
 lib/Makefile
 m4/Makefile
 po/Makefile.in
+python/setup.py
 src/Makefile
 tests/Makefile
 tests/agrep/Makefile
 tre.pc
 tre.spec
 utils/Makefile
+win32/tre-config.h
 ])
 AC_OUTPUT
 

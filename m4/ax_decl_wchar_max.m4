@@ -1,23 +1,37 @@
-dnl @synopsis AX_DECL_WCHAR_MAX
-dnl
-dnl Checks whether the system headers define WCHAR_MAX or not.  If it is
-dnl already defined, does nothing.  Otherwise checks the size and signedness
-dnl of `wchar_t', and defines WCHAR_MAX to the maximum value that can be
-dnl stored in a variable of type `wchar_t'.
-dnl
-dnl @version 1.1
-dnl @author Ville Laurikari <vl@iki.fi>
-dnl
+# ===========================================================================
+#    https://www.gnu.org/software/autoconf-archive/ax_decl_wchar_max.html
+# ===========================================================================
+#
+# SYNOPSIS
+#
+#   AX_DECL_WCHAR_MAX
+#
+# DESCRIPTION
+#
+#   Checks whether the system headers define WCHAR_MAX or not. If it is
+#   already defined, does nothing. Otherwise checks the size and signedness
+#   of `wchar_t', and defines WCHAR_MAX to the maximum value that can be
+#   stored in a variable of type `wchar_t'.
+#
+# LICENSE
+#
+#   Copyright (c) 2008 Ville Laurikari <vl@iki.fi>
+#
+#   Copying and distribution of this file, with or without modification, are
+#   permitted in any medium without royalty provided the copyright notice
+#   and this notice are preserved. This file is offered as-is, without any
+#   warranty.
+
+#serial 8
+
+AU_ALIAS([VL_DECL_WCHAR_MAX], [AX_DECL_WCHAR_MAX])
 AC_DEFUN([AX_DECL_WCHAR_MAX], [
   AC_CACHE_CHECK([whether WCHAR_MAX is defined], ax_cv_decl_wchar_max, [
-    AC_COMPILE_IFELSE(
-      [AC_LANG_PROGRAM([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_WCHAR_H
 #include <wchar.h>
 #endif
-], [WCHAR_MAX])],
-      [ax_cv_decl_wchar_max="yes"],
-      [ax_cv_decl_wchar_max="no"])])
+]], [[WCHAR_MAX]])], [ax_cv_decl_wchar_max="yes"], [ax_cv_decl_wchar_max="no"])])
   if test $ax_cv_decl_wchar_max = "no"; then
     AX_CHECK_SIGN([wchar_t],
       [ wc_signed="yes"

@@ -5,7 +5,7 @@ AC_DEFUN([AX_CHECK_FUNCS_COMP],[
   dnl This is magic to make autoheader pick up the config.h.in templates
   dnl automatically.  This uses macros which are probably not public
   dnl (not documented anyway) but this works at least with Automake 2.59.
-  AC_FOREACH([AX_Func], [$1],
+  m4_foreach_w([AX_Func], [$1],
     [AH_TEMPLATE(AS_TR_CPP(HAVE_[]AX_Func),
                  [Define to 1 if you have the `]AX_Func[' function or macro.])])dnl
   for ax_func in $1; do
