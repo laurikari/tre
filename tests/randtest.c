@@ -25,7 +25,7 @@
 #define REGEXP_MAX_LEN 16
 
 int
-main(int argc, char **argv)
+main(void)
 {
   int len, i, flags, n;
   char regex[50];

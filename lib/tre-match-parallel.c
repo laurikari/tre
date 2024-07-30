@@ -79,7 +79,7 @@ typedef struct {
 
 #ifdef TRE_DEBUG
 static void
-tre_print_reach(const tre_tnfa_t *tnfa, tre_tnfa_reach_t *reach, int num_tags)
+tre_print_reach(const tre_tnfa_reach_t *reach, int num_tags)
 {
   int i;
 
@@ -344,9 +344,9 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 
 #ifdef TRE_DEBUG
       DPRINT(("%3d:%2lc/%05d |", pos - 1, (tre_cint_t)prev_c, (int)prev_c));
-      tre_print_reach(tnfa, reach_next, num_tags);
+      tre_print_reach(reach_next, num_tags);
       DPRINT(("%3d:%2lc/%05d |", pos, (tre_cint_t)next_c, (int)next_c));
-      tre_print_reach(tnfa, reach_next, num_tags);
+      tre_print_reach(reach_next, num_tags);
 #endif /* TRE_DEBUG */
 
       /* Swap `reach' and `reach_next'. */

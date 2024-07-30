@@ -27,9 +27,6 @@ char *alloca ();
 #endif
 #endif /* TRE_USE_ALLOCA */
 
-#define __USE_STRING_INLINES
-#undef __NO_INLINE__
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

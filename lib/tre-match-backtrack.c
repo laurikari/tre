@@ -114,7 +114,7 @@ typedef struct tre_backtrack_struct {
 #define tre_bt_mem_new		  tre_mem_newa
 #define tre_bt_mem_alloc	  tre_mem_alloca
 #define tre_bt_mem_destroy(obj)	  do { } while (0)
-#define xafree(obj)		  /* do nothing, obj was obtained with alloca() */
+#define xafree(obj)		  do { } while (0) /* do nothing, obj was obtained with alloca() */
 #else /* !TRE_USE_ALLOCA */
 #define tre_bt_mem_new		  tre_mem_new
 #define tre_bt_mem_alloc	  tre_mem_alloc
