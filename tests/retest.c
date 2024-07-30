@@ -1480,6 +1480,21 @@ main(int argc, char **argv)
   test_exec("aaaaa", 0, REG_OK, 0, 5, END);
   test_exec("aaaaaa", 0, REG_OK, 0, 6, END);
   test_exec("aaaaaaa", 0, REG_OK, 0, 7, END);
+  test_comp("a{,}", REG_EXTENDED, REG_OK);
+  test_exec("", 0, REG_OK, 0, 0, END);
+  test_exec("aaa", 0, REG_OK, 0, 3, END);
+  test_comp("a{,0}", REG_EXTENDED, REG_OK);
+  test_exec("", 0, REG_OK, 0, 0, END);
+  test_exec("aaa", 0, REG_OK, 0, 0, END);
+  test_comp("a{,1}", REG_EXTENDED, REG_OK);
+  test_exec("", 0, REG_OK, 0, 0, END);
+  test_exec("a", 0, REG_OK, 0, 1, END);
+  test_exec("aa", 0, REG_OK, 0, 1, END);
+  test_comp("a{,2}", REG_EXTENDED, REG_OK);
+  test_exec("", 0, REG_OK, 0, 0, END);
+  test_exec("a", 0, REG_OK, 0, 1, END);
+  test_exec("aa", 0, REG_OK, 0, 2, END);
+  test_exec("aaa", 0, REG_OK, 0, 2, END);
 
   test_comp("a{5,10}", REG_EXTENDED, REG_OK);
   test_comp("a{6,6}", REG_EXTENDED, REG_OK);
