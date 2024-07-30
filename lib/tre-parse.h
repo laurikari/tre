@@ -26,8 +26,6 @@ typedef struct {
   int len;
   /* Current submatch ID. */
   int submatch_id;
-  /* Current position (number of literal). */
-  int position;
   /* The highest back reference or -1 if none seen so far. */
   int max_backref;
   /* This flag is set if the regexp uses approximate matching. */

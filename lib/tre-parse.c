@@ -113,7 +113,7 @@ tre_new_item(tre_mem_t mem, int min, int max, int *i, int *max_i,
 	return REG_ESPACE;
       *items = array = new_items;
     }
-  array[*i] = tre_ast_new_literal(mem, min, max, -1);
+  array[*i] = tre_ast_new_literal(mem, min, max);
   status = array[*i] == NULL ? REG_ESPACE : REG_OK;
   (*i)++;
   return status;
@@ -491,7 +491,6 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	{
 	  int k;
 	  DPRINT(("creating %d - %d\n", (int)l->code_min, (int)l->code_max));
-	  l->position = ctx->position;
 	  if (num_neg_classes > 0)
 	    {
 	      l->neg_classes = tre_mem_alloc(ctx->mem,
@@ -527,7 +526,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
     {
       int k;
       DPRINT(("final: creating %d - %d\n", curr_min, (int)TRE_CHAR_MAX));
-      n = tre_ast_new_literal(ctx->mem, curr_min, TRE_CHAR_MAX, ctx->position);
+      n = tre_ast_new_literal(ctx->mem, curr_min, TRE_CHAR_MAX);
       if (n == NULL)
 	status = REG_ESPACE;
       else
@@ -570,7 +569,6 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 
  parse_bracket_done:
   xfree(items);
-  ctx->position++;
   *result = node;
   return status;
 }
@@ -844,7 +842,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   /* Create the AST node(s). */
   if (min == 0 && max == 0)
     {
-      *result = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
+      *result = tre_ast_new_literal(ctx->mem, EMPTY, -1);
       if (*result == NULL)
 	return REG_ESPACE;
     }
@@ -1363,7 +1361,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		     subexpression was closed.	POSIX leaves the meaning of
 		     this to be implementation-defined.	 We interpret this as
 		     an empty expression (which matches an empty string).  */
-		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
+		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1);
 		  if (result == NULL)
 		    return REG_ESPACE;
 		  if (!(ctx->cflags & REG_EXTENDED))
@@ -1411,7 +1409,6 @@ tre_parse(tre_parse_ctx_t *ctx)
 		    if (status != REG_OK)
 		      return status;
 		    ctx->re += 2;
-		    ctx->position = subctx.position;
 		    result = subctx.result;
 		    break;
 		  }
@@ -1440,22 +1437,22 @@ tre_parse(tre_parse_ctx_t *ctx)
 		{
 		case L'b':
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
-					       ASSERT_AT_WB, -1);
+					       ASSERT_AT_WB);
 		  ctx->re++;
 		  break;
 		case L'B':
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
-					       ASSERT_AT_WB_NEG, -1);
+					       ASSERT_AT_WB_NEG);
 		  ctx->re++;
 		  break;
 		case L'<':
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
-					       ASSERT_AT_BOW, -1);
+					       ASSERT_AT_BOW);
 		  ctx->re++;
 		  break;
 		case L'>':
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
-					       ASSERT_AT_EOW, -1);
+					       ASSERT_AT_EOW);
 		  ctx->re++;
 		  break;
 		case L'x':
@@ -1479,9 +1476,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			  ctx->re++;
 			}
 		      val = strtol(tmp, NULL, 16);
-		      result = tre_ast_new_literal(ctx->mem, (int)val,
-						   (int)val, ctx->position);
-		      ctx->position++;
+		      result = tre_ast_new_literal(ctx->mem, (int)val, (int)val);
 		      break;
 		    }
 		  else if (ctx->re < ctx->re_end)
@@ -1507,9 +1502,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      ctx->re++;
 		      tmp[i] = 0;
 		      val = strtol(tmp, NULL, 16);
-		      result = tre_ast_new_literal(ctx->mem, (int)val, (int)val,
-						   ctx->position);
-		      ctx->position++;
+		      result = tre_ast_new_literal(ctx->mem, (int)val, (int)val);
 		      break;
 		    }
 		  /*FALLTHROUGH*/
@@ -1521,11 +1514,9 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      int val = *ctx->re - L'0';
 		      DPRINT(("tre_parse:     backref: '%.*" STRF "'\n",
 			      REST(ctx->re - 1)));
-		      result = tre_ast_new_literal(ctx->mem, BACKREF, val,
-						   ctx->position);
+		      result = tre_ast_new_literal(ctx->mem, BACKREF, val);
 		      if (result == NULL)
 			return REG_ESPACE;
-		      ctx->position++;
 		      ctx->max_backref = MAX(val, ctx->max_backref);
 		      ctx->re++;
 		    }
@@ -1534,9 +1525,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      /* Escaped character. */
 		      DPRINT(("tre_parse:     escaped: '%.*" STRF "'\n",
 			      REST(ctx->re - 1)));
-		      result = tre_ast_new_literal(ctx->mem, *ctx->re, *ctx->re,
-						   ctx->position);
-		      ctx->position++;
+		      result = tre_ast_new_literal(ctx->mem, *ctx->re, *ctx->re);
 		      ctx->re++;
 		    }
 		  break;
@@ -1552,26 +1541,21 @@ tre_parse(tre_parse_ctx_t *ctx)
 		{
 		  tre_ast_node_t *tmp1;
 		  tre_ast_node_t *tmp2;
-		  tmp1 = tre_ast_new_literal(ctx->mem, 0, L'\n' - 1,
-					     ctx->position);
+		  tmp1 = tre_ast_new_literal(ctx->mem, 0, L'\n' - 1);
 		  if (!tmp1)
 		    return REG_ESPACE;
-		  tmp2 = tre_ast_new_literal(ctx->mem, L'\n' + 1, TRE_CHAR_MAX,
-					     ctx->position + 1);
+		  tmp2 = tre_ast_new_literal(ctx->mem, L'\n' + 1, TRE_CHAR_MAX);
 		  if (!tmp2)
 		    return REG_ESPACE;
 		  result = tre_ast_new_union(ctx->mem, tmp1, tmp2);
 		  if (!result)
 		    return REG_ESPACE;
-		  ctx->position += 2;
 		}
 	      else
 		{
-		  result = tre_ast_new_literal(ctx->mem, 0, TRE_CHAR_MAX,
-					       ctx->position);
+		  result = tre_ast_new_literal(ctx->mem, 0, TRE_CHAR_MAX);
 		  if (!result)
 		    return REG_ESPACE;
-		  ctx->position++;
 		}
 	      ctx->re++;
 	      break;
@@ -1588,7 +1572,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  DPRINT(("tre_parse:	      BOL: '%.*" STRF "'\n",
 			  REST(ctx->re)));
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
-					       ASSERT_AT_BOL, -1);
+					       ASSERT_AT_BOL);
 		  if (result == NULL)
 		    return REG_ESPACE;
 		  ctx->re++;
@@ -1609,7 +1593,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  DPRINT(("tre_parse:	      EOL: '%.*" STRF "'\n",
 			  REST(ctx->re)));
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
-					       ASSERT_AT_EOL, -1);
+					       ASSERT_AT_EOL);
 		  if (result == NULL)
 		    return REG_ESPACE;
 		  ctx->re++;
@@ -1656,7 +1640,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		{
 		  DPRINT(("tre_parse:	    empty: '%.*" STRF "'\n",
 			  REST(ctx->re)));
-		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
+		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1);
 		  if (!result)
 		    return REG_ESPACE;
 		  break;
@@ -1682,13 +1666,11 @@ tre_parse(tre_parse_ctx_t *ctx)
 		     could be several opposite-case counterpoints, but they
 		     cannot be supported portably anyway. */
 		  tmp1 = tre_ast_new_literal(ctx->mem, tre_toupper(*ctx->re),
-					     tre_toupper(*ctx->re),
-					     ctx->position);
+					     tre_toupper(*ctx->re));
 		  if (!tmp1)
 		    return REG_ESPACE;
 		  tmp2 = tre_ast_new_literal(ctx->mem, tre_tolower(*ctx->re),
-					     tre_tolower(*ctx->re),
-					     ctx->position);
+					     tre_tolower(*ctx->re));
 		  if (!tmp2)
 		    return REG_ESPACE;
 		  result = tre_ast_new_union(ctx->mem, tmp1, tmp2);
@@ -1697,12 +1679,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 		}
 	      else
 		{
-		  result = tre_ast_new_literal(ctx->mem, *ctx->re, *ctx->re,
-					       ctx->position);
+		  result = tre_ast_new_literal(ctx->mem, *ctx->re, *ctx->re);
 		  if (!result)
 		    return REG_ESPACE;
 		}
-	      ctx->position++;
 	      ctx->re++;
 	      break;
 	    }
@@ -1715,7 +1695,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	    if (result->submatch_id >= 0)
 	      {
 		tre_ast_node_t *n, *tmp_node;
-		n = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
+		n = tre_ast_new_literal(ctx->mem, EMPTY, -1);
 		if (n == NULL)
 		  return REG_ESPACE;
 		tmp_node = tre_ast_new_catenation(ctx->mem, n, result);
