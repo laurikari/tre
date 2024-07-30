@@ -1388,6 +1388,8 @@ main(int argc, char **argv)
   test_nexec("\000", 1, 0, REG_OK, 0, 1, END);
   test_comp("\\x{}r", REG_EXTENDED, 0);
   test_nexec("\000r", 2, 0, REG_OK, 0, 2, END);
+  test_comp("\\x{00000000000000000000000000000000}", REG_EXTENDED, 0);
+  test_comp("\\x{000000000000000000000000000000000}", REG_EXTENDED, REG_EBRACE);
 
   /* Tests for (?inrU-inrU) and (?inrU-inrU:) */
   test_comp("foo(?i)bar", REG_EXTENDED, 0);
