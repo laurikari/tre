@@ -29,7 +29,7 @@
 
 typedef struct hashTableItemRec {
   void *ptr;
-  int bytes;
+  size_t bytes;
   const char *file;
   int line;
   const char *func;
@@ -90,7 +90,7 @@ hash_void_ptr(void *ptr)
 }
 
 static void
-hash_table_add(hashTable *tbl, void *ptr, int bytes,
+hash_table_add(hashTable *tbl, void *ptr, size_t bytes,
 	       const char *file, int line, const char *func)
 {
   int i;
@@ -125,6 +125,9 @@ hash_table_add(hashTable *tbl, void *ptr, int bytes,
 }
 
 static void
+#if defined(__GNUC__) && __GNUC__ >= 10
+__attribute__((access(none, 2)))
+#endif
 hash_table_del(hashTable *tbl, void *ptr)
 {
   int i;
@@ -199,9 +202,9 @@ xmalloc_configure(int fail_after)
 int
 xmalloc_dump_leaks(void)
 {
-  int i;
-  int num_leaks = 0;
-  int leaked_bytes = 0;
+  unsigned int i;
+  unsigned int num_leaks = 0;
+  size_t leaked_bytes = 0;
   hashTableItem *item;
 
   xmalloc_init();
@@ -211,7 +214,7 @@ xmalloc_dump_leaks(void)
       item = xmalloc_table->table[i];
       while (item != NULL)
 	{
-	  printf("%s:%d: %s: %d bytes at %p not freed\n",
+	  printf("%s:%d: %s: %zu bytes at %p not freed\n",
 		 item->file, item->line, item->func, item->bytes, item->ptr);
 	  num_leaks++;
 	  leaked_bytes += item->bytes;
@@ -221,7 +224,7 @@ xmalloc_dump_leaks(void)
   if (num_leaks == 0)
     printf("No memory leaks.\n");
   else
-    printf("%d unfreed memory chuncks, total %d unfreed bytes.\n",
+    printf("%u unfreed memory chuncks, total %zu unfreed bytes.\n",
 	   num_leaks, leaked_bytes);
   printf("Peak memory consumption %d bytes (%.1f kB, %.1f MB) in %d blocks ",
 	 xmalloc_peak, (double)xmalloc_peak / 1024,
@@ -338,7 +341,7 @@ xrealloc_impl(void *ptr, size_t new_size, const char *file, int line,
     xmalloc_fail_after--;
 
   new_ptr = realloc(ptr, new_size);
-  if (new_ptr != NULL)
+  if (new_ptr != NULL && new_ptr != ptr)
     {
       hash_table_del(xmalloc_table, ptr);
       hash_table_add(xmalloc_table, new_ptr, (int)new_size, file, line, func);
