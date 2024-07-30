@@ -936,7 +936,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 		  {
 		    for (j = iter->min; j < iter->max; j++)
 		      {
-			tre_ast_node_t *tmp, *copy;
+			tre_ast_node_t *copy;
 			pos_add_save = pos_add;
 			status = tre_copy_ast(mem, stack, iter->arg, 0,
 					      &pos_add, NULL, &copy, &max_pos);
@@ -948,10 +948,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 			  seq2 = copy;
 			if (seq2 == NULL)
 			  return REG_ESPACE;
-			tmp = tre_ast_new_literal(mem, EMPTY, -1);
-			if (tmp == NULL)
-			  return REG_ESPACE;
-			seq2 = tre_ast_new_union(mem, tmp, seq2);
+			seq2 = tre_ast_new_iter(mem, seq2, 0, 1, 0);
 			if (seq2 == NULL)
 			  return REG_ESPACE;
 		      }
