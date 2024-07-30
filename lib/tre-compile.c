@@ -712,8 +712,16 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 		    first_tag = 0;
 		  }
 		*result = tre_ast_new_literal(mem, min, max);
-		if (*result == NULL)
+		if (*result == NULL) {
 		  status = REG_ESPACE;
+		  break;
+		}
+		if (!IS_SPECIAL(lit)) {
+		  ((tre_literal_t *)(*result)->obj)->u.class = lit->u.class;
+		  ((tre_literal_t *)(*result)->obj)->neg_classes = lit->neg_classes;
+		} else if (IS_PARAMETER(lit)) {
+		  ((tre_literal_t *)(*result)->obj)->u.params = lit->u.params;
+		}
 
 		if (pos > *max_pos)
 		  *max_pos = pos;
