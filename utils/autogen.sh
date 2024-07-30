@@ -5,9 +5,6 @@ set -e
 # Clear the cache to get a clean rebuild.
 rm -rf autom4te.cache
 
-# Replace variables here and there to get a consistent tree.
-./utils/replace-vars.sh
-
 # Set up the standard gettext infrastructure.
 autopoint
 

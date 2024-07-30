@@ -64,7 +64,7 @@ static struct option const long_options[] =
   {"colour", no_argument, NULL, COLOR_OPTION},
   {"count", no_argument, NULL, 'c'},
   {"delete-cost", required_argument, NULL, 'D'},
-  {"delimiter", no_argument, NULL, 'd'},
+  {"delimiter", required_argument, NULL, 'd'},
   {"delimiter-after", no_argument, NULL, 'M'},
   {"files-with-matches", no_argument, NULL, 'l'},
   {"help", no_argument, &show_help, 1},
