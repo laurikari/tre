@@ -1086,7 +1086,7 @@ main(int argc, char **argv)
   test_comp("[^[:digit:]]+", REG_EXTENDED, 0);
   test_exec("%abC123890xyz=", 0, REG_OK, 0, 4, END);
   test_comp("[[:print:]]+", REG_EXTENDED, 0);
-  test_exec("\n %abC12\f", 0, REG_OK, 1, 8, END);
+  test_exec("\n\t %abC12\f", 0, REG_OK, 2, 9, END);
   test_comp("[[:upper:]]+", REG_EXTENDED, 0);
   test_exec("\n aBCDEFGHIJKLMNOPQRSTUVWXYz", 0, REG_OK, 3, 27, END);
   test_comp("[[:upper:]]+", REG_EXTENDED | REG_ICASE, 0);

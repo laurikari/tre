@@ -150,10 +150,10 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
   /* True for first pass (counting number of needed tags) */
   int first_pass = (mem == NULL || tnfa == NULL);
   int *regset, *orig_regset;
-  int num_tags = 0; /* Total number of tags. */
-  int num_minimals = 0;	 /* Number of special minimal tags. */
-  int tag = 0;	    /* The tag that is to be added next. */
-  int next_tag = 1; /* Next tag to use after this one. */
+  unsigned int num_tags = 0; /* Total number of tags. */
+  unsigned int num_minimals = 0;	 /* Number of special minimal tags. */
+  unsigned int tag = 0;	    /* The tag that is to be added next. */
+  unsigned int next_tag = 1; /* Next tag to use after this one. */
   int *parents;	    /* Stack of submatches the current submatch is
 		       contained in. */
   int minimal_tag = -1; /* Tag that marks the beginning of a minimal match. */
@@ -688,8 +688,8 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	      {
 		tre_literal_t *lit = node->obj;
 		int pos = lit->position;
-		int min = lit->code_min;
-		int max = lit->code_max;
+		long min = lit->code_min;
+		long max = lit->code_max;
 		if (!IS_SPECIAL(lit) || IS_BACKREF(lit))
 		  {
 		    /* XXX - e.g. [ab] has only one position but two
@@ -712,8 +712,16 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 		    first_tag = 0;
 		  }
 		*result = tre_ast_new_literal(mem, min, max);
-		if (*result == NULL)
+		if (*result == NULL) {
 		  status = REG_ESPACE;
+		  break;
+		}
+		if (!IS_SPECIAL(lit)) {
+		  ((tre_literal_t *)(*result)->obj)->u.class = lit->u.class;
+		  ((tre_literal_t *)(*result)->obj)->neg_classes = lit->neg_classes;
+		} else if (IS_PARAMETER(lit)) {
+		  ((tre_literal_t *)(*result)->obj)->u.params = lit->u.params;
+		}
 
 		if (pos > *max_pos)
 		  *max_pos = pos;
@@ -1049,7 +1057,7 @@ tre_set_empty(tre_mem_t mem)
 }
 
 static tre_pos_and_tags_t *
-tre_set_one(tre_mem_t mem, int position, int code_min, int code_max,
+tre_set_one(tre_mem_t mem, int position, long code_min, long code_max,
 	    tre_ctype_t class, tre_ctype_t *neg_classes, int backref)
 {
   tre_pos_and_tags_t *new_set;
@@ -1338,7 +1346,7 @@ tre_compute_npfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		      return REG_ESPACE;
 		    node->lastpos = tre_set_one(mem, lit->position, 0,
 						TRE_CHAR_MAX, 0, NULL,
-						(int)lit->code_max);
+						lit->code_max);
 		    if (!node->lastpos)
 		      return REG_ESPACE;
 		  }
@@ -1361,13 +1369,13 @@ tre_compute_npfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		    node->nullable = 0;
 		    lit->position = (*nextpos)++;
 		    node->firstpos =
-		      tre_set_one(mem, lit->position, (int)lit->code_min,
-				  (int)lit->code_max, 0, NULL, -1);
+		      tre_set_one(mem, lit->position, lit->code_min,
+				  lit->code_max, 0, NULL, -1);
 		    if (!node->firstpos)
 		      return REG_ESPACE;
 		    node->lastpos = tre_set_one(mem, lit->position,
-						(int)lit->code_min,
-						(int)lit->code_max,
+						lit->code_min,
+						lit->code_max,
 						lit->u.class, lit->neg_classes,
 						-1);
 		    if (!node->lastpos)
@@ -1880,8 +1888,8 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   parse_ctx.len = n;
   parse_ctx.cflags = cflags;
   parse_ctx.max_backref = -1;
-  /* workaround for PR#14408: use 8-bit optimizations in 8-bit mode */
-  parse_ctx.cur_max = (cflags & REG_USEBYTES) ? 1 : TRE_MB_CUR_MAX;
+  /* Use 8-bit optimizations in 8-bit mode */
+  parse_ctx.mb_cur_max = (cflags & REG_USEBYTES) ? 1 : TRE_MB_CUR_MAX;
   DPRINT(("tre_compile: parsing '%.*" STRF "'\n", (int)n, regex));
   errcode = tre_parse(&parse_ctx);
   if (errcode != REG_OK)
@@ -2021,7 +2029,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   /* If in eight bit mode, compute a table of characters that can be the
      first character of a match. */
   tnfa->first_char = -1;
-  if (TRE_MB_CUR_MAX == 1 && !tmp_ast_l->nullable)
+  if (parse_ctx.mb_cur_max == 1 && !tmp_ast_l->nullable)
     {
       int count = 0;
       tre_cint_t k;
