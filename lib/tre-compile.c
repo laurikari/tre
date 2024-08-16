@@ -1238,8 +1238,7 @@ tre_match_empty(tre_stack_t *stack, tre_ast_node_t *node, int *tags,
 		}
 	      break;
 	    case ASSERTION:
-	      assert(lit->code_max >= 1
-		     || lit->code_max <= ASSERT_LAST);
+	      assert(lit->code_max >= 1 && lit->code_max <= ASSERT_LAST);
 	      if (assertions != NULL)
 		*assertions |= lit->code_max;
 	      break;

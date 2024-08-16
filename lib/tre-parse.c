@@ -1492,7 +1492,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  else if (ctx->re < ctx->re_end)
 		    {
 		      /* Wide char. */
-		      char tmp[32];
+		      char tmp[9]; /* max 8 hex digits + terminator */
 		      long val;
 		      int i = 0;
 		      ctx->re++;
@@ -1500,7 +1500,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			{
 			  if (ctx->re[0] == CHAR_RBRACE)
 			    break;
-			  if (tre_isxdigit(ctx->re[0]))
+			  if (tre_isxdigit(ctx->re[0]) && i < sizeof(tmp) - 1)
 			    {
 			      tmp[i] = (char)ctx->re[0];
 			      i++;
