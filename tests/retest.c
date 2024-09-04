@@ -1105,6 +1105,7 @@ main(int argc, char **argv)
   test_comp("[[:xdigit:]]+", REG_EXTENDED, 0);
   test_exec("-0123456789ABCDEFabcdef", 0, REG_OK, 1, 23, END);
   test_comp("[[:bogus-character-class-name:]", REG_EXTENDED, REG_ECTYPE);
+  test_comp("[[:\xff:", REG_EXTENDED, REG_ECTYPE);
 
 
   /* Range expressions (assuming that the C locale is being used). */
