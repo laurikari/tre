@@ -40,8 +40,6 @@ You will need the following tools installed on your system:
   - libtool
   - zip (optional)
 
-If you choose to use the "waf" build system you will need python 3.5
-or above.  See the file "README_waf.txt" for more information.
 
 Building
 --------

@@ -19,10 +19,6 @@
              is poorly documented and different for different platforms.
              The non-ASCII encoded strings are now guarded by #ifdefs with one
              of the following values.  Define/undef whichever one(s) you need.
-             These may affect the total number of tests performed, which may
-             make the waf build system result comparisons fail because the
-             output includes the number.  Look at the actual output files under
-             the build directory to see if all the attempted tests pass.
    #define SRC_IN_ISO_8859_1
    #define SRC_IN_UTF_8
    #define SRC_IN_EUC_JP
