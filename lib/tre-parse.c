@@ -1492,7 +1492,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      /* Wide char. */
 		      char tmp[9]; /* max 8 hex digits + terminator */
 		      long val;
-		      int i = 0;
+		      size_t i = 0;
 		      ctx->re++;
 		      while (ctx->re_end - ctx->re >= 0)
 			{
