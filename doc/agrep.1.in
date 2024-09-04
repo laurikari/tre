@@ -128,6 +128,14 @@ Only print the name of each input file which contains at least one
 match, suppressing normal output.  The scanning for each file will
 stop on the first match.
 .TP
+.BI \-m " NUM" "\fR,\fP \-\^\-max\-count=" NUM
+Stop processing each input file after
+.I NUM
+matching (or non-matching if
+.B \-v
+was specified) lines.
+A negative value is interpreted as infinity, which is the default.
+.TP
 .BR \-n ", " \-\^\-record\-number
 Prefix each output record with its sequence number in the input file.
 The number of the first record is 1.
