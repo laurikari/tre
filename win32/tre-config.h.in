@@ -1,13 +1,6 @@
 /* tre-config.h.  This file defines all compile time definitions
    that are needed in `regex.h' for Win32. */
 
-/* Define to 1 if you have `alloca', as a function or macro. */
-#define HAVE_ALLOCA 1
-
-/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
- */
-#define HAVE_ALLOCA_H 1
-
 /* Define to 1 if you have the <libutf8.h> header file. */
 /* #undef HAVE_LIBUTF8_H */
 
@@ -31,7 +24,7 @@
 
 /* Define if you want TRE to use alloca() instead of malloc() when allocating
    memory needed for regexec operations. */
-#define TRE_USE_ALLOCA 1
+/* #undef TRE_USE_ALLOCA */
 
 /* Define to include the system regex.h from TRE regex.h */
 /* #undef TRE_USE_SYSTEM_REGEX_H */

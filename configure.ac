@@ -536,6 +536,7 @@ tests/agrep/Makefile
 tre.pc
 tre.spec
 utils/Makefile
+win32/config.h
 win32/tre-config.h
 ])
 AC_OUTPUT
