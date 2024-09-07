@@ -77,12 +77,15 @@ make_str_source(const char *str)
   str_handler_ctx *ctx;
 
   s = calloc(1, sizeof(*s));
-  if (!s)
+  if (!s) {
+    fprintf(stderr,"Could calloc(1,sizeof(tre_str_source)\n");
     return NULL;
+  }
 
   ctx = malloc(sizeof(str_handler_ctx));
   if (!ctx)
     {
+      fprintf(stderr,"Could malloc(sizeof(str_handler_ctx)\n");
       free(s);
       return NULL;
     }
@@ -109,6 +112,7 @@ free_str_source(tre_str_source *s)
 static void
 test_reguexec(const char *str, const char *regex)
 {
+  reg_errcode_t ec;
   regex_t preg;
   tre_str_source *source;
   regmatch_t pmatch[5];
@@ -117,9 +121,15 @@ test_reguexec(const char *str, const char *regex)
   if (!source)
     return;
 
-  tre_regcomp(&preg, regex, REG_EXTENDED);
-  if (tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
+  ec = tre_regcomp(&preg, regex, REG_EXTENDED);
+  if (REG_OK != ec) {
+    fprintf(output_fd,"Pattern {%s} failed to compile, err code 0x%08x\n",regex,(unsigned)ec);
+  }
+  else if ((ec = tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0)) == 0)
     fprintf(output_fd,"Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
+  else {
+    fprintf(output_fd,"Match pattern {%s} against string {%s} failed, err code 0x%08x\n",regex,str,(unsigned)ec);
+  }
 
   free_str_source(source);
   tre_regfree(&preg);
