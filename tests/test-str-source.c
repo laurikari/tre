@@ -115,29 +115,53 @@ free_str_source(tre_str_source *s)
   free(s);
 }
 
-/* Run one test with tre_reguexec */
-static void
+/* Run one test with tre_reguexec.  Returns 1 if the regex matches, 0 if
+   it doesn't, and -1 if an error occurs. */
+static int
 test_reguexec(const char *str, const char *regex)
 {
   regex_t preg;
   tre_str_source *source;
   regmatch_t pmatch[5];
+  int ret;
 
-  source = make_str_source(str);
-  if (!source)
-    return;
-
-  tre_regcomp(&preg, regex, REG_EXTENDED);
-  if (tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
-    fprintf(outf, "Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
-
-  free_str_source(source);
-  tre_regfree(&preg);
+  if ((source = make_str_source(str)) == NULL)
+    {
+      fprintf(stderr, "Out of memory\n");
+      ret = -1;
+    }
+  else
+    {
+      if (tre_regcomp(&preg, regex, REG_EXTENDED) != REG_OK)
+	{
+	  fprintf(stderr, "Failed to compile /%s/\n", regex);
+	  ret = -1;
+	}
+      else
+	{
+	  if (tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
+	    {
+	      fprintf(outf, "Match: /%s/ matches \"%.*s\" in \"%s\"\n", regex,
+		      (int)(pmatch[0].rm_eo - pmatch[0].rm_so),
+		      str + pmatch[0].rm_so, str);
+	      ret = 1;
+	    }
+	  else
+	    {
+	      fprintf(outf, "No match: /%s/ in \"%s\"\n", regex, str);
+	      ret = 0;
+	    }
+	  tre_regfree(&preg);
+	}
+      free_str_source(source);
+    }
+  return ret;
 }
 
 int
 main(int argc, char **argv)
 {
+  int ret = 0;
   outf = stdout;
 #if defined(HAVE_UNISTD_H) || defined(HAVE_GETOPT_H)
   int opt;
@@ -158,11 +182,11 @@ main(int argc, char **argv)
 	}
     }
 #endif
-  test_reguexec("xfoofofoofoo","(foo)\\1");
-  test_reguexec("catcat","(cat|dog)\\1");
-  test_reguexec("catdog","(cat|dog)\\1");
-  test_reguexec("dogdog","(cat|dog)\\1");
-  test_reguexec("dogcat","(cat|dog)\\1");
+  ret += test_reguexec("xfoofofoofoo", "(foo)\\1") != 1;
+  ret += test_reguexec("catcat", "(cat|dog)\\1") != 1;
+  ret += test_reguexec("catdog", "(cat|dog)\\1") != 0;
+  ret += test_reguexec("dogdog", "(cat|dog)\\1") != 1;
+  ret += test_reguexec("dogcat", "(cat|dog)\\1") != 0;
 
-  return 0;
+  return ret;
 }
