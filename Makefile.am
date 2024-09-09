@@ -15,6 +15,7 @@ EXTRA_DIST = \
 	win32/tre.vcxproj \
 	win32/tre.sln \
 	win32/retest.vcxproj \
+	win32/test-str-source.vcxproj \
 	python/tre-python.c \
 	python/setup.py \
 	python/example.py

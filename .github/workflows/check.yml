@@ -71,6 +71,7 @@ jobs:
     - name: Run tests
       run: |
         win32/Debug/retest.exe -o tests/retest.log
+        win32/Debug/test-str-source.exe -o tests/test-str-source.log
     - name: Upload logs
       if: ${{ failure() }}
       uses: actions/upload-artifact@v4
