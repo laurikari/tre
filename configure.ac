@@ -11,7 +11,11 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
-AM_PROG_CC_C_O
+
+dnl Checks for compiler characteristics.
+AC_USE_SYSTEM_EXTENSIONS
+AC_C_CONST
+AC_C_INLINE
 
 tre_version_1=`echo $PACKAGE_VERSION | cut -d . -f 1`
 tre_version_2=`echo $PACKAGE_VERSION | cut -d . -f 2`
@@ -95,11 +99,6 @@ else
   AM_CONDITIONAL(TRE_AGREP, false)
 fi
 
-
-dnl Checks for compiler characteristics.
-AC_C_CONST
-AC_C_INLINE
-AC_USE_SYSTEM_EXTENSIONS
 
 dnl Make sure locally configured headers are used (this adds the #define to config.h).
 AC_DEFINE(USE_LOCAL_TRE_H, 1, [ Define to ensure locally configured headers are used ])
