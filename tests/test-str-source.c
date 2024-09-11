@@ -1,5 +1,8 @@
 /*
   test-str-source.c - Sample program for using tre_reguexec()
+                      It also serves as a sanity check for correct
+                      linkage when multiple variants of the TRE library 
+                      are present.
 
   This software is released under a BSD-style license.
   See the file LICENSE for details and copyright.
@@ -77,10 +80,11 @@ make_str_source(const char *str)
   str_handler_ctx *ctx;
 
   s = calloc(1, sizeof(*s));
-  if (!s) {
-    fprintf(stderr,"Could not calloc(1,sizeof(tre_str_source)\n");
-    return NULL;
-  }
+  if (!s)
+    {
+      fprintf(stderr,"Could not calloc(1,sizeof(tre_str_source)\n");
+      return NULL;
+    }
 
   ctx = malloc(sizeof(str_handler_ctx));
   if (!ctx)
@@ -122,14 +126,16 @@ test_reguexec(const char *str, const char *regex)
     return;
 
   ec = tre_regcomp(&preg, regex, REG_EXTENDED);
-  if (ec != REG_OK) {
-    fprintf(output_fd,"Pattern {%s} failed to compile, err code 0x%08x\n", regex, (unsigned)ec);
-  }
+  if (ec != REG_OK)
+    {
+      fprintf(output_fd,"Pattern {%s} failed to compile, err code 0x%08x\n", regex, (unsigned)ec);
+    }
   else if ((ec = tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0)) == 0)
     fprintf(output_fd,"Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
-  else {
-    fprintf(output_fd,"Match pattern {%s} against string {%s} failed, err code 0x%08x\n", regex, str, (unsigned)ec);
-  }
+  else
+    {
+      fprintf(output_fd,"Match pattern {%s} against string {%s} failed, err code 0x%08x\n", regex, str, (unsigned)ec);
+    }
 
   free_str_source(source);
   tre_regfree(&preg);
@@ -146,26 +152,31 @@ main(int argc, char **argv)
   int config_mismatch = 0;
   char *char_res;
   output_fd = stdout;
-  while (EOF != (ch = getopt(argc,argv,"o:"))) {
-    switch (ch) {
-      case 'o':
-        if (NULL == (output_fd = fopen(optarg,"w"))) {
-          fprintf(stderr,"Could not open {%s} for output, quitting\n",optarg);
-          exit(1);
-        }
-        break;
-      default:
-        fprintf(stderr,"Invalid command line option '-%c', quitting\n",ch);
-        if (NULL != output_fd && stdout != output_fd) {
-          fclose(output_fd);
-          output_fd = NULL;
-        }
-        exit(1);
+  while ((ch = getopt(argc,argv,"o:") != EOF))
+    {
+      switch (ch)
+	{
+	  case 'o':
+	    if ((output_fd = fopen(optarg,"w")) == NULL)
+	      {
+		fprintf(stderr,"Could not open {%s} for output, quitting\n", optarg);
+		exit(1);
+	      }
+	    break;
+	  default:
+	    fprintf(stderr,"Invalid command line option '-%c', quitting\n", ch);
+	    if (output_fd != NULL && stdout != output_fd)
+	      {
+		fclose(output_fd);
+		output_fd = NULL;
+	      }
+	    exit(1);
+	}
     }
-  }
+
   /* Display the version and configuation of the TRE library we are using. */
-  fprintf(output_fd,"Using TRE library version: %s\n",tre_version());
-  fprintf(output_fd,"   test compiled for version: %s\n",TRE_VERSION);
+  fprintf(output_fd,"Using TRE library version: %s\n", tre_version());
+  fprintf(output_fd,"   test compiled for version: %s\n", TRE_VERSION);
 
   query = (int) TRE_CONFIG_APPROX;
   int_res = -1;
@@ -175,7 +186,7 @@ main(int argc, char **argv)
 #else
   desired_config = 0;
 #endif
-  fprintf(output_fd,"  TRE_CONFIG_APPROX: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  fprintf(output_fd,"  TRE_CONFIG_APPROX: library %d (rc=%d) test compiled for %d\n", int_res, rc, desired_config);
   config_mismatch |= (int_res != desired_config);
 
   query = (int) TRE_CONFIG_WCHAR;
@@ -186,7 +197,7 @@ main(int argc, char **argv)
 #else
   desired_config = 0;
 #endif
-  fprintf(output_fd,"  TRE_CONFIG_WCHAR: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  fprintf(output_fd,"  TRE_CONFIG_WCHAR: library %d (rc=%d) test compiled for %d\n", int_res, rc, desired_config);
   config_mismatch |= (int_res != desired_config);
 
   query = (int) TRE_CONFIG_MULTIBYTE;
@@ -197,7 +208,7 @@ main(int argc, char **argv)
 #else
   desired_config = 0;
 #endif
-  fprintf(output_fd,"  TRE_CONFIG_MULTIBYTE: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  fprintf(output_fd,"  TRE_CONFIG_MULTIBYTE: library %d (rc=%d) test compiled for %d\n", int_res, rc, desired_config);
   config_mismatch |= (int_res != desired_config);
 
   query = (int) TRE_CONFIG_SYSTEM_ABI;
@@ -208,18 +219,19 @@ main(int argc, char **argv)
 #else
   desired_config = 0;
 #endif
-  fprintf(output_fd,"  TRE_CONFIG_SYSTEM_ABI: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  fprintf(output_fd,"  TRE_CONFIG_SYSTEM_ABI: library %d (rc=%d) test compiled for %d\n", int_res, rc, desired_config);
   config_mismatch |= (int_res != desired_config);
 
   query = (int) TRE_CONFIG_VERSION;
   char_res = "---";
   rc = tre_config(query,&char_res);
-  fprintf(output_fd,"  TRE_CONFIG_VERSION: {%s} (rc=%d)\n",char_res,rc);
+  fprintf(output_fd,"  TRE_CONFIG_VERSION: {%s} (rc=%d)\n", char_res, rc);
 
-  if (config_mismatch) {
-    fprintf(output_fd,"WARNING: The configuration this test program was compiled with is not the same");
-    fprintf(output_fd,"as the configuration of the libtre being used, some tests may be incorrect.\n");
-  }
+  if (config_mismatch)
+    {
+      fprintf(output_fd,"WARNING: The configuration this test program was compiled with is not the same");
+      fprintf(output_fd,"as the configuration of the libtre being used, some tests may be incorrect.\n");
+    }
 
   fprintf(output_fd,"------------------ Test 1: should Match: 6 - 12\n");
   test_reguexec("xfoofofoofoo","(foo)\\1");
@@ -232,9 +244,10 @@ main(int argc, char **argv)
   fprintf(output_fd,"------------------ Test 5: should not match\n");
   test_reguexec("dogcat","(cat|dog)\\1");
 
-  if (NULL != output_fd && stdout != output_fd) {
-    fclose(output_fd);
-    output_fd = NULL;
-  }
+  if (NULL != output_fd && stdout != output_fd)
+    {
+      fclose(output_fd);
+      output_fd = NULL;
+    }
   return 0;
 }
