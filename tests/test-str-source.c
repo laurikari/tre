@@ -78,14 +78,14 @@ make_str_source(const char *str)
 
   s = calloc(1, sizeof(*s));
   if (!s) {
-    fprintf(stderr,"Could calloc(1,sizeof(tre_str_source)\n");
+    fprintf(stderr,"Could not calloc(1,sizeof(tre_str_source)\n");
     return NULL;
   }
 
   ctx = malloc(sizeof(str_handler_ctx));
   if (!ctx)
     {
-      fprintf(stderr,"Could malloc(sizeof(str_handler_ctx)\n");
+      fprintf(stderr,"Could not malloc(sizeof(str_handler_ctx)\n");
       free(s);
       return NULL;
     }
@@ -122,13 +122,13 @@ test_reguexec(const char *str, const char *regex)
     return;
 
   ec = tre_regcomp(&preg, regex, REG_EXTENDED);
-  if (REG_OK != ec) {
-    fprintf(output_fd,"Pattern {%s} failed to compile, err code 0x%08x\n",regex,(unsigned)ec);
+  if (ec != REG_OK) {
+    fprintf(output_fd,"Pattern {%s} failed to compile, err code 0x%08x\n", regex, (unsigned)ec);
   }
   else if ((ec = tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0)) == 0)
     fprintf(output_fd,"Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
   else {
-    fprintf(output_fd,"Match pattern {%s} against string {%s} failed, err code 0x%08x\n",regex,str,(unsigned)ec);
+    fprintf(output_fd,"Match pattern {%s} against string {%s} failed, err code 0x%08x\n", regex, str, (unsigned)ec);
   }
 
   free_str_source(source);
@@ -139,6 +139,12 @@ int
 main(int argc, char **argv)
 {
   int ch;
+  int rc;
+  int query;
+  int int_res;
+  int desired_config;
+  int config_mismatch = 0;
+  char *char_res;
   output_fd = stdout;
   while (EOF != (ch = getopt(argc,argv,"o:"))) {
     switch (ch) {
@@ -157,10 +163,73 @@ main(int argc, char **argv)
         exit(1);
     }
   }
+  /* Display the version and configuation of the TRE library we are using. */
+  fprintf(output_fd,"Using TRE library version: %s\n",tre_version());
+  fprintf(output_fd,"   test compiled for version: %s\n",TRE_VERSION);
+
+  query = (int) TRE_CONFIG_APPROX;
+  int_res = -1;
+  rc = tre_config(query,&int_res);
+#ifdef TRE_APPROX
+  desired_config = 1;
+#else
+  desired_config = 0;
+#endif
+  fprintf(output_fd,"  TRE_CONFIG_APPROX: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  config_mismatch |= (int_res != desired_config);
+
+  query = (int) TRE_CONFIG_WCHAR;
+  int_res = -1;
+  rc = tre_config(query,&int_res);
+#ifdef TRE_WCHAR
+  desired_config = 1;
+#else
+  desired_config = 0;
+#endif
+  fprintf(output_fd,"  TRE_CONFIG_WCHAR: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  config_mismatch |= (int_res != desired_config);
+
+  query = (int) TRE_CONFIG_MULTIBYTE;
+  int_res = -1;
+  rc = tre_config(query,&int_res);
+#ifdef TRE_MULTIBYTE
+  desired_config = 1;
+#else
+  desired_config = 0;
+#endif
+  fprintf(output_fd,"  TRE_CONFIG_MULTIBYTE: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  config_mismatch |= (int_res != desired_config);
+
+  query = (int) TRE_CONFIG_SYSTEM_ABI;
+  int_res = -1;
+  rc = tre_config(query,&int_res);
+#ifdef TRE_CONFIG_SYSTEM_ABI
+  desired_config = 1;
+#else
+  desired_config = 0;
+#endif
+  fprintf(output_fd,"  TRE_CONFIG_SYSTEM_ABI: library %d (rc=%d) test compiled for %d\n",int_res,rc,desired_config);
+  config_mismatch |= (int_res != desired_config);
+
+  query = (int) TRE_CONFIG_VERSION;
+  char_res = "---";
+  rc = tre_config(query,&char_res);
+  fprintf(output_fd,"  TRE_CONFIG_VERSION: {%s} (rc=%d)\n",char_res,rc);
+
+  if (config_mismatch) {
+    fprintf(output_fd,"WARNING: The configuration this test program was compiled with is not the same");
+    fprintf(output_fd,"as the configuration of the libtre being used, some tests may be incorrect.\n");
+  }
+
+  fprintf(output_fd,"------------------ Test 1: should Match: 6 - 12\n");
   test_reguexec("xfoofofoofoo","(foo)\\1");
+  fprintf(output_fd,"------------------ Test 2: should Match: 0 - 6\n");
   test_reguexec("catcat","(cat|dog)\\1");
+  fprintf(output_fd,"------------------ Test 3: should not match\n");
   test_reguexec("catdog","(cat|dog)\\1");
+  fprintf(output_fd,"------------------ Test 4: should Match: 0 - 6\n");
   test_reguexec("dogdog","(cat|dog)\\1");
+  fprintf(output_fd,"------------------ Test 5: should not match\n");
   test_reguexec("dogcat","(cat|dog)\\1");
 
   if (NULL != output_fd && stdout != output_fd) {
