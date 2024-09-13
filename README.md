@@ -184,32 +184,20 @@ handler, or in many threads of a multithreaded application.
 Portable
 --------
 
-TRE is portable across multiple platforms. Here's a table of
-platforms and compilers that have been successfully used to compile
-and run TRE:
+TRE is portable across multiple platforms.  Below is a table of
+platforms and compilers used to develop and test TRE:
 
 <table>
-   <tr><th>Platform(s)</th>                    <th>Compiler(s)</th></tr>
-   <tr><td>AIX 4.3.2 - 5.3.0</td>              <td>GCC, C for AIX compiler version 5</td></tr>
-   <tr><td>Compaq Tru64 UNIX V5.1A/B</td>      <td>Compaq C V6.4-014 - V6.5-011</td></tr>
-   <tr><td>Cygwin 1.3 - 1.5</td>               <td>GCC</td></tr>
-   <tr><td>Digital UNIX V4.0</td>              <td>DEC C V5.9-005</td></tr>
-   <tr><td>FreeBSD 4 and above</td>            <td>GCC</td></tr>
-   <tr><td>GNU/Linux systems on x86, x86_64, ppc64, s390</td><td>GCC</td></tr>
-   <tr><td>HP-UX 10.20- 11.00</td>             <td>GCC, HP C Compiler</td></tr>
-   <tr><td>IRIX 6.5</td>                       <td>GCC, MIPSpro Compilers 7.3.1.3m</td></tr>
-   <tr><td>Max OS X</td></tr>
-   <tr><td>NetBSD 1.5 and above</td>           <td>GCC, egcs</td></tr>
-   <tr><td>OpenBSD 3.3 and above</td>          <td>GCC</td></tr>
-   <tr><td>Solaris 2.7-10 sparc/x86</td>       <td>GCC, Sun Workshop 6 compilers</td></tr>
-   <tr><td>Windows 98 - XP</td>                <td>Microsoft Visual C++ 6.0</td></tr>
+	<tr><th>Platform</th>				<th>Compiler</th></tr>
+	<tr><td>FreeBSD 14.1</td>			<td>Clang 18</td></tr>
+	<tr><td>Ubuntu 22.04</td>			<td>GCC 11</td></tr>
+	<tr><td>macOS 14.6</td>				<td>Clang 14</td></tr>
+	<tr><td>Windows 11</td>				<td>Microsoft Visual Studio 2022</td></tr>
 </table>
 
-
-TRE 0.7.5 should compile without changes on all of the above
-platforms.  Tell me if you are using TRE on a platform that is not
-listed above, and I'll add it to the list. Also let me know if TRE
-does not work on a listed platform.
+TRE should compile without changes on most modern POSIX-like
+platforms, and be easily portable to any platform with a hosted C
+implementation.
 
 Depending on the platform, you may need to install libutf8 to get
 wide character and multibyte character set support.

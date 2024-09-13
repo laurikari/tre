@@ -10,10 +10,12 @@ SUBDIRS = local_includes lib $(agrep_dirs) tests utils po m4
 
 EXTRA_DIST = \
 	LICENSE \
-	win32/tre-config.h win32/config.h \
-	win32/tre.vcproj \
+	win32/tre-config.h
+	win32/config.h \
+	win32/tre.vcxproj \
 	win32/tre.sln \
-	win32/retest.vcproj \
+	win32/retest.vcxproj \
+	win32/test-str-source.vcxproj \
 	python/tre-python.c \
 	python/setup.py \
 	python/example.py

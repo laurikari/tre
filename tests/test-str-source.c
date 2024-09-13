@@ -14,11 +14,15 @@
 #include <stdlib.h>
 #include <string.h>
 /* look for getopt in order to use a -o option for output. */
+#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
+#elif defined(HAVE_GETOPT_H)
+#include <getopt.h>
+#endif
 
 #include "tre-internal.h"
 
-static FILE *output_fd = NULL;
+static FILE *outf = NULL;
 
 /* Context structure for the tre_str_source wrappers.  */
 typedef struct {
@@ -37,7 +41,9 @@ str_handler_get_next(tre_char_t *c, unsigned int *pos_add, void *context)
   str_handler_ctx *ctx = context;
   unsigned char ch = ctx->str[ctx->pos];
 
-  fprintf(output_fd,"str[%lu] = %d\n", (unsigned long)ctx->pos, ch);
+#ifdef TRE_DEBUG
+  fprintf(outf, "str[%lu] = %d\n", (unsigned long)ctx->pos, ch);
+#endif /* TRE_DEBUG */
   *c = ch;
   if (ch)
     ctx->pos++;
@@ -52,7 +58,9 @@ str_handler_rewind(size_t pos, void *context)
 {
   str_handler_ctx *ctx = context;
 
-  fprintf(output_fd,"rewind to %lu\n", (unsigned long)pos);
+#ifdef TRE_DEBUG
+  fprintf(outf, "rewind to %lu\n", (unsigned long)pos);
+#endif /* TRE_DEBUG */
   ctx->pos = pos;
 }
 
@@ -62,9 +70,11 @@ static int
 str_handler_compare(size_t pos1, size_t pos2, size_t len, void *context)
 {
   str_handler_ctx *ctx = context;
-  fprintf(output_fd,"comparing %lu-%lu and %lu-%lu\n",
+#ifdef TRE_DEBUG
+  fprintf(outf, "comparing %lu-%lu and %lu-%lu\n",
 	 (unsigned long)pos1, (unsigned long)pos1 + len,
 	 (unsigned long)pos2, (unsigned long)pos2 + len);
+#endif /* TRE_DEBUG */
   return strncmp(ctx->str + pos1, ctx->str + pos2, len);
 }
 
@@ -105,57 +115,78 @@ free_str_source(tre_str_source *s)
   free(s);
 }
 
-/* Run one test with tre_reguexec */
-static void
+/* Run one test with tre_reguexec.  Returns 1 if the regex matches, 0 if
+   it doesn't, and -1 if an error occurs. */
+static int
 test_reguexec(const char *str, const char *regex)
 {
   regex_t preg;
   tre_str_source *source;
   regmatch_t pmatch[5];
+  int ret;
 
-  source = make_str_source(str);
-  if (!source)
-    return;
-
-  tre_regcomp(&preg, regex, REG_EXTENDED);
-  if (tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
-    fprintf(output_fd,"Match: %d - %d\n", (int)pmatch[0].rm_so, (int)pmatch[0].rm_eo);
-
-  free_str_source(source);
-  tre_regfree(&preg);
+  if ((source = make_str_source(str)) == NULL)
+    {
+      fprintf(stderr, "Out of memory\n");
+      ret = -1;
+    }
+  else
+    {
+      if (tre_regcomp(&preg, regex, REG_EXTENDED) != REG_OK)
+	{
+	  fprintf(stderr, "Failed to compile /%s/\n", regex);
+	  ret = -1;
+	}
+      else
+	{
+	  if (tre_reguexec(&preg, source, elementsof(pmatch), pmatch, 0) == 0)
+	    {
+	      fprintf(outf, "Match: /%s/ matches \"%.*s\" in \"%s\"\n", regex,
+		      (int)(pmatch[0].rm_eo - pmatch[0].rm_so),
+		      str + pmatch[0].rm_so, str);
+	      ret = 1;
+	    }
+	  else
+	    {
+	      fprintf(outf, "No match: /%s/ in \"%s\"\n", regex, str);
+	      ret = 0;
+	    }
+	  tre_regfree(&preg);
+	}
+      free_str_source(source);
+    }
+  return ret;
 }
 
 int
 main(int argc, char **argv)
 {
-  int ch;
-  output_fd = stdout;
-  while (EOF != (ch = getopt(argc,argv,"o:"))) {
-    switch (ch) {
-      case 'o':
-        if (NULL == (output_fd = fopen(optarg,"w"))) {
-          fprintf(stderr,"Could not open {%s} for output, quitting\n",optarg);
-          exit(1);
-        }
-        break;
-      default:
-        fprintf(stderr,"Invalid command line option '-%c', quitting\n",ch);
-        if (NULL != output_fd && stdout != output_fd) {
-          fclose(output_fd);
-          output_fd = NULL;
-        }
-        exit(1);
+  int ret = 0;
+  outf = stdout;
+#if defined(HAVE_UNISTD_H) || defined(HAVE_GETOPT_H)
+  int opt;
+  while ((opt = getopt(argc, argv, "o:")) != EOF)
+    {
+      switch (opt)
+	{
+	case 'o':
+	  if ((outf = fopen(optarg, "w")) == NULL)
+	    {
+	      perror(optarg);
+	      exit(1);
+	    }
+	  break;
+	default:
+	  /* getopt() will have printed an error message already */
+	  exit(1);
+	}
     }
-  }
-  test_reguexec("xfoofofoofoo","(foo)\\1");
-  test_reguexec("catcat","(cat|dog)\\1");
-  test_reguexec("catdog","(cat|dog)\\1");
-  test_reguexec("dogdog","(cat|dog)\\1");
-  test_reguexec("dogcat","(cat|dog)\\1");
+#endif
+  ret += test_reguexec("xfoofofoofoo", "(foo)\\1") != 1;
+  ret += test_reguexec("catcat", "(cat|dog)\\1") != 1;
+  ret += test_reguexec("catdog", "(cat|dog)\\1") != 0;
+  ret += test_reguexec("dogdog", "(cat|dog)\\1") != 1;
+  ret += test_reguexec("dogcat", "(cat|dog)\\1") != 0;
 
-  if (NULL != output_fd && stdout != output_fd) {
-    fclose(output_fd);
-    output_fd = NULL;
-  }
-  return 0;
+  return ret;
 }
