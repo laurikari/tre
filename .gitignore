@@ -32,8 +32,3 @@ Makefile.in
 /configure
 /dist
 /tmp-build
-.lock-waf_*
-build/
-.waf3-*
-waf3-*
-__pycache__
