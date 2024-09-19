@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tre\n"
 "Report-Msgid-Bugs-To: tre-general@lists.laurikari.net\n"
-"POT-Creation-Date: 2016-12-08 11:31+0200\n"
+"POT-Creation-Date: 2024-09-19 10:44+0200\n"
 "PO-Revision-Date: 2006-05-23 21:27+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -15,94 +15,98 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: lib/regerror.c:37
+#: lib/regerror.c:39
 msgid "No error"
 msgstr "Inga fel"
 
-#: lib/regerror.c:38
+#: lib/regerror.c:40
 msgid "No match"
 msgstr "Ingen träff"
 
-#: lib/regerror.c:39
+#: lib/regerror.c:41
 msgid "Invalid regexp"
 msgstr "Ogiltigt reguljärt uttryck"
 
-#: lib/regerror.c:40
+#: lib/regerror.c:42
 msgid "Unknown collating element"
 msgstr "Okänt kollationeringselement"
 
-#: lib/regerror.c:41
+#: lib/regerror.c:43
 msgid "Unknown character class name"
 msgstr "Okänt teckenklassnamn"
 
-#: lib/regerror.c:42
+#: lib/regerror.c:44
 msgid "Trailing backslash"
 msgstr "Avslutande omvänt snedstreck"
 
-#: lib/regerror.c:43
+#: lib/regerror.c:45
 msgid "Invalid back reference"
 msgstr "Ogiltig bakåtreferens"
 
-#: lib/regerror.c:44
+#: lib/regerror.c:46
 msgid "Missing ']'"
 msgstr "Saknar \"]\""
 
-#: lib/regerror.c:45
+#: lib/regerror.c:47
 msgid "Missing ')'"
 msgstr "Saknar \")\""
 
-#: lib/regerror.c:46
+#: lib/regerror.c:48
 msgid "Missing '}'"
 msgstr "Saknar \"}\""
 
-#: lib/regerror.c:47
+#: lib/regerror.c:49
 msgid "Invalid contents of {}"
 msgstr "Ogiltigt innehåll i {}"
 
-#: lib/regerror.c:48
+#: lib/regerror.c:50
 msgid "Invalid character range"
 msgstr "Ogiltigt teckenomfång"
 
-#: lib/regerror.c:49 src/agrep.c:229 src/agrep.c:299 src/agrep.c:324
-#: src/agrep.c:695 src/agrep.c:734
+#: lib/regerror.c:51 src/agrep.c:234 src/agrep.c:304 src/agrep.c:329
+#: src/agrep.c:711 src/agrep.c:750
 msgid "Out of memory"
 msgstr "Slut på minne"
 
-#: lib/regerror.c:50
+#: lib/regerror.c:52
 msgid "Invalid use of repetition operators"
 msgstr ""
 
-#: lib/regerror.c:65
+#: lib/regerror.c:53
+msgid "Maximum repetition in {} larger than "
+msgstr ""
+
+#: lib/regerror.c:68
 msgid "Unknown error"
 msgstr "Okänt fel"
 
-#: src/agrep.c:96 src/agrep.c:103
+#: src/agrep.c:99 src/agrep.c:106
 #, c-format
 msgid "Usage: %s [OPTION]... PATTERN [FILE]...\n"
 msgstr "Användning: %s [FLAGGA]... MÖNSTER [FIL]...\n"
 
-#: src/agrep.c:98
+#: src/agrep.c:101
 #, c-format
 msgid "Try `%s --help' for more information.\n"
 msgstr "Prova \"%s --help\" för mer information.\n"
 
-#: src/agrep.c:104
+#: src/agrep.c:107
 #, c-format
 msgid ""
 "Searches for approximate matches of PATTERN in each FILE or standard input.\n"
 "Example: `%s -2 optimize foo.txt' outputs all lines in file `foo.txt' that\n"
-"match \"optimize\" within two errors.  E.g. lines which contain \"optimise"
-"\",\n"
+"match \"optimize\" within two errors.  E.g. lines which contain "
+"\"optimise\",\n"
 "\"optmise\", and \"opitmize\" all match.\n"
 msgstr ""
 "Söker efter ungefärliga träffar på MÖNSTER i varje FIL eller standard in.\n"
-"Exempel: \"%s -2 optimera foo.txt\" skriver ut alla rader i filen \"foo.txt"
-"\"\n"
+"Exempel: \"%s -2 optimera foo.txt\" skriver ut alla rader i filen \"foo."
+"txt\"\n"
 "som matchar \"optimera\" med maximalt två fel.  T.ex. rader som innehåller\n"
 "\"optimera\", \"optmera\", and \"opitmera\" är alla sökträffar.\n"
 
-#: src/agrep.c:110
-#, c-format
+#: src/agrep.c:113
+#, fuzzy, c-format
 msgid ""
 "Regexp selection and interpretation:\n"
 "  -e, --regexp=PATTERN\t    use PATTERN as a regular expression\n"
@@ -134,6 +138,7 @@ msgid ""
 "  -l, --files-with-matches  only print FILE names containing matches\n"
 "  -M, --delimiter-after     print record delimiter after record if -d is "
 "used\n"
+"  -m, --max-count=NUM       stop after NUM selected lines\n"
 "  -n, --record-number\t    print record number with output\n"
 "      --line-number         same as -n\n"
 "  -q, --quiet, --silent\t    suppress all normal output\n"
@@ -181,7 +186,7 @@ msgstr ""
 "      --show-position       skriv ut start- och slutposition för varje\n"
 "\t\t\t    utskriven post för den första träffen inom posten\n"
 
-#: src/agrep.c:149
+#: src/agrep.c:153
 #, c-format
 msgid ""
 "With no FILE, or when FILE is -, reads standard input.  If less than two\n"
@@ -195,7 +200,7 @@ msgstr ""
 "hittas och 2 om fel inträffar.  Om varken -E eller -# anges så väljs endast\n"
 "exakta träffar.\n"
 
-#: src/agrep.c:155
+#: src/agrep.c:159
 #, c-format
 msgid ""
 "PATTERN is a POSIX extended regular expression (ERE) with the TRE "
@@ -205,42 +210,42 @@ msgstr ""
 "MÖNSTER är ett POSIX-utökat reguljärt uttryck (ERE) med TRE-utökningar.\n"
 "Se tre(7) för en komplett beskrivning.\n"
 
-#: src/agrep.c:159
+#: src/agrep.c:163
 #, c-format
 msgid "Report bugs to: "
 msgstr "Rapportera fel till: "
 
-#: src/agrep.c:244
+#: src/agrep.c:249
 #, c-format
 msgid "Error reading from %s: %s\n"
 msgstr "Fel vid läsning från %s: %s\n"
 
-#: src/agrep.c:339
+#: src/agrep.c:344
 msgid "Cannot use -B when reading from standard input."
 msgstr "Kan inte använda -B vid inläsning från standard in."
 
-#: src/agrep.c:343
+#: src/agrep.c:348
 msgid "(standard input)"
 msgstr "(standard in)"
 
-#: src/agrep.c:600
+#: src/agrep.c:612
 #, c-format
 msgid "Copyright (c) 2001-2009 Ville Laurikari <vl@iki.fi>.\n"
 msgstr "Copyright © 2001-2009 Ville Laurikari <vl@iki.fi>.\n"
 
-#: src/agrep.c:622
+#: src/agrep.c:634
 #, c-format
 msgid "%s: invalid option --%s\n"
 msgstr "%s: ogiltig flagga --%s\n"
 
-#: src/agrep.c:749
+#: src/agrep.c:765
 msgid "Error in search pattern"
 msgstr "Fel i sökmönster"
 
-#: src/agrep.c:760
+#: src/agrep.c:776
 msgid "Error in record delimiter pattern"
 msgstr "Fel i postavgränsande mönster"
 
-#: src/agrep.c:767
+#: src/agrep.c:783
 msgid "Record delimiter pattern must not match an empty string"
 msgstr "Postavgränsande mönster får inte matcha en tom sträng"
