@@ -9,7 +9,7 @@ import sys
 import os
 import shutil
 
-version = "0.8.0"
+version = "0.9.0"
 data_files = []
 include_dirs = ["../local_includes"]
 library_dirs = ["../lib/.libs"]
