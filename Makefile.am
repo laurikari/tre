@@ -10,7 +10,7 @@ SUBDIRS = local_includes lib $(agrep_dirs) tests utils po m4
 
 EXTRA_DIST = \
 	LICENSE \
-	win32/tre-config.h
+	win32/tre-config.h \
 	win32/config.h \
 	win32/tre.vcxproj \
 	win32/tre.sln \
