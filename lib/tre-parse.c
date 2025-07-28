@@ -1218,7 +1218,6 @@ tre_parse(tre_parse_ctx_t *ctx)
 	  switch (*ctx->re)
 	    {
 	    case CHAR_LPAREN:  /* parenthesized subexpression */
-
 	      /* Handle "(?...)" extensions.  They work in a way similar
 		 to Perls corresponding extensions. */
 	      if (ctx->cflags & REG_EXTENDED
@@ -1325,58 +1324,51 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  break;
 		}
 
-	      if (ctx->cflags & REG_EXTENDED
-		  || (ctx->re > ctx->re_start
-		      && *(ctx->re - 1) == CHAR_BACKSLASH))
+	      if (!(ctx->cflags & REG_EXTENDED))
+		goto parse_literal;
+
+	    atom_lparen:
+	      depth++;
+	      if (ctx->re + 2 < ctx->re_end
+		  && *(ctx->re + 1) == CHAR_QUESTIONMARK
+		  && *(ctx->re + 2) == CHAR_COLON)
 		{
-		  depth++;
-		  if (ctx->re + 2 < ctx->re_end
-		      && *(ctx->re + 1) == CHAR_QUESTIONMARK
-		      && *(ctx->re + 2) == CHAR_COLON)
-		    {
-		      DPRINT(("tre_parse: group begin: '%.*" STRF
-			      "', no submatch\n", REST(ctx->re)));
-		      /* Don't mark for submatching. */
-		      ctx->re += 3;
-		      STACK_PUSHX(stack, int, PARSE_RE);
-		    }
-		  else
-		    {
-		      DPRINT(("tre_parse: group begin: '%.*" STRF
-			      "', submatch %d\n", REST(ctx->re),
-			      ctx->submatch_id));
-		      ctx->re++;
-		      /* First parse a whole RE, then mark the resulting tree
-			 for submatching. */
-		      STACK_PUSHX(stack, int, ctx->submatch_id);
-		      STACK_PUSHX(stack, int, PARSE_MARK_FOR_SUBMATCH);
-		      STACK_PUSHX(stack, int, PARSE_RE);
-		      ctx->submatch_id++;
-		    }
+		  DPRINT(("tre_parse: group begin: '%.*" STRF
+			  "', no submatch\n", REST(ctx->re)));
+		  /* Don't mark for submatching. */
+		  ctx->re += 3;
+		  STACK_PUSHX(stack, int, PARSE_RE);
 		}
 	      else
-		goto parse_literal;
+		{
+		  DPRINT(("tre_parse: group begin: '%.*" STRF
+			  "', submatch %d\n", REST(ctx->re),
+			  ctx->submatch_id));
+		  ctx->re++;
+		  /* First parse a whole RE, then mark the resulting tree
+		     for submatching. */
+		  STACK_PUSHX(stack, int, ctx->submatch_id);
+		  STACK_PUSHX(stack, int, PARSE_MARK_FOR_SUBMATCH);
+		  STACK_PUSHX(stack, int, PARSE_RE);
+		  ctx->submatch_id++;
+		}
 	      break;
 
 	    case CHAR_RPAREN:  /* end of current subexpression */
-	      if ((ctx->cflags & REG_EXTENDED && depth > 0)
-		  || (!(ctx->cflags & REG_EXTENDED) && ctx->re > ctx->re_start
-		      && *(ctx->re - 1) == CHAR_BACKSLASH))
-		{
-		  DPRINT(("tre_parse:	    empty: '%.*" STRF "'\n",
-			  REST(ctx->re)));
-		  /* We were expecting an atom, but instead the current
-		     subexpression was closed.	POSIX leaves the meaning of
-		     this to be implementation-defined.	 We interpret this as
-		     an empty expression (which matches an empty string).  */
-		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1);
-		  if (result == NULL)
-		    return REG_ESPACE;
-		  if (!(ctx->cflags & REG_EXTENDED))
-		    ctx->re--;
-		}
-	      else
+	      if (!(ctx->cflags & REG_EXTENDED) || depth == 0)
 		goto parse_literal;
+	    atom_rparen:
+	      DPRINT(("tre_parse:	    empty: '%.*" STRF "'\n",
+		      REST(ctx->re)));
+	      /* We were expecting an atom, but instead the current
+		 subexpression was closed.  POSIX leaves the meaning of
+		 this to be implementation-defined.  We interpret this as
+		 an empty expression (which matches an empty string).  */
+	      result = tre_ast_new_literal(ctx->mem, EMPTY, -1);
+	      if (result == NULL)
+		return REG_ESPACE;
+	      if (!(ctx->cflags & REG_EXTENDED))
+		ctx->re--;
 	      break;
 
 	    case CHAR_LBRACKET: /* bracket expression */
@@ -1389,16 +1381,15 @@ tre_parse(tre_parse_ctx_t *ctx)
 	      break;
 
 	    case CHAR_BACKSLASH:
-	      /* If this is "\(" or "\)" chew off the backslash and
-		 try again. */
-	      if (!(ctx->cflags & REG_EXTENDED)
-		  && ctx->re + 1 < ctx->re_end
-		  && (*(ctx->re + 1) == CHAR_LPAREN
-		      || *(ctx->re + 1) == CHAR_RPAREN))
+	      /* If this is "\(" or "\)" skip straight there. */
+	      if (!(ctx->cflags & REG_EXTENDED) && ctx->re + 1 < ctx->re_end)
 		{
 		  ctx->re++;
-		  STACK_PUSHX(stack, int, PARSE_ATOM);
-		  break;
+		  if (*ctx->re == CHAR_LPAREN)
+		      goto atom_lparen;
+		  if (*ctx->re == CHAR_RPAREN)
+		      goto atom_rparen;
+		  ctx->re--;
 		}
 
 	      /* If a macro is used, parse the expanded macro recursively. */
