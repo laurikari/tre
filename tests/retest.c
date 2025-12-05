@@ -1632,6 +1632,8 @@ main(int argc, char **argv)
   test_comp("([a-c]*)\\1", REG_EXTENDED, 0);
   test_exec("abcacdef", 0, REG_OK, 0, 0, 0, 0, END);
   test_exec("abcabcabcd", 0, REG_OK, 0, 6, 0, 3, END);
+  test_comp("(.{1,3})\\1", REG_EXTENDED, 0);
+  test_exec("foo", 0, REG_OK, 1, 3, 1, 2, END);
 
   test_comp("\\(a*\\)*\\(x\\)\\(\\1\\)", 0, 0);
   test_exec("x", 0, REG_OK, 0, 1, 0, 0, 0, 1, 1, 1, END);

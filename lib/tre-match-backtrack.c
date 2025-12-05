@@ -616,7 +616,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	      /* Check for end of string. */
 	      if (len < 0)
 		{
-		  if (next_c == L'\0')
+		  if (next_c_start == L'\0')
 		    {
 		      DPRINT(("end of string.\n"));
 		      break;
@@ -624,7 +624,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		}
 	      else
 		{
-		  if (pos >= len)
+		  if (pos_start >= len)
 		    {
 		      DPRINT(("end of string.\n"));
 		      break;
