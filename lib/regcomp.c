@@ -21,6 +21,8 @@ int
 tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 {
   int ret;
+  if (n > TRE_MAX_RE)
+    return REG_ESPACE;
 #if TRE_WCHAR
   tre_char_t *wregex;
   size_t wlen;
@@ -103,6 +105,8 @@ int
 tre_regncompb(regex_t *preg, const char *regex, size_t n, int cflags)
 {
   int ret;
+  if (n > TRE_MAX_RE)
+    return REG_ESPACE;
 #if TRE_WCHAR /* wide chars = we need to convert it all to the wide format */
   tre_char_t *wregex;
   size_t i;
@@ -126,7 +130,10 @@ tre_regncompb(regex_t *preg, const char *regex, size_t n, int cflags)
 int
 tre_regcomp(regex_t *preg, const char *regex, int cflags)
 {
-  return tre_regncomp(preg, regex, regex ? strlen(regex) : 0, cflags);
+  size_t n = regex ? strlen(regex) : 0;
+  if (n > TRE_MAX_RE)
+    return REG_ESPACE;
+  return tre_regncomp(preg, regex, n, cflags);
 }
 
 int
@@ -134,10 +141,12 @@ tre_regcompb(regex_t *preg, const char *regex, int cflags)
 {
   int ret;
   tre_char_t *wregex;
-  size_t i, n = strlen(regex);
+  size_t i, n = regex ? strlen(regex) : 0;
   const unsigned char *str = (const unsigned char *)regex;
   tre_char_t *wstr;
 
+  if (n > TRE_MAX_RE)
+    return REG_ESPACE;
   wregex = xmalloc(sizeof(tre_char_t) * (n + 1));
   if (wregex == NULL) return REG_ESPACE;
   wstr = wregex;
@@ -155,13 +164,18 @@ tre_regcompb(regex_t *preg, const char *regex, int cflags)
 int
 tre_regwncomp(regex_t *preg, const wchar_t *regex, size_t n, int cflags)
 {
+  if (n > TRE_MAX_RE)
+    return REG_ESPACE;
   return tre_compile(preg, regex, n, cflags);
 }
 
 int
 tre_regwcomp(regex_t *preg, const wchar_t *regex, int cflags)
 {
-  return tre_compile(preg, regex, regex ? wcslen(regex) : 0, cflags);
+  size_t n = regex ? wcslen(regex) : 0;
+  if (n > TRE_MAX_RE)
+    return REG_ESPACE;
+  return tre_compile(preg, regex, n, cflags);
 }
 #endif /* TRE_WCHAR */
 

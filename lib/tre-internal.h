@@ -21,6 +21,9 @@
 #include <ctype.h>
 #include "../local_includes/tre.h"
 
+#define TRE_MAX_RE	65536
+#define TRE_MAX_STACK	1048576
+
 #ifdef TRE_DEBUG
 #include <stdio.h>
 #define DPRINT(msg) do {printf msg; fflush(stdout);} while(/*CONSTCOND*/(void)0,0)
