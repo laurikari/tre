@@ -38,7 +38,7 @@ tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
   if (TRE_MB_CUR_MAX == 1)
 #endif /* TRE_MULTIBYTE */
     {
-      unsigned int i;
+      size_t i;
       const unsigned char *str = (const unsigned char *)regex;
       tre_char_t *wstr = wregex;
 
@@ -49,7 +49,7 @@ tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 #if TRE_MULTIBYTE
   else
     {
-      int consumed;
+      size_t consumed;
       tre_char_t *wcptr = wregex;
 #ifdef HAVE_MBSTATE_T
       mbstate_t state;
@@ -134,8 +134,7 @@ tre_regcompb(regex_t *preg, const char *regex, int cflags)
 {
   int ret;
   tre_char_t *wregex;
-  size_t wlen, n = strlen(regex);
-  unsigned int i;
+  size_t i, n = strlen(regex);
   const unsigned char *str = (const unsigned char *)regex;
   tre_char_t *wstr;
 
@@ -143,10 +142,10 @@ tre_regcompb(regex_t *preg, const char *regex, int cflags)
   if (wregex == NULL) return REG_ESPACE;
   wstr = wregex;
 
-  for (i = 0; i < n; i++) *(wstr++) = *(str++);
-  wlen = n;
-  wregex[wlen] = L'\0';
-  ret = tre_compile(preg, wregex, wlen, cflags | REG_USEBYTES);
+  for (i = 0; i < n; i++)
+    *(wstr++) = *(str++);
+  wregex[n] = L'\0';
+  ret = tre_compile(preg, wregex, n, cflags | REG_USEBYTES);
   xfree(wregex);
   return ret;
 }
