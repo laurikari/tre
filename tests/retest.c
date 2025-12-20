@@ -60,7 +60,7 @@
 #define CHAR_T wchar_t
 #define L(x) (L ## x)
 
-#define MAXSTRSIZE 8192
+#define MAXSTRSIZE (TRE_MAX_RE * 2)
 static wchar_t wstr[MAXSTRSIZE];
 static wchar_t wregex[MAXSTRSIZE];
 static int woffs[MAXSTRSIZE];
@@ -501,7 +501,7 @@ static void
 test_comp(const char *re, int flags, int ret)
 {
   int errcode = 0;
-  int len = strlen(re);
+  int len = re ? strlen(re) : 0;
 
   if (valid_reobj)
     {
@@ -1738,7 +1738,9 @@ main(int argc, char **argv)
   test_comp("a\\{1,256\\}", 0, REG_BADMAX);
 
 
-#define TOOLONG 2048
+  test_comp(NULL, REG_BASIC, REG_OK);
+  test_comp(NULL, REG_EXTENDED, REG_OK);
+#define TOOLONG (TRE_MAX_RE / 2 + 1)
   static char toolong[TOOLONG + TOOLONG + 1];
   memset(toolong, '(', TOOLONG);
   memset(toolong + TOOLONG, ')', TOOLONG);

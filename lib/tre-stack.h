@@ -14,20 +14,20 @@
 
 typedef struct tre_stack_rec tre_stack_t;
 
-/* Creates a new stack object.	`size' is initial size in bytes, `max_size'
-   is maximum size, and `increment' specifies how much more space will be
-   allocated with realloc() if all space gets used up.	Returns the stack
-   object or NULL if out of memory. */
+/* Creates a new stack object with initial size `size' and maximum size
+   `max_size'. Pushing an additional item onto a full stack will resize
+   the stack to double its capacity until the maximum is reached. Returns
+   the stack object or NULL if out of memory. */
 tre_stack_t *
-tre_stack_new(int size, int max_size, int increment);
+tre_stack_new(size_t size, size_t max_size);
 
 /* Frees the stack object. */
 void
 tre_stack_destroy(tre_stack_t *s);
 
-/* Returns the current number of objects in the stack. */
-int
-tre_stack_num_objects(tre_stack_t *s);
+/* Returns the current number of items on the stack. */
+size_t
+tre_stack_num_items(tre_stack_t *s);
 
 /* Each tre_stack_push_*(tre_stack_t *s, <type> value) function pushes
    `value' on top of stack `s'.  Returns REG_ESPACE if out of memory.

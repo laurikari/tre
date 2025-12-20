@@ -146,7 +146,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
   reg_errcode_t status = REG_OK;
   tre_addtags_symbol_t symbol;
   tre_ast_node_t *node = tree; /* Tree node we are currently looking at. */
-  int bottom = tre_stack_num_objects(stack);
+  size_t bottom = tre_stack_num_items(stack);
   /* True for first pass (counting number of needed tags) */
   int first_pass = (mem == NULL || tnfa == NULL);
   int *regset, *orig_regset;
@@ -197,11 +197,8 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
   STACK_PUSH(stack, voidptr, node);
   STACK_PUSH(stack, int, ADDTAGS_RECURSE);
 
-  while (tre_stack_num_objects(stack) > bottom)
+  while (status == REG_OK && tre_stack_num_items(stack) > bottom)
     {
-      if (status != REG_OK)
-	break;
-
       symbol = (tre_addtags_symbol_t)tre_stack_pop_int(stack);
       switch (symbol)
 	{
@@ -608,7 +605,7 @@ tre_add_tags(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 	  break;
 
 	} /* end switch(symbol) */
-    } /* end while(tre_stack_num_objects(stack) > bottom) */
+    } /* end while(tre_stack_num_items(stack) > bottom) */
 
   if (!first_pass)
     tre_purge_regset(regset, tnfa, tag);
@@ -659,7 +656,7 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	     tre_ast_node_t **copy, int *max_pos)
 {
   reg_errcode_t status = REG_OK;
-  int bottom = tre_stack_num_objects(stack);
+  size_t bottom = tre_stack_num_items(stack);
   int num_copied = 0;
   int first_tag = 1;
   tre_ast_node_t **result = copy;
@@ -668,7 +665,7 @@ tre_copy_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
   STACK_PUSH(stack, voidptr, ast);
   STACK_PUSH(stack, int, COPY_RECURSE);
 
-  while (status == REG_OK && tre_stack_num_objects(stack) > bottom)
+  while (status == REG_OK && tre_stack_num_items(stack) > bottom)
     {
       tre_ast_node_t *node;
       if (status != REG_OK)
@@ -809,7 +806,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	       tre_tag_direction_t *tag_directions, int *max_depth)
 {
   reg_errcode_t status = REG_OK;
-  int bottom = tre_stack_num_objects(stack);
+  size_t bottom = tre_stack_num_items(stack);
   int pos_add = 0;
   int pos_add_total = 0;
   int max_pos = 0;
@@ -825,7 +822,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 
   STACK_PUSHR(stack, voidptr, ast);
   STACK_PUSHR(stack, int, EXPAND_RECURSE);
-  while (status == REG_OK && tre_stack_num_objects(stack) > bottom)
+  while (status == REG_OK && tre_stack_num_items(stack) > bottom)
     {
       tre_ast_node_t *node;
       tre_expand_ast_symbol_t symbol;
@@ -1198,7 +1195,7 @@ tre_match_empty(tre_stack_t *stack, tre_ast_node_t *node, int *tags,
   tre_catenation_t *cat;
   tre_iteration_t *iter;
   int i;
-  int bottom = tre_stack_num_objects(stack);
+  size_t bottom = tre_stack_num_items(stack);
   reg_errcode_t status = REG_OK;
   if (num_tags_seen)
     *num_tags_seen = 0;
@@ -1208,7 +1205,7 @@ tre_match_empty(tre_stack_t *stack, tre_ast_node_t *node, int *tags,
   status = tre_stack_push_voidptr(stack, node);
 
   /* Walk through the tree recursively. */
-  while (status == REG_OK && tre_stack_num_objects(stack) > bottom)
+  while (status == REG_OK && tre_stack_num_items(stack) > bottom)
     {
       node = tre_stack_pop_voidptr(stack);
 
@@ -1313,12 +1310,12 @@ static reg_errcode_t
 tre_compute_npfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		 int *nextpos)
 {
-  int bottom = tre_stack_num_objects(stack);
+  size_t bottom = tre_stack_num_items(stack);
 
   STACK_PUSHR(stack, voidptr, tree);
   STACK_PUSHR(stack, int, NPFL_RECURSE);
 
-  while (tre_stack_num_objects(stack) > bottom)
+  while (tre_stack_num_items(stack) > bottom)
     {
       tre_npfl_stack_symbol_t symbol;
       tre_ast_node_t *node;
@@ -1868,7 +1865,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 
   /* Allocate a stack used throughout the compilation process for various
      purposes. */
-  stack = tre_stack_new(512, 10240, 128);
+  stack = tre_stack_new(512, TRE_MAX_STACK);
   if (!stack)
     return REG_ESPACE;
   /* Allocate a fast memory allocator. */
