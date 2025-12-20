@@ -1,10 +1,3 @@
-## Looking for maintainers!
-
-This project is looking for maintainers.  For starters, there are a few
-pull requests waiting for review.
-
-Let me know at ville@laurikari.net if you wish to step up!
-
 Introduction
 ============
 
