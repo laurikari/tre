@@ -60,7 +60,7 @@
 #define CHAR_T wchar_t
 #define L(x) (L ## x)
 
-#define MAXSTRSIZE (TRE_MAX_RE * 2)
+#define MAXSTRSIZE 8192
 static wchar_t wstr[MAXSTRSIZE];
 static wchar_t wregex[MAXSTRSIZE];
 static int woffs[MAXSTRSIZE];
@@ -1740,12 +1740,6 @@ main(int argc, char **argv)
 
   test_comp(NULL, REG_BASIC, REG_OK);
   test_comp(NULL, REG_EXTENDED, REG_OK);
-#define TOOLONG (TRE_MAX_RE / 2 + 1)
-  static char toolong[TOOLONG + TOOLONG + 1];
-  memset(toolong, '(', TOOLONG);
-  memset(toolong + TOOLONG, ')', TOOLONG);
-  toolong[TOOLONG + TOOLONG] = '\0';
-  test_comp(toolong, REG_EXTENDED, REG_ESPACE);
 
 
   /*

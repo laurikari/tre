@@ -68,3 +68,10 @@ TESTS = test-str-source retest
 if TRE_MULTIBYTE
 TESTS += wretest
 endif TRE_MULTIBYTE
+
+# This test produces insane amounts of debugging output
+if !TRE_DEBUG
+check_PROGRAMS += test-limits
+TESTS += test-limits
+test_limits_LDADD = libxtre.la $(LDADD)
+endif
