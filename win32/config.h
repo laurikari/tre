@@ -171,9 +171,17 @@
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
 
-/* Define as `__inline' if that's what the C compiler calls it, or to nothing
-   if it is not supported. */
-#define inline __inline
+/* Define to '__inline__' or '__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+/* #undef inline */
+#endif
+
+/* Define as 'unsigned int' if <stddef.h> doesn't define. */
+/* #undef size_t */
+
+/* Define as 'int' if <sys/types.h> doesn't define. */
+#define ssize_t long
 
 /* Avoid silly warnings about "insecure" functions. */
 #define _CRT_SECURE_NO_DEPRECATE 1
