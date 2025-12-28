@@ -1013,6 +1013,7 @@ main(int argc, char **argv)
   test_exec("x$", 0, REG_OK, 0, 2, END);
 
   test_comp("x\\", 0, REG_EESCAPE);
+  test_comp("a\\{", 0, REG_EBRACE);
 
   test_comp(".", 0, 0);
   test_exec("a", 0, REG_OK, 0, 1, END);
@@ -1024,6 +1025,13 @@ main(int argc, char **argv)
   test_exec("(+)", 0, REG_NOMATCH);
   test_exec("+", 0, REG_NOMATCH);
 
+  /* Truncated BRE/ERE atoms. */
+  test_comp("a{", REG_EXTENDED, REG_EBRACE);
+  test_comp("a{1,", REG_EXTENDED, REG_EBRACE);
+  test_comp("a{1,2", REG_EXTENDED, REG_EBRACE);
+  test_comp("\\Q", REG_EXTENDED, REG_EESCAPE);
+  test_comp("\\U", REG_EXTENDED, REG_EESCAPE);
+
 
   /*
    * Test bracket expressions.
@@ -1032,6 +1040,8 @@ main(int argc, char **argv)
   test_comp("[", 0, REG_EBRACK);
   test_comp("[]", 0, REG_EBRACK);
   test_comp("[^]", 0, REG_EBRACK);
+  test_comp("[a-", 0, REG_EBRACK);
+  test_comp("[^-", 0, REG_EBRACK);
 
   test_comp("[]x]", 0, 0);
   test_exec("]", 0, REG_OK, 0, 1, END);
@@ -1402,6 +1412,8 @@ main(int argc, char **argv)
   test_nexec("\000", 1, 0, REG_OK, 0, 1, END);
   test_comp("\\xr", REG_EXTENDED, 0);
   test_nexec("\000r", 2, 0, REG_OK, 0, 2, END);
+  test_comp("\\x{", REG_EXTENDED, REG_EBRACE);
+  test_comp("(?", REG_EXTENDED, REG_BADPAT);
   test_comp("\\x{41}", REG_EXTENDED, 0);
   test_exec("ABC", 0, REG_OK, 0, 1, END);
   test_comp("\\x{5}", REG_EXTENDED, 0);
