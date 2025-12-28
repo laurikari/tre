@@ -214,7 +214,22 @@ wrap_regcomp(regex_t *preg, const CHAR_T *data, size_t len, int cflags)
 {
 #ifdef HAVE_REGNCOMP
   if (use_regncomp)
-    return tre_regncomp(preg, data, len, cflags);
+    {
+      CHAR_T *buf = NULL;
+      int ret;
+
+      if (len > 0)
+	{
+	  buf = xmalloc(len * sizeof(CHAR_T));
+	  if (buf == NULL)
+	    return REG_ESPACE;
+	  memcpy(buf, data, len * sizeof(CHAR_T));
+	}
+
+      ret = tre_regncomp(preg, buf ? buf : data, len, cflags);
+      xfree(buf);
+      return ret;
+    }
   else
     return tre_regcomp(preg, data, cflags);
 #else /* !HAVE_REGNCOMP */
@@ -500,79 +515,87 @@ test_exec(const char *str, int eflags, ...)
 static void
 test_comp(const char *re, int flags, int ret)
 {
-  int errcode = 0;
-  int len = re ? strlen(re) : 0;
+  int use_regncomp_value;
 
-  if (valid_reobj)
+  for (use_regncomp_value = 0; use_regncomp_value <= 1; use_regncomp_value++)
     {
-      tre_regfree(&reobj);
-      valid_reobj = 0;
-    }
+      int errcode = 0;
+      int len = re ? strlen(re) : 0;
 
-  comp_tests++;
+      if (valid_reobj)
+        {
+          tre_regfree(&reobj);
+          valid_reobj = 0;
+        }
+
+      comp_tests++;
+      use_regncomp = use_regncomp_value;
 
 #ifdef WRETEST
-  {
-    int wlen = mbntowc(wregex, re, len, NULL);
-
-    if (wlen < 0)
       {
-	comp_errors++;
-	fprintf(outf, "Invalid or incomplete multi-byte sequence in %s\n", re);
-	return;
+        int wlen = mbntowc(wregex, re, len, NULL);
+
+        if (wlen < 0)
+          {
+            comp_errors++;
+            fprintf(outf, "Invalid or incomplete multi-byte sequence in %s\n", re);
+            return;
+          }
+        wregex[wlen] = L'\0';
+        len = wlen;
       }
-    wregex[wlen] = L'\0';
-    len = wlen;
-  }
 #define re wregex
 #endif /* WRETEST */
-  regex_pattern = re;
-  cflags_global = flags;
+      regex_pattern = re;
+      cflags_global = flags;
 
 #ifdef MALLOC_DEBUGGING
-  xmalloc_configure(-1);
-  if (ret != REG_ESPACE) {
-    static int j = 0;
-    int i = 0;
-    while (1)
-      {
-	xmalloc_configure(i);
-	comp_tests++;
-	if (j++ % 20 == 0)
-	  test_status('.');
-	errcode = wrap_regcomp(&reobj, re, len, flags);
-	if (errcode != REG_ESPACE)
-	  {
-	    test_status('*');
-	    break;
-	  }
+      xmalloc_configure(-1);
+      if (ret != REG_ESPACE) {
+        static int j = 0;
+        int i = 0;
+        while (1)
+          {
+            xmalloc_configure(i);
+            comp_tests++;
+            if (j++ % 20 == 0)
+              test_status('.');
+            errcode = wrap_regcomp(&reobj, re, len, flags);
+            if (errcode != REG_ESPACE)
+              {
+                test_status('*');
+                break;
+              }
 #ifdef REGEX_DEBUG
-	xmalloc_dump_leaks();
+            xmalloc_dump_leaks();
 #endif /* REGEX_DEBUG */
-	i++;
-      }
-  } else
+            i++;
+          }
+      } else
 #endif /* !MALLOC_DEBUGGING */
-  errcode = wrap_regcomp(&reobj, re, len, flags);
+        errcode = wrap_regcomp(&reobj, re, len, flags);
 
 #ifdef WRETEST
 #undef re
 #endif /* WRETEST */
 
-  if (errcode != ret)
-    {
+      if (errcode != ret)
+        {
 #ifndef WRETEST
-      fprintf(outf, "Comp error, regex: \"%s\"\n", regex_pattern);
+          fprintf(outf, "Comp error, regex: \"%s\"\n", regex_pattern);
 #else /* WRETEST */
-      fprintf(outf, "Comp error, regex: \"%ls\"\n", regex_pattern);
+          fprintf(outf, "Comp error, regex: \"%ls\"\n", regex_pattern);
 #endif /* WRETEST */
-      fprintf(outf, "	expected return code %d, got %d.\n",
-	     ret, errcode);
-      comp_errors++;
+          fprintf(outf, "       expected return code %d, got %d.\n",
+                  ret, errcode);
+          comp_errors++;
+        }
+
+      if (errcode == 0)
+        valid_reobj = 1;
     }
 
-  if (errcode == 0)
-    valid_reobj = 1;
+  use_regncomp = 0;
 }
 
 
