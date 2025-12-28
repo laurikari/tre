@@ -1379,11 +1379,11 @@ main(int argc, char **argv)
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
 #ifdef SRC_IN_ISO_8859_1
-  test_exec(",.(a23_Nt-ˆo)", 0, REG_OK, 3, 9, END);
+  test_exec(",.(a23_Nt-\xF6o)", 0, REG_OK, 3, 9, END);
 #else
 #ifdef SRC_IN_UTF_8
   /* iconv -f ISO-8859-1 -t UTF-8 file_with_lines_above > www_utf_8 */
-  test_exec(",.(a23_Nt-√∂o)", 0, REG_OK, 3, 9, END);
+  test_exec(",.(a23_Nt-\xC3\xB6o)", 0, REG_OK, 3, 9, END);
 #else
   unsigned char str_000[] = {
     ',','.','(','a','2','3','_','N','t','-',0xF6,'o',0x00
@@ -1784,16 +1784,16 @@ main(int argc, char **argv)
   /* This same test with the correct locale is below.
      TBR: This is a guess for the source encoding, see comments below after the locale is set to a Japanese locale. */
 #ifdef SRC_IN_EUC_JP
-  test_comp("µ°+", REG_EXTENDED, 0);
-  test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠",
+  test_comp("\xB5\xA1+", REG_EXTENDED, 0);
+  test_exec("\xA4\xB3\xA4\xCE\xBE\xDE\xA4\xCF\xA1\xA2\xB5\xA1\xA1\xA6\xCD\xF8\xCA\xD8\xC0\xAD\xA1\xA6\xA5\xBB\xA5\xAD",
             0, REG_OK, 10, 13, END);
 #else
 #ifdef SRC_IN_UTF_8
   /* iconv -f EUC_JP -t UTF-8 file_with_lines_above > zzz_utf_8
      This may be incorrect because the match results might be incorrect for UTF-8, I (TBR) just don't know enough to be certain.
      It compiles and runs successfully on my desktop with the C.UTF-8 locale. */
-  test_comp("Ê©ü+", REG_EXTENDED, 0);
-  test_exec("„Åì„ÅÆË≥û„ÅØ„ÄÅÊ©ü„ÉªÂà©‰æøÊÄß„Éª„Çª„Ç≠",
+  test_comp("\xE6\xA9\x9F+", REG_EXTENDED, 0);
+  test_exec("\xE3\x81\x93\xE3\x81\xAE\xE8\xB3\x9E\xE3\x81\xAF\xE3\x80\x81\xE6\xA9\x9F\xE3\x83\xBB\xE5\x88\xA9\xE4\xBE\xBF\xE6\x80\xA7\xE3\x83\xBB\xE3\x82\xBB\xE3\x82\xAD",
             0, REG_OK, 15, 18, END);
 #else
   /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
@@ -1814,14 +1814,14 @@ main(int argc, char **argv)
     {
       fprintf(outf, "\nTesting LC_CTYPE en_US.ISO-8859-1\n");
 #ifdef SRC_IN_ISO_8859_1
-      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZÂ‰ˆ", REG_ICASE, 0);
-      test_exec("abCDefGhiJKlmNoPqRStuVwXyz≈ƒ÷", 0, REG_OK, 0, 29, END);
+      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZ\xE5\xE4\xF6", REG_ICASE, 0);
+      test_exec("abCDefGhiJKlmNoPqRStuVwXyz\xC5\xC4\xD6", 0, REG_OK, 0, 29, END);
 #else
 #ifdef SRC_IN_UTF_8
       /* iconv -f ISO-8859-1 -t UTF-8 file_with_lines_above > yyy_utf_8 */
       /* This fails with no match on freebsd, but succeeds in linux. */
-      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZ√•√§√∂", REG_ICASE, 0);
-      test_exec("abCDefGhiJKlmNoPqRStuVwXyz√Ö√Ñ√ñ", 0, REG_OK, 0, 29, END);
+      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZ\xC3\xA5\xC3\xA4\xC3\xB6", REG_ICASE, 0);
+      test_exec("abCDefGhiJKlmNoPqRStuVwXyz\xC3\x85\xC3\x84\xC3\x96", 0, REG_OK, 0, 29, END);
 #else
       /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
       unsigned char str_003[] = {
@@ -1855,15 +1855,15 @@ main(int argc, char **argv)
          all the others I tried resulted in invalid characters.  So guess at EUC-JP.
          If anyone knows what the encoding actually was, feel free to let me know at tbr at acm dot org :). */
 #ifdef SRC_IN_EUC_JP
-      test_comp("µ°+", REG_EXTENDED, 0);
-      test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠", 0, REG_OK, 10, 12, END);
+      test_comp("\xB5\xA1+", REG_EXTENDED, 0);
+      test_exec("\xA4\xB3\xA4\xCE\xBE\xDE\xA4\xCF\xA1\xA2\xB5\xA1\xA1\xA6\xCD\xF8\xCA\xD8\xC0\xAD\xA1\xA6\xA5\xBB\xA5\xAD", 0, REG_OK, 10, 12, END);
 #else
 #ifdef SRC_IN_UTF_8
       /* iconv -f EUC_JP -t UTF-8 file_with_lines_above > zzz_utf_8
          This may fail because the match results might be incorrect for UTF-8, I (TBR) just don't know enough to be certain.
          It compiles and runs successfully on my desktop with the C.UTF-8 locale. */
-      test_comp("Ê©ü+", REG_EXTENDED, 0);
-      test_exec("„Åì„ÅÆË≥û„ÅØ„ÄÅÊ©ü„ÉªÂà©‰æøÊÄß„Éª„Çª„Ç≠", 0, REG_OK, 10, 12, END);
+      test_comp("\xE6\xA9\x9F+", REG_EXTENDED, 0);
+      test_exec("\xE3\x81\x93\xE3\x81\xAE\xE8\xB3\x9E\xE3\x81\xAF\xE3\x80\x81\xE6\xA9\x9F\xE3\x83\xBB\xE5\x88\xA9\xE4\xBE\xBF\xE6\x80\xA7\xE3\x83\xBB\xE3\x82\xBB\xE3\x82\xAD", 0, REG_OK, 10, 12, END);
 #else
       /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
       /* This test uses the same strings (str_001 and str_002) as above, now with a Japanese locale.
