@@ -41,7 +41,7 @@
 	else								      \
 	  {								      \
 	    size_t w;							      \
-	    int max;							      \
+	    size_t max;							      \
 	    if (len >= 0)						      \
 	      max = len - pos;						      \
 	    else							      \

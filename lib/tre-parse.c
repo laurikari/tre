@@ -957,8 +957,8 @@ tre_parse(tre_parse_ctx_t *ctx)
   int depth = 0;
   int temporary_cflags = 0;
 
-  DPRINT(("tre_parse: parsing '%.*" STRF "', len = %d\n",
-	  ctx->len, ctx->re, ctx->len));
+  DPRINT(("tre_parse: parsing '%.*" STRF "', len = %zu\n",
+	  (int)ctx->len, ctx->re, ctx->len));
 
   if (!ctx->nofirstsub)
     {

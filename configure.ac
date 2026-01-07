@@ -16,6 +16,7 @@ dnl Checks for compiler characteristics.
 AC_USE_SYSTEM_EXTENSIONS
 AC_C_CONST
 AC_C_INLINE
+AC_TYPE_SSIZE_T
 
 tre_version_1=`echo $PACKAGE_VERSION | cut -d . -f 1`
 tre_version_2=`echo $PACKAGE_VERSION | cut -d . -f 2`

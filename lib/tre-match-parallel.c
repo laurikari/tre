@@ -104,14 +104,14 @@ tre_print_reach(const tre_tnfa_reach_t *reach, int num_tags)
 #endif /* TRE_DEBUG */
 
 reg_errcode_t
-tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
+tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, ssize_t len,
 		      tre_str_type_t type, int *match_tags, int eflags,
 		      int *match_end_ofs)
 {
   /* State variables required by GET_NEXT_WCHAR. */
   tre_char_t prev_c = 0, next_c = 0;
   const char *str_byte = string;
-  int pos = -1;
+  ssize_t pos = -1;
   unsigned int pos_add_next = 1;
 #ifdef TRE_WCHAR
   const wchar_t *str_wide = string;
@@ -119,6 +119,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
   mbstate_t mbstate;
 #endif /* TRE_MBSTATE */
 #endif /* TRE_WCHAR */
+  reg_errcode_t ret;
   int reg_notbol = eflags & REG_NOTBOL;
   int reg_noteol = eflags & REG_NOTEOL;
   int reg_newline = tnfa->cflags & REG_NEWLINE;
@@ -135,6 +136,15 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
   int new_match = 0;
   int *tmp_tags = NULL;
   int *tmp_iptr;
+
+  /*
+   * TRE internals tend to use int instead of size_t for positions or
+   * lengths and don't check for overflow.  This will take time to fix
+   * properly.  In the meantime, simply limit the input to what we can
+   * handle.
+   */
+  if (len > TRE_MAX_STRING)
+    len = TRE_MAX_STRING;
 
 #ifdef TRE_MBSTATE
   memset(&mbstate, '\0', sizeof(mbstate));
@@ -263,7 +273,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
     }
 #endif
 
-  DPRINT(("length: %d\n", len));
+  DPRINT(("length: %zd\n", len));
   DPRINT(("pos:chr/code | states and tags\n"));
   DPRINT(("-------------+------------------------------------------------\n"));
 
@@ -331,7 +341,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 	      if (str_user_end)
 		break;
 	    }
-	  else if (next_c == L'\0')
+	  else if (next_c == L'\0' || pos >= TRE_MAX_STRING)
 	    break;
 	}
       else
@@ -343,9 +353,9 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
       GET_NEXT_WCHAR();
 
 #ifdef TRE_DEBUG
-      DPRINT(("%3d:%2lc/%05d |", pos - 1, (tre_cint_t)prev_c, (int)prev_c));
+      DPRINT(("%3zd:%2lc/%05d |", pos - 1, (tre_cint_t)prev_c, (int)prev_c));
       tre_print_reach(reach_next, num_tags);
-      DPRINT(("%3d:%2lc/%05d |", pos, (tre_cint_t)next_c, (int)next_c));
+      DPRINT(("%3zd:%2lc/%05d |", pos, (tre_cint_t)next_c, (int)next_c));
       tre_print_reach(reach_next, num_tags);
 #endif /* TRE_DEBUG */
 
@@ -488,13 +498,14 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 
   DPRINT(("match end offset = %d\n", match_eo));
 
+  *match_end_ofs = match_eo;
+  ret = match_eo >= 0 ? REG_OK : REG_NOMATCH;
+
 #ifndef TRE_USE_ALLOCA
   if (buf)
     xfree(buf);
 #endif /* !TRE_USE_ALLOCA */
-
-  *match_end_ofs = match_eo;
-  return match_eo >= 0 ? REG_OK : REG_NOMATCH;
+  return ret;
 }
 
 /* EOF */
