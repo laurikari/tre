@@ -59,7 +59,7 @@ tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 #endif /* HAVE_MBSTATE_T */
       while (n > 0)
 	{
-	  consumed = tre_mbrtowc(wcptr, regex, n, &state);
+	  consumed = (int)tre_mbrtowc(wcptr, regex, n, &state);
 
 	  switch (consumed)
 	    {
@@ -79,7 +79,7 @@ tre_regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 	    case -2:
 	      /* The last character wasn't complete.  Let's not call it a
 		 fatal error. */
-	      consumed = n;
+	      consumed = (int)n;
 	      break;
 	    }
 	  regex += consumed;
