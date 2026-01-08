@@ -1367,6 +1367,35 @@ main(int argc, char **argv)
   test_comp("\\t", REG_EXTENDED, 0);
   test_comp("\\e", REG_EXTENDED, 0);
 
+  /* Test the \o33 and \o{23072} extensions for specifying 8 bit and wide
+     characters in octal. */
+  test_comp("\\o101", REG_EXTENDED, 0);
+  test_exec("ABC", 0, REG_OK, 0, 1, END);
+  test_comp("\\o5", REG_EXTENDED, 0);
+  test_exec("\005", 0, REG_OK, 0, 1, END);
+  test_comp("\\o5r", REG_EXTENDED, 0);
+  test_exec("\005r", 0, REG_OK, 0, 2, END);
+  test_comp("\\o", REG_EXTENDED, 0);
+  test_nexec("\000", 1, 0, REG_OK, 0, 1, END);
+  test_comp("\\or", REG_EXTENDED, 0);
+  test_nexec("\000r", 2, 0, REG_OK, 0, 2, END);
+  test_comp("\\o{101}", REG_EXTENDED, 0);
+  test_exec("ABC", 0, REG_OK, 0, 1, END);
+  test_comp("\\o{5}", REG_EXTENDED, 0);
+  test_exec("\005", 0, REG_OK, 0, 1, END);
+  test_comp("\\o{5}r", REG_EXTENDED, 0);
+  test_exec("\005r", 0, REG_OK, 0, 2, END);
+  test_comp("\\o{}", REG_EXTENDED, 0);
+  test_nexec("\000", 1, 0, REG_OK, 0, 1, END);
+  test_comp("\\o{}r", REG_EXTENDED, 0);
+  test_nexec("\000r", 2, 0, REG_OK, 0, 2, END);
+  test_comp("\\o{00000000000}", REG_EXTENDED, 0);
+  test_comp("\\o{17777777777}", REG_EXTENDED, 0);
+  test_comp("\\o{20000000000}", REG_EXTENDED, REG_EBRACE);
+  test_comp("\\o{000000000000}", REG_EXTENDED, 0);
+  test_comp("\\o{017777777777}", REG_EXTENDED, 0);
+  test_comp("\\o{020000000000}", REG_EXTENDED, REG_EBRACE);
+
   /* Test the \x1B and \x{263a} extensions for specifying 8 bit and wide
      characters in hexadecimal. */
   test_comp("\\x41", REG_EXTENDED, 0);
@@ -1390,7 +1419,11 @@ main(int argc, char **argv)
   test_comp("\\x{}r", REG_EXTENDED, 0);
   test_nexec("\000r", 2, 0, REG_OK, 0, 2, END);
   test_comp("\\x{00000000}", REG_EXTENDED, 0);
-  test_comp("\\x{000000000}", REG_EXTENDED, REG_EBRACE);
+  test_comp("\\x{7fffffff}", REG_EXTENDED, 0);
+  test_comp("\\x{800000000}", REG_EXTENDED, REG_EBRACE);
+  test_comp("\\x{000000000}", REG_EXTENDED, 0);
+  test_comp("\\x{07fffffff}", REG_EXTENDED, 0);
+  test_comp("\\x{080000000}", REG_EXTENDED, REG_EBRACE);
 
   /* Tests for (?inrU-inrU) and (?inrU-inrU:) */
   test_comp("foo(?i)bar", REG_EXTENDED, 0);
