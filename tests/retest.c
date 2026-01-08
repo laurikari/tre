@@ -1166,7 +1166,12 @@ main(int argc, char **argv)
   test_comp("[[.", 0, REG_ECOLLATE);
   test_comp("[[=", 0, REG_ECOLLATE);
 
-
+  /* BRE parentheses. */
+  test_comp("\\\\(a", 0, 0);
+  test_exec("\\(a", 0, REG_OK, 0, 3, END);
+  test_comp("\\(a\\\\)\\)", 0, 0);
+  test_exec("a\\)", 0, REG_OK, 0, 3, 0, 3, END);
+  test_comp("\\(\\\\)", 0, REG_EPAREN);
 
   /* Miscellaneous tests. */
   test_comp("abc\\(\\(de\\)\\(fg\\)\\)hi", 0, 0);
