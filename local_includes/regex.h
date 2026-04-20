@@ -10,7 +10,7 @@
 
 */
 
-#ifndef TRE_REXEX_H
+#ifndef TRE_REGEX_H
 #define TRE_REGEX_H 1
 
 #ifdef USE_LOCAL_TRE_H
