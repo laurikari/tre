@@ -799,11 +799,35 @@ typedef enum {
   EXPAND_AFTER_ITER
 } tre_expand_ast_symbol_t;
 
+/* Helper to check if a node consists strictly of zero-width assertions/empty
+ * paths */
+static int
+tre_is_empty_node(tre_ast_node_t *node)
+{
+  if (!node)
+    return 0;
+  if (node->type == LITERAL)
+    {
+      tre_literal_t *lit = node->obj;
+      return (lit->code_min < 0 && lit->code_min != BACKREF);
+    }
+  if (node->type == UNION)
+    return tre_is_empty_node(((tre_union_t *)node->obj)->left)
+           && tre_is_empty_node(((tre_union_t *)node->obj)->right);
+  if (node->type == CATENATION)
+    return tre_is_empty_node(((tre_catenation_t *)node->obj)->left)
+           && tre_is_empty_node(((tre_catenation_t *)node->obj)->right);
+  if (node->type == ITERATION)
+    return tre_is_empty_node(((tre_iteration_t *)node->obj)->arg);
+  return 0;
+}
+
 /* Expands each iteration node that has a finite nonzero minimum or maximum
    iteration count to a catenated sequence of copies of the node. */
 static reg_errcode_t
 tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
-	       tre_tag_direction_t *tag_directions, int *max_depth)
+               tre_tag_direction_t *tag_directions, int *max_depth,
+               int *dist_depth)
 {
   reg_errcode_t status = REG_OK;
   size_t bottom = tre_stack_num_items(stack);
@@ -861,13 +885,130 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	      }
 	    case CATENATION:
 	      {
-		tre_catenation_t *cat = node->obj;
-		STACK_PUSHX(stack, voidptr, cat->right);
-		STACK_PUSHX(stack, int, EXPAND_RECURSE);
-		STACK_PUSHX(stack, voidptr, cat->left);
-		STACK_PUSHX(stack, int, EXPAND_RECURSE);
-		break;
-	      }
+                tre_catenation_t *cat = node->obj;
+
+                /* If left child is an empty CATENATION, rotate the tree!
+                   (A B) C -> A (B C)
+                   This exposes inner UNIONs to the distribution logic below.
+                 */
+                if (cat->left->type == CATENATION
+                    && tre_is_empty_node(cat->left))
+                  {
+                    tre_ast_node_t *new_right_node = tre_ast_new_catenation(
+                        mem, ((tre_catenation_t *)cat->left->obj)->right,
+                        cat->right);
+                    if (!new_right_node)
+                      {
+                        status = REG_ESPACE;
+                        break;
+                      }
+                    cat->right = new_right_node;
+                    cat->left = ((tre_catenation_t *)cat->left->obj)->left;
+
+                    STACK_PUSHX(stack, voidptr, node);
+                    STACK_PUSHX(stack, int, EXPAND_RECURSE);
+                    break;
+                  }
+
+                /* Distribute CAT over UNION for zero-width assertions to
+                   prevent tre_match_empty from dropping alternative empty
+                   paths. Rewrites A(B|C) -> AB|AC and (A|B)C -> AC|BC */
+                if (cat->left->type == UNION && tre_is_empty_node(cat->left))
+                  {
+                    if (*dist_depth >= MAX_DISTRIBUTION_DEPTH)
+                      {
+                        status = REG_ESPACE;
+                        break;
+                      }
+                    (*dist_depth)++;
+
+                    tre_union_t *uni = cat->left->obj;
+                    tre_ast_node_t *cat1, *cat2, *right_copy;
+                    int pos_add_local = 0;
+                    int max_pos_local = max_pos;
+
+                    status = tre_copy_ast(mem, stack, cat->right, 0,
+                                          &pos_add_local, tag_directions,
+                                          &right_copy, &max_pos_local);
+                    if (status != REG_OK)
+                      break;
+
+                    cat1 = tre_ast_new_catenation(mem, uni->left, cat->right);
+                    cat2 = tre_ast_new_catenation(mem, uni->right, right_copy);
+                    if (!cat1 || !cat2)
+                      {
+                        status = REG_ESPACE;
+                        break;
+                      }
+
+                    tre_union_t *new_uni
+                        = tre_mem_alloc(mem, sizeof(*new_uni));
+                    if (!new_uni)
+                      {
+                        status = REG_ESPACE;
+                        break;
+                      }
+                    new_uni->left = cat1;
+                    new_uni->right = cat2;
+
+                    node->type = UNION;
+                    node->obj = new_uni;
+                    STACK_PUSHX(stack, voidptr, node);
+                    STACK_PUSHX(stack, int, EXPAND_RECURSE);
+                    break;
+                  }
+
+                if (cat->right->type == UNION && tre_is_empty_node(cat->right))
+                  {
+                    if (*dist_depth >= MAX_DISTRIBUTION_DEPTH)
+                      {
+                        status = REG_ESPACE;
+                        break;
+                      }
+                    (*dist_depth)++;
+
+                    tre_union_t *uni = cat->right->obj;
+                    tre_ast_node_t *cat1, *cat2, *left_copy;
+                    int pos_add_local = 0;
+                    int max_pos_local = max_pos;
+
+                    status = tre_copy_ast(mem, stack, cat->left, 0,
+                                          &pos_add_local, tag_directions,
+                                          &left_copy, &max_pos_local);
+                    if (status != REG_OK)
+                      break;
+
+                    cat1 = tre_ast_new_catenation(mem, cat->left, uni->left);
+                    cat2 = tre_ast_new_catenation(mem, left_copy, uni->right);
+                    if (!cat1 || !cat2)
+                      {
+                        status = REG_ESPACE;
+                        break;
+                      }
+
+                    tre_union_t *new_uni
+                        = tre_mem_alloc(mem, sizeof(*new_uni));
+                    if (!new_uni)
+                      {
+                        status = REG_ESPACE;
+                        break;
+                      }
+                    new_uni->left = cat1;
+                    new_uni->right = cat2;
+
+                    node->type = UNION;
+                    node->obj = new_uni;
+                    STACK_PUSHX (stack, voidptr, node);
+                    STACK_PUSHX (stack, int, EXPAND_RECURSE);
+                    break;
+                  }
+
+                STACK_PUSHX (stack, voidptr, cat->right);
+                STACK_PUSHX (stack, int, EXPAND_RECURSE);
+                STACK_PUSHX (stack, voidptr, cat->left);
+                STACK_PUSHX (stack, int, EXPAND_RECURSE);
+                break;
+              }
 	    case ITERATION:
 	      {
 		tre_iteration_t *iter = node->obj;
@@ -1859,6 +2000,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   reg_errcode_t errcode;
   tre_mem_t mem;
   int numpos = 0;
+  int dist_depth = 0;
 
   /* Parse context. */
   tre_parse_ctx_t parse_ctx;
@@ -1964,12 +2106,6 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 #endif /* TRE_DEBUG */
     }
 
-  /* Expand iteration nodes. */
-  errcode = tre_expand_ast(mem, stack, tree, tag_directions,
-			   &tnfa->params_depth);
-  if (errcode != REG_OK)
-    ERROR_EXIT(errcode);
-
   /* Add a dummy node for the final state.
      XXX - For certain patterns this dummy node can be optimized away,
 	   for example "a*" or "ab*".	Figure out a simple way to detect
@@ -1982,6 +2118,12 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   tree = tre_ast_new_catenation(mem, tmp_ast_l, tmp_ast_r);
   if (tree == NULL)
     ERROR_EXIT(REG_ESPACE);
+
+  /* Expand iteration nodes and distribute empty paths. */
+  errcode = tre_expand_ast(mem, stack, tree, tag_directions,
+                           &tnfa->params_depth, &dist_depth);
+  if (errcode != REG_OK)
+    ERROR_EXIT(errcode);
 
   errcode = tre_compute_npfl(mem, stack, tree, &numpos);
   if (errcode != REG_OK)
@@ -2011,6 +2153,16 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
       add += counts[i] + 1;
       counts[i] = 0;
     }
+
+  /* Map all dummy nodes representing final positions to the exact same offset
+   * state */
+  if (tree->lastpos && tree->lastpos[0].position >= 0)
+    {
+      int final_offset = offs[tree->lastpos[0].position];
+      for (i = 1; tree->lastpos[i].position >= 0; i++)
+        offs[tree->lastpos[i].position] = final_offset;
+    }
+
   transitions = xcalloc((unsigned)add + 1, sizeof(*transitions));
   if (transitions == NULL)
     ERROR_EXIT(REG_ESPACE);
