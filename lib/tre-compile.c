@@ -1881,7 +1881,7 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   parse_ctx.mem = mem;
   parse_ctx.stack = stack;
   parse_ctx.re = regex;
-  parse_ctx.len = n;
+  parse_ctx.len = (int)n;
   parse_ctx.cflags = cflags;
   parse_ctx.max_backref = -1;
   /* Use 8-bit optimizations in 8-bit mode */
