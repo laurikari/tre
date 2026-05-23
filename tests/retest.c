@@ -214,7 +214,22 @@ wrap_regcomp(regex_t *preg, const CHAR_T *data, size_t len, int cflags)
 {
 #ifdef HAVE_REGNCOMP
   if (use_regncomp)
-    return tre_regncomp(preg, data, len, cflags);
+    {
+      CHAR_T *buf = NULL;
+      int ret;
+
+      if (len > 0)
+	{
+	  buf = xmalloc(len * sizeof(CHAR_T));
+	  if (buf == NULL)
+	    return REG_ESPACE;
+	  memcpy(buf, data, len * sizeof(CHAR_T));
+	}
+
+      ret = tre_regncomp(preg, buf ? buf : data, len, cflags);
+      xfree(buf);
+      return ret;
+    }
   else
     return tre_regcomp(preg, data, cflags);
 #else /* !HAVE_REGNCOMP */
@@ -500,79 +515,87 @@ test_exec(const char *str, int eflags, ...)
 static void
 test_comp(const char *re, int flags, int ret)
 {
-  int errcode = 0;
-  int len = re ? strlen(re) : 0;
+  int use_regncomp_value;
 
-  if (valid_reobj)
+  for (use_regncomp_value = 0; use_regncomp_value <= 1; use_regncomp_value++)
     {
-      tre_regfree(&reobj);
-      valid_reobj = 0;
-    }
+      int errcode = 0;
+      int len = re ? strlen(re) : 0;
 
-  comp_tests++;
+      if (valid_reobj)
+        {
+          tre_regfree(&reobj);
+          valid_reobj = 0;
+        }
+
+      comp_tests++;
+      use_regncomp = use_regncomp_value;
 
 #ifdef WRETEST
-  {
-    int wlen = mbntowc(wregex, re, len, NULL);
-
-    if (wlen < 0)
       {
-	comp_errors++;
-	fprintf(outf, "Invalid or incomplete multi-byte sequence in %s\n", re);
-	return;
+        int wlen = mbntowc(wregex, re, len, NULL);
+
+        if (wlen < 0)
+          {
+            comp_errors++;
+            fprintf(outf, "Invalid or incomplete multi-byte sequence in %s\n", re);
+            return;
+          }
+        wregex[wlen] = L'\0';
+        len = wlen;
       }
-    wregex[wlen] = L'\0';
-    len = wlen;
-  }
 #define re wregex
 #endif /* WRETEST */
-  regex_pattern = re;
-  cflags_global = flags;
+      regex_pattern = re;
+      cflags_global = flags;
 
 #ifdef MALLOC_DEBUGGING
-  xmalloc_configure(-1);
-  if (ret != REG_ESPACE) {
-    static int j = 0;
-    int i = 0;
-    while (1)
-      {
-	xmalloc_configure(i);
-	comp_tests++;
-	if (j++ % 20 == 0)
-	  test_status('.');
-	errcode = wrap_regcomp(&reobj, re, len, flags);
-	if (errcode != REG_ESPACE)
-	  {
-	    test_status('*');
-	    break;
-	  }
+      xmalloc_configure(-1);
+      if (ret != REG_ESPACE) {
+        static int j = 0;
+        int i = 0;
+        while (1)
+          {
+            xmalloc_configure(i);
+            comp_tests++;
+            if (j++ % 20 == 0)
+              test_status('.');
+            errcode = wrap_regcomp(&reobj, re, len, flags);
+            if (errcode != REG_ESPACE)
+              {
+                test_status('*');
+                break;
+              }
 #ifdef REGEX_DEBUG
-	xmalloc_dump_leaks();
+            xmalloc_dump_leaks();
 #endif /* REGEX_DEBUG */
-	i++;
-      }
-  } else
+            i++;
+          }
+      } else
 #endif /* !MALLOC_DEBUGGING */
-  errcode = wrap_regcomp(&reobj, re, len, flags);
+        errcode = wrap_regcomp(&reobj, re, len, flags);
 
 #ifdef WRETEST
 #undef re
 #endif /* WRETEST */
 
-  if (errcode != ret)
-    {
+      if (errcode != ret)
+        {
 #ifndef WRETEST
-      fprintf(outf, "Comp error, regex: \"%s\"\n", regex_pattern);
+          fprintf(outf, "Comp error, regex: \"%s\"\n", regex_pattern);
 #else /* WRETEST */
-      fprintf(outf, "Comp error, regex: \"%ls\"\n", regex_pattern);
+          fprintf(outf, "Comp error, regex: \"%ls\"\n", regex_pattern);
 #endif /* WRETEST */
-      fprintf(outf, "	expected return code %d, got %d.\n",
-	     ret, errcode);
-      comp_errors++;
+          fprintf(outf, "       expected return code %d, got %d.\n",
+                  ret, errcode);
+          comp_errors++;
+        }
+
+      if (errcode == 0)
+        valid_reobj = 1;
     }
 
-  if (errcode == 0)
-    valid_reobj = 1;
+  use_regncomp = 0;
 }
 
 
@@ -990,6 +1013,7 @@ main(int argc, char **argv)
   test_exec("x$", 0, REG_OK, 0, 2, END);
 
   test_comp("x\\", 0, REG_EESCAPE);
+  test_comp("a\\{", 0, REG_EBRACE);
 
   test_comp(".", 0, 0);
   test_exec("a", 0, REG_OK, 0, 1, END);
@@ -1001,6 +1025,12 @@ main(int argc, char **argv)
   test_exec("(+)", 0, REG_NOMATCH);
   test_exec("+", 0, REG_NOMATCH);
 
+  /* Truncated BRE/ERE atoms. */
+  test_comp("a{", REG_EXTENDED, REG_EBRACE);
+  test_comp("a{1,", REG_EXTENDED, REG_EBRACE);
+  test_comp("a{1,2", REG_EXTENDED, REG_EBRACE);
+  test_comp("\\Q", REG_EXTENDED, REG_EESCAPE);
+
 
   /*
    * Test bracket expressions.
@@ -1009,6 +1039,8 @@ main(int argc, char **argv)
   test_comp("[", 0, REG_EBRACK);
   test_comp("[]", 0, REG_EBRACK);
   test_comp("[^]", 0, REG_EBRACK);
+  test_comp("[a-", 0, REG_EBRACK);
+  test_comp("[^-", 0, REG_EBRACK);
 
   test_comp("[]x]", 0, 0);
   test_exec("]", 0, REG_OK, 0, 1, END);
@@ -1346,11 +1378,11 @@ main(int argc, char **argv)
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
 #ifdef SRC_IN_ISO_8859_1
-  test_exec(",.(a23_Nt-ˆo)", 0, REG_OK, 3, 9, END);
+  test_exec(",.(a23_Nt-\xF6o)", 0, REG_OK, 3, 9, END);
 #else
 #ifdef SRC_IN_UTF_8
   /* iconv -f ISO-8859-1 -t UTF-8 file_with_lines_above > www_utf_8 */
-  test_exec(",.(a23_Nt-√∂o)", 0, REG_OK, 3, 9, END);
+  test_exec(",.(a23_Nt-\xC3\xB6o)", 0, REG_OK, 3, 9, END);
 #else
   unsigned char str_000[] = {
     ',','.','(','a','2','3','_','N','t','-',0xF6,'o',0x00
@@ -1379,6 +1411,8 @@ main(int argc, char **argv)
   test_nexec("\000", 1, 0, REG_OK, 0, 1, END);
   test_comp("\\xr", REG_EXTENDED, 0);
   test_nexec("\000r", 2, 0, REG_OK, 0, 2, END);
+  test_comp("\\x{", REG_EXTENDED, REG_EBRACE);
+  test_comp("(?", REG_EXTENDED, REG_BADPAT);
   test_comp("\\x{41}", REG_EXTENDED, 0);
   test_exec("ABC", 0, REG_OK, 0, 1, END);
   test_comp("\\x{5}", REG_EXTENDED, 0);
@@ -1749,16 +1783,16 @@ main(int argc, char **argv)
   /* This same test with the correct locale is below.
      TBR: This is a guess for the source encoding, see comments below after the locale is set to a Japanese locale. */
 #ifdef SRC_IN_EUC_JP
-  test_comp("µ°+", REG_EXTENDED, 0);
-  test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠",
+  test_comp("\xB5\xA1+", REG_EXTENDED, 0);
+  test_exec("\xA4\xB3\xA4\xCE\xBE\xDE\xA4\xCF\xA1\xA2\xB5\xA1\xA1\xA6\xCD\xF8\xCA\xD8\xC0\xAD\xA1\xA6\xA5\xBB\xA5\xAD",
             0, REG_OK, 10, 13, END);
 #else
 #ifdef SRC_IN_UTF_8
   /* iconv -f EUC_JP -t UTF-8 file_with_lines_above > zzz_utf_8
      This may be incorrect because the match results might be incorrect for UTF-8, I (TBR) just don't know enough to be certain.
      It compiles and runs successfully on my desktop with the C.UTF-8 locale. */
-  test_comp("Ê©ü+", REG_EXTENDED, 0);
-  test_exec("„Åì„ÅÆË≥û„ÅØ„ÄÅÊ©ü„ÉªÂà©‰æøÊÄß„Éª„Çª„Ç≠",
+  test_comp("\xE6\xA9\x9F+", REG_EXTENDED, 0);
+  test_exec("\xE3\x81\x93\xE3\x81\xAE\xE8\xB3\x9E\xE3\x81\xAF\xE3\x80\x81\xE6\xA9\x9F\xE3\x83\xBB\xE5\x88\xA9\xE4\xBE\xBF\xE6\x80\xA7\xE3\x83\xBB\xE3\x82\xBB\xE3\x82\xAD",
             0, REG_OK, 15, 18, END);
 #else
   /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
@@ -1779,14 +1813,14 @@ main(int argc, char **argv)
     {
       fprintf(outf, "\nTesting LC_CTYPE en_US.ISO-8859-1\n");
 #ifdef SRC_IN_ISO_8859_1
-      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZÂ‰ˆ", REG_ICASE, 0);
-      test_exec("abCDefGhiJKlmNoPqRStuVwXyz≈ƒ÷", 0, REG_OK, 0, 29, END);
+      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZ\xE5\xE4\xF6", REG_ICASE, 0);
+      test_exec("abCDefGhiJKlmNoPqRStuVwXyz\xC5\xC4\xD6", 0, REG_OK, 0, 29, END);
 #else
 #ifdef SRC_IN_UTF_8
       /* iconv -f ISO-8859-1 -t UTF-8 file_with_lines_above > yyy_utf_8 */
       /* This fails with no match on freebsd, but succeeds in linux. */
-      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZ√•√§√∂", REG_ICASE, 0);
-      test_exec("abCDefGhiJKlmNoPqRStuVwXyz√Ö√Ñ√ñ", 0, REG_OK, 0, 29, END);
+      test_comp("aBCdeFghiJKlmnoPQRstuvWXyZ\xC3\xA5\xC3\xA4\xC3\xB6", REG_ICASE, 0);
+      test_exec("abCDefGhiJKlmNoPqRStuVwXyz\xC3\x85\xC3\x84\xC3\x96", 0, REG_OK, 0, 29, END);
 #else
       /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
       unsigned char str_003[] = {
@@ -1820,15 +1854,15 @@ main(int argc, char **argv)
          all the others I tried resulted in invalid characters.  So guess at EUC-JP.
          If anyone knows what the encoding actually was, feel free to let me know at tbr at acm dot org :). */
 #ifdef SRC_IN_EUC_JP
-      test_comp("µ°+", REG_EXTENDED, 0);
-      test_exec("§≥§Œæﬁ§œ°¢µ°°¶Õ¯ ÿ¿≠°¶•ª•≠", 0, REG_OK, 10, 12, END);
+      test_comp("\xB5\xA1+", REG_EXTENDED, 0);
+      test_exec("\xA4\xB3\xA4\xCE\xBE\xDE\xA4\xCF\xA1\xA2\xB5\xA1\xA1\xA6\xCD\xF8\xCA\xD8\xC0\xAD\xA1\xA6\xA5\xBB\xA5\xAD", 0, REG_OK, 10, 12, END);
 #else
 #ifdef SRC_IN_UTF_8
       /* iconv -f EUC_JP -t UTF-8 file_with_lines_above > zzz_utf_8
          This may fail because the match results might be incorrect for UTF-8, I (TBR) just don't know enough to be certain.
          It compiles and runs successfully on my desktop with the C.UTF-8 locale. */
-      test_comp("Ê©ü+", REG_EXTENDED, 0);
-      test_exec("„Åì„ÅÆË≥û„ÅØ„ÄÅÊ©ü„ÉªÂà©‰æøÊÄß„Éª„Çª„Ç≠", 0, REG_OK, 10, 12, END);
+      test_comp("\xE6\xA9\x9F+", REG_EXTENDED, 0);
+      test_exec("\xE3\x81\x93\xE3\x81\xAE\xE8\xB3\x9E\xE3\x81\xAF\xE3\x80\x81\xE6\xA9\x9F\xE3\x83\xBB\xE5\x88\xA9\xE4\xBE\xBF\xE6\x80\xA7\xE3\x83\xBB\xE3\x82\xBB\xE3\x82\xAD", 0, REG_OK, 10, 12, END);
 #else
       /* Represent the test strings as a sequence of bytes so we don't run afoul of the compiler's expected source-charset. */
       /* This test uses the same strings (str_001 and str_002) as above, now with a Japanese locale.
