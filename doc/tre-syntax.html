@@ -337,7 +337,9 @@ An assertion-character can be any of the following:
 <tr><td>
 <pre>
 <i>literal</i> ::= <i>ordinary-character</i>
+        |   <b>"\o"</b> [<b>"0"</b>-<b>"7"</b> ]{0,3}
         |   <b>"\x"</b> [<b>"1"</b>-<b>"9"</b> <b>"a"-<b>"f"</b> <b>"A"</b>-<b>"F"</b>]{0,2}
+        |   <b>"\o{"</b> [<b>"0"</b>-<b>"7"</b> ]* <b>"}"</b>
         |   <b>"\x{"</b> [<b>"1"</b>-<b>"9"</b> <b>"a"-<b>"f"</b> <b>"A"</b>-<b>"F"</b>]* <b>"}"</b>
         |   <b>"\"</b> <i>character</i>
 </pre>
@@ -345,15 +347,15 @@ An assertion-character can be any of the following:
 </table>
 <p>
 A literal is either an ordinary character (a character that has no
-other significance in the context), an 8 bit hexadecimal encoded
-character (e.g. <tt>\x1B</tt>), a wide hexadecimal encoded character
-(e.g. <tt>\x{263a}</tt>), or an escaped character.  An escaped
-character is a <tt>\</tt> followed by any character, and matches that
-character.  Escaping can be used to match characters which have a
-special meaning in regexp syntax.  A <tt>\</tt> cannot be the last
-character of an ERE.  Escaping also allows you to include a few
-non-printable characters in the regular expression.  These special
-escape sequences include:
+other significance in the context), an 8 bit octal or hexadecimal
+encoded character (e.g. <tt>\x1B</tt>, <tt>\o33</tt>), a wide octal
+or hexadecimal encoded character (e.g. <tt>\x{263a}, \o{23072}</tt>), or an
+escaped character.  An escaped character is a <tt>\</tt> followed by
+any character, and matches that character.  Escaping can be used to
+match characters which have a special meaning in regexp syntax.
+A <tt>\</tt> cannot be the last character of an ERE.  Escaping also
+allows you to include a few non-printable characters in the regular
+expression.  These special escape sequences include:
 </p>
 
 <ul>
