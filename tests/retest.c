@@ -1348,6 +1348,26 @@ main(int argc, char **argv)
   test_comp("\\<.", REG_EXTENDED, 0);
   test_exec(";xaa", 0, REG_OK, 1, 2, END);
 
+  /* Tests for zero-width assertion branch dropping and AST distribution limits. */
+  test_comp("^|$", REG_EXTENDED, 0);
+  test_exec("", REG_NOTBOL, REG_OK, 0, 0, END);
+
+  test_comp("(^|\\b)a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+
+  test_comp("(\\b^|\\b)a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+
+  test_comp("(^{1}|\\b)a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+
+  /* AST Explosion Safeguard Test (Denial of Service protection)
+     Chaining 15 empty unions should trigger the MAX_DISTRIBUTION_DEPTH
+     safeguard and safely abort compilation with REG_ESPACE. */
+  test_comp("(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)"
+            "(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)a",
+            REG_EXTENDED, REG_ESPACE);
+
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
 #ifdef SRC_IN_ISO_8859_1

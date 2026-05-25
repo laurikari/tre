@@ -6,11 +6,14 @@
 
 */
 
-
 #ifndef TRE_COMPILE_H
 #define TRE_COMPILE_H 1
 
-typedef struct {
+/* Limit distribution to prevent $O(2^N)$ AST explosion DoS */
+#define MAX_DISTRIBUTION_DEPTH 10 /* Allows 1024 branches */
+
+typedef struct
+{
   int position;
   int code_min;
   int code_max;
