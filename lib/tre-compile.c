@@ -1335,6 +1335,8 @@ tre_compute_npfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		    /* Back references: nullable = false, firstpos = {i},
 		       lastpos = {i}. */
 		    node->nullable = 0;
+		    if (*nextpos == TRE_MAX_POS)
+		      return REG_ESPACE;
 		    lit->position = (*nextpos)++;
 		    node->firstpos = tre_set_one(mem, lit->position, 0,
 					     TRE_CHAR_MAX, 0, NULL, -1);
@@ -1363,6 +1365,8 @@ tre_compute_npfl(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *tree,
 		    /* Literal at position i: nullable = false, firstpos = {i},
 		       lastpos = {i}. */
 		    node->nullable = 0;
+		    if (*nextpos == TRE_MAX_POS)
+		      return REG_ESPACE;
 		    lit->position = (*nextpos)++;
 		    node->firstpos =
 		      tre_set_one(mem, lit->position, lit->code_min,
@@ -2008,6 +2012,10 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
   for (i = 0; i < numpos; i++)
     {
       offs[i] = add;
+      /* Note that counts[i] cannot exceed TRE_MAX_POS which is orders of
+	 magnitude smaller than TRE_MAX_TRANS */
+      if (add >= TRE_MAX_TRANS - counts[i] - 1)
+	  ERROR_EXIT(REG_ESPACE);
       add += counts[i] + 1;
       counts[i] = 0;
     }
