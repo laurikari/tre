@@ -8,6 +8,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+# include <pthread.h>
+# define TEST_STACK_DEPTH 1
+#endif
+
 #ifdef USE_SYSTEM_REGEX
 # include <regex.h>
 # ifndef REG_BASIC
@@ -32,6 +37,28 @@ static void ok(void) { fputc('+', stderr); ntests++; nok++; }
 static void notok(void) { fputc('-', stderr); ntests++; }
 static void done(void) { fputc('\n', stderr); exit(nok == ntests ? 0 : 1); }
 #define check(expr) do { ((expr) ? ok() : notok()); } while (0)
+
+#ifdef TEST_STACK_DEPTH
+/* Compile and match a pattern in a small-stack thread; the subject is
+   the pattern itself (a string of 'a's). */
+static void *
+compile_large(void *arg)
+{
+  const char *pat = arg;
+  regex_t re;
+  regmatch_t m[1];
+  intptr_t err;
+
+  err = regcomp(&re, pat, REG_EXTENDED);
+  if (err == REG_OK)
+    {
+      if (regexec(&re, pat, 1, m, 0) != REG_OK)
+	err = -1;
+      regfree(&re);
+    }
+  return (void *)err;
+}
+#endif /* TEST_STACK_DEPTH */
 
 int
 main(void)
@@ -137,5 +164,34 @@ main(void)
     }
     free(buf);
   }
+
+  /* Compiling a large regex must not overflow the C stack: the TNFA
+     conversion recursed once per AST node until it was converted to
+     iteration.	 Run the compilation in a thread with a small stack so
+     the recursive implementation would crash here even on platforms
+     with large default stacks. */
+#ifdef TEST_STACK_DEPTH
+  {
+    pthread_t thr;
+    pthread_attr_t attr;
+    void *ret = (void *)-1;
+    size = 60000; /* <= TRE_MAX_RE, deep enough to need several MB of
+		     C stack at one stack frame per AST node */
+    if ((buf = malloc(size + 1)) == NULL) {
+      notok();
+    } else {
+      memset(buf, 'a', size);
+      buf[size] = '\0';
+      fprintf(stderr, "S");
+      check(pthread_attr_init(&attr) == 0
+	    && pthread_attr_setstacksize(&attr, 1024 * 1024) == 0
+	    && pthread_create(&thr, &attr, compile_large, buf) == 0
+	    && pthread_join(thr, &ret) == 0
+	    && ret == (void *)REG_OK);
+      free(buf);
+    }
+  }
+#endif /* TEST_STACK_DEPTH */
+
   done();
 }
