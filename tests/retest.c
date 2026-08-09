@@ -633,6 +633,23 @@ main(int argc, char **argv)
   test_exec("xxxxxx", 0, REG_NOMATCH);
 #endif
 
+  /*
+   * Literal (REG_LITERAL) patterns.
+   */
+
+  /* An empty literal pattern matches the empty string. */
+  test_comp("", REG_EXTENDED | REG_LITERAL, 0);
+  test_exec("abc", 0, REG_OK, 0, 0, END);
+  test_exec("", 0, REG_OK, 0, 0, END);
+
+  /* Metacharacters lose their meaning in literal mode. */
+  test_comp("a.c", REG_EXTENDED | REG_LITERAL, 0);
+  test_exec("xa.cy", 0, REG_OK, 1, 4, END);
+  test_exec("abc", 0, REG_NOMATCH);
+  test_comp("(a|b)*", REG_EXTENDED | REG_LITERAL, 0);
+  test_exec("x(a|b)*y", 0, REG_OK, 1, 7, END);
+  test_exec("ababab", 0, REG_NOMATCH);
+
 #ifdef TRE_APPROX
   /*
    * Approximate matching tests.

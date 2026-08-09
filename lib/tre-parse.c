@@ -1645,6 +1645,22 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  break;
 		}
 
+#ifdef REG_LITERAL
+	      /* In literal mode the branch above is skipped, so an empty
+		 pattern would otherwise fall through without producing an
+		 atom.  Emit an empty expression, which matches the empty
+		 string. */
+	      if ((ctx->cflags & REG_LITERAL) && ctx->re >= ctx->re_end)
+		{
+		  DPRINT(("tre_parse:	    literal empty: '%.*" STRF "'\n",
+			  REST(ctx->re)));
+		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1);
+		  if (!result)
+		    return REG_ESPACE;
+		  break;
+		}
+#endif /* REG_LITERAL */
+
 	      DPRINT(("tre_parse:     literal: '%.*" STRF "'\n",
 		      REST(ctx->re)));
 	      /* Note that we can't use an tre_isalpha() test here, since there
