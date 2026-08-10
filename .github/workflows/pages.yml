@@ -1,0 +1,44 @@
+name: Publish documentation
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build website
+    runs-on: ubuntu-latest
+    steps:
+    - name: Prepare
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pandoc
+    - name: Check out
+      uses: actions/checkout@v4
+    - name: Build website
+      run: ./doc/build-website.sh _site
+    - name: Upload website
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: _site
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy
+      id: deployment
+      uses: actions/deploy-pages@v4
