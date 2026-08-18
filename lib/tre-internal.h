@@ -22,6 +22,7 @@
 
 #include <limits.h>
 #include <ctype.h>
+#include <stddef.h>
 
 #include "tre/tre.h"
 
@@ -137,11 +138,23 @@ tre_ctype_t tre_ctype(const char *name);
 
 typedef enum { STR_WIDE, STR_BYTE, STR_MBS, STR_USER } tre_str_type_t;
 
+/* A union with the strictest alignment of the objects TRE places in
+   its memory blocks.  Aligning to `long' is not enough on LLP64
+   platforms such as 64-bit Windows, where `long' is narrower than
+   pointers and doubles. */
+typedef union {
+  void *ptr;
+  void (*fn)(void);
+  long long ll;
+  double d;
+} tre_aligned_t;
+
 /* Returns number of bytes to add to (char *)ptr to make it
-   properly aligned for the type. */
+   properly aligned for the type.  The cast must be to `size_t', not
+   `long', which would truncate the pointer on LLP64 platforms. */
 #define ALIGN(ptr, type) \
-  ((((long)ptr) % sizeof(type)) \
-   ? (sizeof(type) - (((long)ptr) % sizeof(type))) \
+  ((((size_t)ptr) % sizeof(type)) \
+   ? (sizeof(type) - (((size_t)ptr) % sizeof(type))) \
    : 0)
 
 #undef MAX
