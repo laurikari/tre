@@ -39,23 +39,20 @@ static void done(void) { fputc('\n', stderr); exit(nok == ntests ? 0 : 1); }
 #define check(expr) do { ((expr) ? ok() : notok()); } while (0)
 
 #ifdef TEST_STACK_DEPTH
-/* Compile and match a pattern in a small-stack thread; the subject is
-   the pattern itself (a string of 'a's). */
+/* Compile a pattern in a small-stack thread.  Compile only: with
+   TRE_USE_ALLOCA, regexec() allocates buffers proportional to the
+   automaton size on the stack, which cannot fit in a small stack no
+   matter how compilation is implemented. */
 static void *
 compile_large(void *arg)
 {
   const char *pat = arg;
   regex_t re;
-  regmatch_t m[1];
   intptr_t err;
 
   err = regcomp(&re, pat, REG_EXTENDED);
   if (err == REG_OK)
-    {
-      if (regexec(&re, pat, 1, m, 0) != REG_OK)
-	err = -1;
-      regfree(&re);
-    }
+    regfree(&re);
   return (void *)err;
 }
 #endif /* TEST_STACK_DEPTH */
