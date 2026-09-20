@@ -21,6 +21,7 @@
 #endif /* HAVE_WCTYPE_H */
 
 #include <limits.h>
+#include <stdint.h>
 #include <ctype.h>
 
 #include "tre/tre.h"
@@ -140,8 +141,8 @@ typedef enum { STR_WIDE, STR_BYTE, STR_MBS, STR_USER } tre_str_type_t;
 /* Returns number of bytes to add to (char *)ptr to make it
    properly aligned for the type. */
 #define ALIGN(ptr, type) \
-  ((((long)ptr) % sizeof(type)) \
-   ? (sizeof(type) - (((long)ptr) % sizeof(type))) \
+  ((((intptr_t)ptr) % sizeof(type)) \
+   ? (sizeof(type) - (((intptr_t)ptr) % sizeof(type))) \
    : 0)
 
 #undef MAX
