@@ -357,7 +357,8 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
       else
 	{
 	  DPRINT(("tre_parse_bracket:   char: '%.*" STRF "'\n", REST(re)));
-	  if (*re == CHAR_MINUS && *(re + 1) != CHAR_RBRACKET
+	  if (*re == CHAR_MINUS
+	      && (re + 1 >= ctx->re_end || *(re + 1) != CHAR_RBRACKET)
 	      && ctx->re != re)
 	    /* Two ranges are not allowed to share and endpoint. */
 	    return REG_ERANGE;
@@ -436,7 +437,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   if (items == NULL)
     return REG_ESPACE;
 
-  if (*ctx->re == CHAR_CARET)
+  if (ctx->re < ctx->re_end && *ctx->re == CHAR_CARET)
     {
       DPRINT(("tre_parse_bracket: negate: '%.*" STRF "'\n", REST(ctx->re)));
       negate = 1;
@@ -750,7 +751,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	    case L'<':
 	      DPRINT(("tre_parse:    max cost: '%.*" STRF "'\n", REST(r)));
 	      r++;
-	      while (*r == L' ')
+	      while (r < ctx->re_end && *r == L' ')
 		r++;
 	      cost_max = tre_parse_int(&r, ctx->re_end);
 	      if (cost_max < 0)
@@ -770,7 +771,9 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 		  const tre_char_t *sr = r;
 #endif /* TRE_DEBUG */
 		  int cost = tre_parse_int(&r, ctx->re_end);
-		  /* XXX - make sure r is not past end. */
+		  /* The number parser may have consumed the rest of the pattern. */
+		  if (r >= ctx->re_end)
+		    return REG_EBRACE;
 		  switch (*r)
 		    {
 		    case L'i':	/* Insert cost */
@@ -1025,6 +1028,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		     && c == CHAR_RPAREN && depth > 0)
 		    || (!(ctx->cflags & REG_EXTENDED)
 			&& (c == CHAR_BACKSLASH
+			    && ctx->re + 1 < ctx->re_end
 			    && *(ctx->re + 1) == CHAR_RPAREN)))
 		  {
 		    if (!(ctx->cflags & REG_EXTENDED) && depth == 0)
@@ -1221,6 +1225,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	      /* Handle "(?...)" extensions.  They work in a way similar
 		 to Perls corresponding extensions. */
 	      if (ctx->cflags & REG_EXTENDED
+		  && ctx->re + 1 < ctx->re_end
 		  && *(ctx->re + 1) == CHAR_QUESTIONMARK)
 		{
 		  int new_cflags = ctx->cflags;
@@ -1230,6 +1235,8 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  ctx->re += 2;
 		  while (/*CONSTCOND*/(void)1,1)
 		    {
+		      if (ctx->re >= ctx->re_end)
+			return REG_BADPAT;
 		      if (*ctx->re == L'i')
 			{
 			  DPRINT(("tre_parse:	    icase: '%.*" STRF "\n",
@@ -1295,10 +1302,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 				  REST(ctx->re)));
 			  /* A comment can contain any character except a
 			     right parenthesis */
-			  while (*ctx->re != CHAR_RPAREN
-				 && ctx->re < ctx->re_end)
+			  while (ctx->re < ctx->re_end
+				 && *ctx->re != CHAR_RPAREN)
 			    ctx->re++;
-			  if (*ctx->re == CHAR_RPAREN && ctx->re < ctx->re_end)
+			  if (ctx->re < ctx->re_end && *ctx->re == CHAR_RPAREN)
 			    {
 			      ctx->re++;
 			      break;
@@ -1456,7 +1463,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  break;
 		case L'x':
 		  ctx->re++;
-		  if (ctx->re[0] != CHAR_LBRACE && ctx->re < ctx->re_end)
+		  if (ctx->re < ctx->re_end && ctx->re[0] != CHAR_LBRACE)
 		    {
 		      /* 8 bit hex char. */
 		      char tmp[3] = {0, 0, 0};
@@ -1464,12 +1471,12 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      DPRINT(("tre_parse:  8 bit hex: '%.*" STRF "'\n",
 			      REST(ctx->re - 2)));
 
-		      if (tre_isxdigit(ctx->re[0]) && ctx->re < ctx->re_end)
+		      if (ctx->re < ctx->re_end && tre_isxdigit(ctx->re[0]))
 			{
 			  tmp[0] = (char)ctx->re[0];
 			  ctx->re++;
 			}
-		      if (tre_isxdigit(ctx->re[0]) && ctx->re < ctx->re_end)
+		      if (ctx->re < ctx->re_end && tre_isxdigit(ctx->re[0]))
 			{
 			  tmp[1] = (char)ctx->re[0];
 			  ctx->re++;
@@ -1485,7 +1492,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      long val;
 		      size_t i = 0;
 		      ctx->re++;
-		      while (ctx->re_end - ctx->re >= 0)
+		      while (ctx->re < ctx->re_end)
 			{
 			  if (ctx->re[0] == CHAR_RBRACE)
 			    break;
@@ -1619,7 +1626,18 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 	      /* We are expecting an atom.  If the subexpression (or the whole
 		 regexp) ends here, we interpret it as an empty expression
-		 (which matches an empty string).  */
+		 (which matches an empty string).  This also applies in
+		 REG_LITERAL mode, where the test below is skipped. */
+	      if (ctx->re >= ctx->re_end)
+		{
+		  DPRINT(("tre_parse:	    empty: '%.*" STRF "'\n",
+			  REST(ctx->re)));
+		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1);
+		  if (!result)
+		    return REG_ESPACE;
+		  break;
+		}
+
 	      if (
 #ifdef REG_LITERAL
 		  !(ctx->cflags & REG_LITERAL) &&
