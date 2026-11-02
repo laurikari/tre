@@ -692,10 +692,7 @@ main(int argc, char **argv)
   test_comp("^(foobar){~1}$", REG_EXTENDED, 0);
   test_exec("foobar", 0, REG_OK, 0, 6, 0, 6, END);
   test_exec("xfoobar", 0, REG_OK, 0, 7, 0, 7, END);
-  /*
-    This currently fails.
   test_exec("foobarx", 0, REG_OK, 0, 7, 0, 7, END);
-  */
   test_exec("fooxbar", 0, REG_OK, 0, 7, 0, 7, END);
   test_exec("foxbar", 0, REG_OK, 0, 6, 0, 6, END);
   test_exec("xoobar", 0, REG_OK, 0, 6, 0, 6, END);
@@ -708,6 +705,21 @@ main(int argc, char **argv)
   test_exec("xxfoobar", 0, REG_NOMATCH);
   test_exec("xfoxbar", 0, REG_NOMATCH);
   test_exec("foxbarx", 0, REG_NOMATCH);
+
+  /* Insertions between the last character and a following assertion. */
+  test_comp("^(caf){~1}$", REG_EXTENDED, 0);
+  test_exec("cafe", 0, REG_OK, 0, 4, 0, 4, END);
+  test_exec("cafxy", 0, REG_NOMATCH);
+  test_comp("^(caf){~2}$", REG_EXTENDED, 0);
+  test_exec("cafxy", 0, REG_OK, 0, 5, 0, 5, END);
+  test_comp("(caf){~1}$", REG_EXTENDED, 0);
+  test_exec("xcafe", 0, REG_OK, 1, 5, 1, 5, END);
+  test_comp("^(caf){~1}$", REG_EXTENDED | REG_NEWLINE, 0);
+  test_exec("cafe\nxyz", 0, REG_OK, 0, 4, 0, 4, END);
+  test_comp("(foo){~1}\\> bar", REG_EXTENDED, 0);
+  test_exec("foox bar", 0, REG_OK, 0, 8, 0, 4, END);
+  test_comp("foo (bar){~1}\\>", REG_EXTENDED, 0);
+  test_exec("foo barx", 0, REG_OK, 0, 8, 4, 8, END);
 
   /* At most one insert, two deletes, and three substitutions.
      Additionally, deletes cost two and substitutes one, and total
@@ -1805,6 +1817,39 @@ main(int argc, char **argv)
 #endif
 #endif
     }
+
+#if defined(TRE_MULTIBYTE) && defined(TRE_APPROX)
+  if (setlocale(LC_CTYPE, "en_US.UTF-8") != NULL ||
+      setlocale(LC_CTYPE, "C.UTF-8") != NULL)
+    {
+      fprintf(outf, "\nTesting approximate matching with LC_CTYPE en_US.UTF-8\n");
+      /* In multibyte locales character classes are kept as assertions
+	 instead of being expanded to ranges, but a character outside the
+	 class must still be a substitutable mismatch, as it is in
+	 single-byte locales.  "\303\251" is U+00E9, two bytes in UTF-8. */
+      test_comp("^([[:alpha:]]){~1}$", REG_EXTENDED, 0);
+      test_exec("5", 0, REG_OK, 0, 1, 0, 1, END);
+      test_exec("\303\251", 0, REG_OK, 0, 2, 0, 2, END);
+      test_exec("55", 0, REG_NOMATCH);
+      test_comp("^([^[:alpha:]]){~1}$", REG_EXTENDED, 0);
+      test_exec("a", 0, REG_OK, 0, 1, 0, 1, END);
+      test_comp("^(a[[:alpha:]]b){~1}$", REG_EXTENDED, 0);
+      test_exec("a5b", 0, REG_OK, 0, 3, 0, 3, END);
+      test_exec("a55b", 0, REG_NOMATCH);
+      test_comp("^([[:digit:]]){#1}$", REG_EXTENDED, 0);
+      test_exec("a", 0, REG_OK, 0, 1, 0, 1, END);
+      test_exec("\303\251", 0, REG_OK, 0, 2, 0, 2, END);
+      test_comp("^([[:digit:]]){#0~1}$", REG_EXTENDED, 0);
+      test_exec("a", 0, REG_NOMATCH);
+      test_comp("^([[:upper:]]){~1}$", REG_EXTENDED | REG_ICASE, 0);
+      test_exec("a", 0, REG_OK, 0, 1, 0, 1, END);
+      test_exec("5", 0, REG_OK, 0, 1, 0, 1, END);
+    }
+  else
+    {
+      fprintf(outf, "\nTRE_MULTIBYTE enabled, but skipping approximate LC_CTYPE en_US.UTF-8 tests (locale unavailable)\n");
+    }
+#endif /* TRE_MULTIBYTE && TRE_APPROX */
 
 #ifdef TRE_MULTIBYTE
   if (setlocale(LC_CTYPE, "ja_JP.eucjp") != NULL ||
