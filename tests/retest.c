@@ -1446,6 +1446,73 @@ main(int argc, char **argv)
 	    REG_EXTENDED | REG_NOSUB, 0);
   test_exec(" a", 0, REG_OK, END);
 
+  /* Each optional group doubles the ways to reach the next position, but
+     the ways need the same assertions, so they must not multiply the
+     transitions. */
+  test_comp("x(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?", REG_EXTENDED | REG_NOSUB, 0);
+  test_exec("xyy", 0, REG_OK, END);
+  test_exec("x y", 0, REG_OK, END);
+  test_exec("y", 0, REG_NOMATCH);
+  test_comp("x(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?", REG_EXTENDED, 0);
+  test_exec("x", 0, REG_OK, 0, 1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_exec("xy", 0, REG_OK, 0, 2, 1, 2,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_exec("xyy", 0, REG_OK, 0, 3, 1, 2, 2, 3,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, END);
+
+  /* Repetitions of a group that may match an assertion, followed by a back
+     reference, as in Pi-hole filters. */
+  test_comp("(((((\\B|.)|[a-c])){1,2})*)\\1", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_OK, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_exec("ads.double", 0, REG_OK, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_comp("((((((((\\B|.){1,2})*){1,2})*){1,2})*){1,2})*",
+	    REG_EXTENDED | REG_NOSUB, 0);
+  test_exec("ab", 0, REG_OK, END);
+
+  /* Skipping an optional assertion is taken exactly where the assertion
+     fails. */
+  test_comp("(^)?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_exec("a", REG_NOTBOL, REG_OK, 0, 1, 0, 0, END);
+  test_comp("(^)?a", REG_EXTENDED | REG_NEWLINE, 0);
+  test_exec("b\na", 0, REG_OK, 2, 3, 2, 2, END);
+  test_comp("a($)?", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_OK, 0, 1, 1, 1, END);
+  test_exec("a", REG_NOTEOL, REG_OK, 0, 1, 1, 1, END);
+  test_comp("a($)?", REG_EXTENDED | REG_NEWLINE, 0);
+  test_exec("a\nb", 0, REG_OK, 0, 1, 1, 1, END);
+  test_comp("(\\<)?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+  test_comp("a(\\>)?", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_OK, 0, 1, 1, 1, END);
+  test_exec("a ", 0, REG_OK, 0, 1, 1, 1, END);
+  test_comp("(\\b)?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_comp("(\\B)?a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+
+  /* Assertions that contradict each other never hold. */
+  test_comp("x\\b\\By", REG_EXTENDED, 0);
+  test_exec("xy", 0, REG_NOMATCH);
+  test_exec("x y", 0, REG_NOMATCH);
+  test_comp("(\\b\\B|c)d", REG_EXTENDED, 0);
+  test_exec("cd", 0, REG_OK, 0, 2, 0, 1, END);
+  test_exec("d", 0, REG_NOMATCH);
+  test_comp("(\\b\\B)*a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, END);
+  test_comp("x(\\b\\B)?y", REG_EXTENDED, 0);
+  test_exec("xy", 0, REG_OK, 0, 2, 1, 1, END);
+
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
 #ifdef SRC_IN_ISO_8859_1

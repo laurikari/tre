@@ -197,6 +197,13 @@ struct tnfa_transition {
 #define ASSERT_AT_WB_NEG	128   /* Not a word boundary. */
 #define ASSERT_BACKREF		256   /* A back reference in `backref'. */
 #define ASSERT_LAST		256
+/* The negations of the assertions above that have none.  They appear only
+   in transitions, where a less preferred way to match the empty string
+   is taken only when the preferred ones cannot be. */
+#define ASSERT_NOT_BOL		512   /* Not at beginning of line. */
+#define ASSERT_NOT_EOL	       1024   /* Not at end of line. */
+#define ASSERT_NOT_BOW	       2048   /* Not at beginning of word. */
+#define ASSERT_NOT_EOW	       4096   /* Not at end of word. */
 
 /* Tag directions. */
 typedef enum {
