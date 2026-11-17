@@ -308,7 +308,9 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	  DPRINT(("tre_parse_bracket:  class: '%.*" STRF "'\n", REST(re)));
 	  while (endptr < ctx->re_end && *endptr != CHAR_COLON)
 	    endptr++;
-	  if (endptr != ctx->re_end)
+	  /* The class is skipped up to endptr + 2, past ":]", so the
+	     character after the colon must be within the pattern. */
+	  if (endptr + 1 < ctx->re_end)
 	    {
 	      len = MIN(endptr - re - 2, 63);
 #ifdef TRE_WCHAR
