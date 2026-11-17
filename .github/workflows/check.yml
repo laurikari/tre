@@ -15,7 +15,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y autoconf automake autopoint gettext libtool
     - name: Check out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Configure
       run: |
         ./utils/autogen.sh
@@ -28,7 +28,7 @@ jobs:
       run: make distcheck
     - name: Upload logs
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: tre-ubuntu-logs
         path: ./**/*.log
@@ -41,7 +41,7 @@ jobs:
         brew update
         brew install autoconf automake gettext libtool
     - name: Check out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Configure
       run: |
         ./utils/autogen.sh
@@ -54,7 +54,7 @@ jobs:
       run: make distcheck
     - name: Upload logs
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: tre-macos-logs
         path: ./**/*.log
@@ -63,9 +63,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Prepare
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
     - name: Check out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Build
       run: msbuild win32/tre.sln
     - name: Run tests
@@ -74,7 +74,7 @@ jobs:
         win32/Debug/test-str-source.exe -o tests/test-str-source.log
     - name: Upload logs
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: tre-macos-logs
         path: ./**/*.log
