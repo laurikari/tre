@@ -800,7 +800,12 @@ typedef enum {
 } tre_expand_ast_symbol_t;
 
 /* Expands each iteration node that has a finite nonzero minimum or maximum
-   iteration count to a catenated sequence of copies of the node. */
+   iteration count to a catenated sequence of copies of the node.
+
+   Nested bounds multiply, so the expansion can be far larger than the
+   pattern: ((a{255}){255}){255} has 16 million positions.  Enforce
+   TRE_MAX_POS as the copies are made, rather than leaving it to
+   tre_compute_npfl() after all of them have been allocated. */
 static reg_errcode_t
 tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 	       tre_tag_direction_t *tag_directions, int *max_depth)
@@ -917,6 +922,8 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 					  &max_pos);
 		    if (status != REG_OK)
 		      return status;
+		    if (max_pos >= TRE_MAX_POS)
+		      return REG_ESPACE;
 		    if (seq1 != NULL)
 		      seq1 = tre_ast_new_catenation(mem, seq1, copy);
 		    else
@@ -933,6 +940,8 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 					  &pos_add, NULL, &seq2, &max_pos);
 		    if (status != REG_OK)
 		      return status;
+		    if (max_pos >= TRE_MAX_POS)
+		      return REG_ESPACE;
 		    seq2 = tre_ast_new_iter(mem, seq2, 0, -1, 0);
 		    if (seq2 == NULL)
 		      return REG_ESPACE;
@@ -947,6 +956,8 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 					      &pos_add, NULL, &copy, &max_pos);
 			if (status != REG_OK)
 			  return status;
+			if (max_pos >= TRE_MAX_POS)
+			  return REG_ESPACE;
 			if (seq2 != NULL)
 			  seq2 = tre_ast_new_catenation(mem, copy, seq2);
 			else

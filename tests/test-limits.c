@@ -158,6 +158,9 @@ extras(void)
     { "((a*){13}){13}", 0 },
     { "(((a*){13}){13}){13}", 0 },
     { "((((a*){13}){13}){13}){13}", REG_ESPACE },
+    /* Rejected during expansion: building the 4e9 copies first would
+       exhaust memory. */
+    { "(((a{255}){255}){255}){255}", REG_ESPACE },
   };
   regex_t preg;
   int error;
