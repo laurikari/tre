@@ -33,8 +33,12 @@ static void notok(void) { fputc('-', stderr); ntests++; }
 static void done(void) { fputc('\n', stderr); exit(nok == ntests ? 0 : 1); }
 #define check(expr) do { ((expr) ? ok() : notok()); } while (0)
 
-int
-main(void)
+/*
+ * These tests exercise TRE_MAX_RE / TRE_MAX_STRING and allocate large
+ * amounts of memory.  They will most likely not run on a 32-bit system.
+ */
+static void
+limits(void)
 {
   regmatch_t pm[9];
   regex_t preg;
@@ -137,5 +141,41 @@ main(void)
     }
     free(buf);
   }
+}
+
+/*
+ * These tests exercise TRE_MAX_POS / TRE_MAX_TRANS and don't interact
+ * well with the various memory tricks which retest plays.
+ */
+static void
+extras(void)
+{
+  static const struct {
+    const char *regex;
+    int result;
+  } testcases[] = {
+    { "(a*){13}", 0 },
+    { "((a*){13}){13}", 0 },
+    { "(((a*){13}){13}){13}", 0 },
+    { "((((a*){13}){13}){13}){13}", REG_ESPACE },
+  };
+  regex_t preg;
+  int error;
+
+  fputc('X', stderr);
+  for (unsigned int i = 0; i < sizeof(testcases) / sizeof(testcases[0]); i++)
+    {
+      error = regcomp(&preg, testcases[i].regex, REG_EXTENDED);
+      check(error == testcases[i].result);
+      if (error == 0)
+	regfree(&preg);
+    }
+}
+
+int
+main(void)
+{
+  limits();
+  extras();
   done();
 }
