@@ -762,7 +762,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	    case L'<':
 	      DPRINT(("tre_parse:    max cost: '%.*" STRF "'\n", REST(r)));
 	      r++;
-	      while (*r == L' ')
+	      while (r < ctx->re_end && *r == L' ')
 		r++;
 	      cost_max = tre_parse_int(&r, ctx->re_end);
 	      if (cost_max < 0)
@@ -782,7 +782,8 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 		  const tre_char_t *sr = r;
 #endif /* TRE_DEBUG */
 		  int cost = tre_parse_int(&r, ctx->re_end);
-		  /* XXX - make sure r is not past end. */
+		  if (r >= ctx->re_end)
+		    return REG_EBRACE;
 		  switch (*r)
 		    {
 		    case L'i':	/* Insert cost */
