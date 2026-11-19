@@ -119,7 +119,12 @@ typedef short tre_cint_t;
 
 #endif /* !TRE_WCHAR */
 
-#if defined(TRE_WCHAR) && defined(HAVE_ISWCTYPE) && defined(HAVE_WCTYPE)
+/* Do not use the system iswctype()/wctype() on Windows: the CRT has no
+   "blank" character class (wctype("blank") returns 0, so [[:blank:]]
+   fails with REG_ECTYPE), and iswprint(L'\t') incorrectly returns true.
+   TRE's own implementations in tre-parse.c handle both. */
+#if !defined(_WIN32) && \
+  defined(TRE_WCHAR) && defined(HAVE_ISWCTYPE) && defined(HAVE_WCTYPE)
 #define TRE_USE_SYSTEM_WCTYPE 1
 #endif
 
