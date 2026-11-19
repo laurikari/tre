@@ -1681,6 +1681,16 @@ main(int argc, char **argv)
   test_exec("1234", 0, REG_NOMATCH);
   test_exec("12341234", 0, REG_OK, 0, 8, 0, 4, END);
 
+  /* Assertions after a back reference see its last character. */
+  test_comp("(-a)\\1\\>", REG_EXTENDED, 0);
+  test_exec("-a-a", 0, REG_OK, 0, 4, 0, 2, END);
+  test_comp("(a-)\\1\\<b", REG_EXTENDED, 0);
+  test_exec("a-a-b", 0, REG_OK, 0, 5, 0, 2, END);
+  test_comp("a()\\1\\>", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 1, 1, END);
+  test_comp("(a\n)\\1^b", REG_EXTENDED | REG_NEWLINE, 0);
+  test_exec("a\na\nb", 0, REG_OK, 0, 5, 0, 2, END);
+
   /*
    * Test minimal repetitions (non-greedy repetitions)
    */
@@ -1850,6 +1860,53 @@ main(int argc, char **argv)
   else
     {
       fprintf(outf, "\nTRE_MULTIBYTE enabled, but skipping LC_CTYPE ja_JP.eucJP (locale unavailable)\n");
+    }
+
+  if (setlocale(LC_CTYPE, "en_US.UTF-8") != NULL ||
+      setlocale(LC_CTYPE, "C.UTF-8") != NULL)
+    {
+      fprintf(outf, "\nTesting LC_CTYPE en_US.UTF-8\n");
+      /* "\303\251" is U+00E9, two bytes in UTF-8.  Offsets are in bytes. */
+
+      /* Match offsets when the backtracking matcher backtracks or
+	 restarts after a multibyte character. */
+      test_comp("b", REG_EXTENDED, 0);
+      test_exec("\303\251b", 0, REG_OK, 2, 3, END);
+      test_comp("\303\251a|\303\251b", REG_EXTENDED, 0);
+      test_exec("\303\251b", 0, REG_OK, 0, 3, END);
+      test_comp("(ab|a)\303\251", REG_EXTENDED, 0);
+      test_exec("a\303\251", 0, REG_OK, 0, 3, 0, 1, END);
+
+      /* An empty back reference before a multibyte character. */
+      test_comp("()\\1\303\251", REG_EXTENDED, 0);
+      test_exec("\303\251", 0, REG_OK, 0, 2, 0, 0, END);
+
+      /* Back references to multibyte text.  The expected results are
+	 those of glibc regexec(). */
+      test_comp("(\303\251a)\\1", REG_EXTENDED, 0);
+      test_exec("\303\251a\303\251a", 0, REG_OK, 0, 6, 0, 3, END);
+      test_comp("(\303\251)\\1", REG_EXTENDED, 0);
+      test_exec("\303\251\303\251", 0, REG_OK, 0, 4, 0, 2, END);
+      test_exec("a\303\251\303\251", 0, REG_OK, 1, 5, 1, 3, END);
+      test_exec("\303\251a", 0, REG_NOMATCH);
+      test_comp("x(\303\251)\\1", REG_EXTENDED, 0);
+      test_exec("x\303\251\303\251", 0, REG_OK, 0, 5, 1, 3, END);
+      test_comp("(\303\251)\\1b", REG_EXTENDED, 0);
+      test_exec("\303\251\303\251b", 0, REG_OK, 0, 5, 0, 2, END);
+      test_comp("(\303\251a|\303\251b)\\1", REG_EXTENDED, 0);
+      test_exec("\303\251b\303\251b", 0, REG_OK, 0, 6, 0, 3, END);
+      test_comp("(\303\251)\\1\\>", REG_EXTENDED, 0);
+      test_exec("\303\251\303\251", 0, REG_OK, 0, 4, 0, 2, END);
+      /* A reference must not be compared with the text before the
+	 current position. */
+      test_comp("(a)\\1", REG_EXTENDED, 0);
+      test_exec("a", 0, REG_NOMATCH);
+      test_comp("x(a)\\1", REG_EXTENDED, 0);
+      test_exec("xa", 0, REG_NOMATCH);
+    }
+  else
+    {
+      fprintf(outf, "\nTRE_MULTIBYTE enabled, but skipping LC_CTYPE en_US.UTF-8 (locale unavailable)\n");
     }
 #endif /* TRE_MULTIBYTE */
 #endif

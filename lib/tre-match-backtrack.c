@@ -74,6 +74,7 @@ char *alloca ();
 
 typedef struct {
   int pos;
+  unsigned int pos_add_next;
   const char *str_byte;
 #ifdef TRE_WCHAR
   const wchar_t *str_wide;
@@ -163,6 +164,7 @@ typedef struct tre_backtrack_struct {
       else								      \
 	stack = stack->next;						      \
       stack->item.pos = (_pos);						      \
+      stack->item.pos_add_next = pos_add_next;				      \
       stack->item.str_byte = (_str_byte);				      \
       BT_STACK_WIDE_IN(_str_wide);					      \
       stack->item.state = (_state);					      \
@@ -180,6 +182,7 @@ typedef struct tre_backtrack_struct {
       int i;								      \
       assert(stack->prev);						      \
       pos = stack->item.pos;						      \
+      pos_add_next = stack->item.pos_add_next;				      \
       if (type == STR_USER)                                                   \
         str_source->rewind(pos + pos_add_next, str_source->context);          \
       str_byte = stack->item.str_byte;					      \
@@ -223,6 +226,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   int next_c_start;
   const char *str_byte_start;
   int pos_start = -1;
+  unsigned int pos_add_next_start = 1;
 #ifdef TRE_WCHAR
   const wchar_t *str_wide_start;
 #endif /* TRE_WCHAR */
@@ -328,6 +332,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
     str_source->rewind(pos + pos_add_next, str_source->context);
   GET_NEXT_WCHAR();
   pos_start = pos;
+  pos_add_next_start = pos_add_next;
   next_c_start = next_c;
   str_byte_start = str_byte;
 #ifdef TRE_WCHAR
@@ -452,7 +457,8 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	      {
 		DPRINT(("  substring (len %d) is [%d, %d[: '%.*s'\n",
 			bt_len, so, eo, bt_len, (char*)string + so));
-		DPRINT(("  current string is '%.*s'\n", slen, str_byte - 1));
+		DPRINT(("  current string is '%.*s'\n", slen,
+			(char*)string + pos));
 	      }
 #ifdef TRE_WCHAR
 	    else if (type == STR_WIDE)
@@ -478,8 +484,8 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 				 (size_t)bt_len);
 #endif /* TRE_WCHAR */
 	      else
-		result = strncmp((const char*)string + so, str_byte - 1,
-				 (size_t)bt_len);
+		result = strncmp((const char*)string + so,
+				 (const char*)string + pos, (size_t)bt_len);
 	    }
 	  else if (len - pos < bt_len)
 	    result = 1;
@@ -489,8 +495,8 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 			     (size_t)bt_len);
 #endif /* TRE_WCHAR */
 	  else
-	    result = memcmp((const char*)string + so, str_byte - 1,
-			    (size_t)bt_len);
+	    result = memcmp((const char*)string + so,
+			    (const char*)string + pos, (size_t)bt_len);
 
 	  if (result == 0)
 	    {
@@ -505,15 +511,17 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 
 	      states_seen[trans_i->state_id] = empty_br_match;
 
-	      /* Advance in input string and resync `prev_c', `next_c'
-		 and pos. */
+	      /* Advance past the matched text.  Read it instead of skipping
+		 it, so that `prev_c' is its last character, `next_c' and
+		 `pos_add_next' describe the character after it, and a
+		 STR_USER source is advanced past it as well.  Stop if the
+		 input does not advance (end of string). */
 	      DPRINT(("	 back reference matched\n"));
-	      str_byte += bt_len - 1;
-#ifdef TRE_WCHAR
-	      str_wide += bt_len - 1;
-#endif /* TRE_WCHAR */
-	      pos += bt_len - 1;
-	      GET_NEXT_WCHAR();
+	      {
+		ssize_t end = pos + bt_len;
+		while (pos < end && pos_add_next > 0)
+		  GET_NEXT_WCHAR();
+	      }
 	      DPRINT(("	 pos now %zd\n", pos));
 	    }
 	  else
@@ -641,6 +649,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		}
 	      DPRINT(("restarting from next start position\n"));
 	      next_c = (tre_char_t) next_c_start;
+	      pos_add_next = pos_add_next_start;
 #ifdef TRE_MBSTATE
 	      mbstate = mbstate_start;
 #endif /* TRE_MBSTATE */

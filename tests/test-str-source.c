@@ -187,6 +187,9 @@ main(int argc, char **argv)
   ret += test_reguexec("catdog", "(cat|dog)\\1") != 0;
   ret += test_reguexec("dogdog", "(cat|dog)\\1") != 1;
   ret += test_reguexec("dogcat", "(cat|dog)\\1") != 0;
+  ret += test_reguexec("foofoox", "(foo)\\1x") != 1;
+  ret += test_reguexec("foofooy", "(foo)\\1x") != 0;
+  ret += test_reguexec("xcatcatx", "(cat|dog)\\1x") != 1;
 
   return ret;
 }
