@@ -366,6 +366,13 @@ escape sequences include:
 </ul>
 
 <p>
+TRE also supports the nonstandard <tt>\Q</tt> and <tt>\E</tt> escapes.
+<tt>\Q</tt> turns on literal mode (same effect as the <tt>REG_LITERAL</tt>
+compile flag) and <tt>\E</tt> turns it off.  In literal mode, all
+characters are treated as ordinary.
+</p>
+
+<p>
 An ordinary character is just a single character with no other
 significance, and matches that character.  A <tt>{</tt> followed by
 something else than a digit is considered an ordinary character.
