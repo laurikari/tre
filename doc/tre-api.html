@@ -166,10 +166,12 @@ codes if there was an error:
 <blockquote>
 <dl>
 <dt><tt>REG_BADPAT</tt></dt>
-<dd>Invalid regexp.  TRE returns this only if a multibyte character
+<dd>Invalid regexp.  TRE returns this if a multibyte character
 set is used in the current locale, and <tt><font
 class="arg">regex</font></tt> contained an invalid multibyte
-sequence.</dd>
+sequence, or if <tt><font class="arg">regex</font></tt> uses both
+back references and approximate matching, which cannot be used
+together.</dd>
 <dt><tt>REG_ECOLLATE</tt></dt>
 <dd>Invalid collating element referenced.  TRE returns this whenever
 equivalence classes or multicharacter collating elements are used in
@@ -669,7 +671,10 @@ the match, respectively.
 <p>
 The <tt>regaexec()</tt> functions return zero if a match with cost
 smaller than <code>params-&gt;max_cost</code> was found, otherwise
-they return <code>REG_NOMATCH</code> to indicate no match, or
+they return <code>REG_NOMATCH</code> to indicate no match,
+<code>REG_BADPAT</code> if the regexp contains back references and
+<code>params-&gt;max_cost</code> is not zero (back references and
+approximate matching cannot be used together), or
 <code>REG_ESPACE</code> to indicate that enough temporary memory could
 not be allocated to complete the matching operation.
 </p>

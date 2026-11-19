@@ -394,6 +394,13 @@ but many matchers, including TRE, implement back references for both
 EREs and BREs.
 </p>
 
+<p>
+Back references cannot be combined with approximate matching.  A
+regexp that contains both fails to compile with <tt>REG_BADPAT</tt>,
+and <tt>regaexec()</tt> returns <tt>REG_BADPAT</tt> for a regexp
+with back references unless the maximum cost is zero.
+</p>
+
 <h3>Options</h3>
 <a name="options"></a>
 <table bgcolor="#e0e0f0" cellpadding="10">
