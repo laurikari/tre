@@ -1854,7 +1854,8 @@ main(int argc, char **argv)
 #endif /* TRE_MULTIBYTE */
 #endif
 
-  tre_regfree(&reobj);
+  if (valid_reobj)
+    tre_regfree(&reobj);
 
   fprintf(outf, "\n");
   if (comp_errors || exec_errors)
