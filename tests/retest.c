@@ -1135,6 +1135,18 @@ main(int argc, char **argv)
   test_comp("[^A-C]*", REG_ICASE | REG_EXTENDED, 0);
   test_exec("tObAcCo", 0, REG_OK, 0, 2, END);
 
+  /* Character sets and case-insensitive literals copied by bounds. */
+  test_comp("x([a-c]){2}y", REG_ICASE | REG_EXTENDED, 0);
+  test_exec("zxAcy", 0, REG_OK, 1, 5, 3, 4, END);
+  test_comp("(b){2,3}c", REG_ICASE | REG_EXTENDED, 0);
+  test_exec("abBbC", 0, REG_OK, 1, 5, 3, 4, END);
+  test_comp("[a-c]{2}[^a-c]", REG_ICASE | REG_EXTENDED, 0);
+  test_exec("xaBCd", 0, REG_OK, 2, 5, END);
+  test_comp("a.{2}b", REG_NEWLINE | REG_EXTENDED, 0);
+  test_exec("a\nxb axyb", 0, REG_OK, 5, 9, END);
+  test_comp("([^a-c]|x)+", REG_ICASE | REG_EXTENDED, 0);
+  test_exec("AdXeB", 0, REG_OK, 1, 4, 3, 4, END);
+
   /* Complex character sets. */
   test_comp("[[:digit:]a-z#$%]+", REG_EXTENDED, 0);
   test_exec("__abc#lmn012$x%yz789*", 0, REG_OK, 2, 20, END);
