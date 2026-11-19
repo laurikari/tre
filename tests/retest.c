@@ -1272,6 +1272,32 @@ main(int argc, char **argv)
   test_exec("def\nabc", REG_NOTEOL, REG_NOMATCH);
   test_exec("def\nabc", REG_NOTBOL | REG_NOTEOL, REG_NOMATCH);
 
+  /* A pattern anchored in every alternative only matches at the start. */
+  test_comp("^ab|^cd", REG_EXTENDED, 0);
+  test_exec("xcd", 0, REG_NOMATCH);
+  test_exec("cdx", 0, REG_OK, 0, 2, END);
+  test_comp("^ab|cd", REG_EXTENDED, 0);
+  test_exec("xxcd", 0, REG_OK, 2, 4, END);
+  test_comp("(^|x)ab", REG_EXTENDED, 0);
+  test_exec("yxab", 0, REG_OK, 1, 4, 1, 2, END);
+  test_comp("^(a|b)*c", REG_EXTENDED, 0);
+  test_exec("ababc", 0, REG_OK, 0, 5, 3, 4, END);
+  test_exec("ababc", REG_NOTBOL, REG_NOMATCH);
+  test_exec("abxc", 0, REG_NOMATCH);
+
+  /* Matching resumes at the next character that can start a match. */
+  test_comp("(\\.|^)ab\\.c$", REG_EXTENDED, 0);
+  test_exec("ab.c", 0, REG_OK, 0, 4, 0, 0, END);
+  test_exec("x.ab.c", 0, REG_OK, 1, 6, 1, 2, END);
+  test_exec("xab.c", 0, REG_NOMATCH);
+  test_comp("(\\.|^)ab$", REG_EXTENDED, 0);
+  test_nexec("x.ab", 3, 0, REG_NOMATCH);
+  test_comp("\\<ab", REG_EXTENDED, 0);
+  test_exec("xab ab", 0, REG_OK, 4, 6, END);
+  test_comp("b+c", REG_EXTENDED, 0);
+  test_exec("abbbc", 0, REG_OK, 1, 5, END);
+  test_exec("abab", 0, REG_NOMATCH);
+
   /* With BRE syntax, `^' has a special meaning only at the beginning of the
      RE or the beginning of a parenthesized subexpression. */
   test_comp("a\\{0,1\\}^bc", 0, 0);
