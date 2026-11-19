@@ -1348,6 +1348,171 @@ main(int argc, char **argv)
   test_comp("\\<.", REG_EXTENDED, 0);
   test_exec(";xaa", 0, REG_OK, 1, 2, END);
 
+  /* Zero-width assertions inside alternations and optional groups.  Every
+     empty path through a nullable subexpression must be kept, not only the
+     POSIX-preferred one (issues #78 and #101). */
+  test_comp("^|$", REG_EXTENDED, 0);
+  test_exec("", 0, REG_OK, 0, 0, END);
+  test_exec("", REG_NOTBOL, REG_OK, 0, 0, END);
+  test_exec("", REG_NOTEOL, REG_OK, 0, 0, END);
+  test_exec("", REG_NOTBOL | REG_NOTEOL, REG_NOMATCH);
+  test_exec("a", REG_NOTBOL, REG_OK, 1, 1, END);
+  test_comp("$|^", REG_EXTENDED, 0);
+  test_exec("", REG_NOTBOL, REG_OK, 0, 0, END);
+  test_exec("", REG_NOTEOL, REG_OK, 0, 0, END);
+  test_exec("", REG_NOTBOL | REG_NOTEOL, REG_NOMATCH);
+
+  test_comp("(^|\\b)a", REG_EXTENDED, 0);
+  test_exec("this is a word", 0, REG_OK, 8, 9, 8, 8, END);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, END);
+  test_exec("a", REG_NOTBOL, REG_OK, 0, 1, 0, 0, END);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("(\\b|^)a", REG_EXTENDED, 0);
+  test_exec("a", REG_NOTBOL, REG_OK, 0, 1, 0, 0, END);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("(^|\\B)a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_exec(" a", 0, REG_NOMATCH);
+  test_comp("(\\>|\\<)a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+  test_comp("(\\>|^)a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_NOMATCH);
+  test_comp("(^|\\b|$)a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+
+  test_comp("a($|\\b)", REG_EXTENDED, 0);
+  test_exec("a b", 0, REG_OK, 0, 1, 1, 1, END);
+  test_exec("a", REG_NOTEOL, REG_OK, 0, 1, 1, 1, END);
+  test_exec("ab", 0, REG_NOMATCH);
+  test_comp("a(\\b|$)", REG_EXTENDED, 0);
+  test_exec("a b", 0, REG_OK, 0, 1, 1, 1, END);
+  test_exec("a", REG_NOTEOL, REG_OK, 0, 1, 1, 1, END);
+  test_comp("x(^|$)", REG_EXTENDED, 0);
+  test_exec("x", 0, REG_OK, 0, 1, 1, 1, END);
+  test_exec("x", REG_NOTEOL, REG_NOMATCH);
+  test_exec("xy", 0, REG_NOMATCH);
+  test_comp("x(^|$)", REG_EXTENDED | REG_NEWLINE, 0);
+  test_exec("x\nx", 0, REG_OK, 0, 1, 1, 1, END);
+  test_comp("(^|\\b)word", REG_EXTENDED, 0);
+  test_exec("a word", 0, REG_OK, 2, 6, 2, 2, END);
+  test_exec("aword", 0, REG_NOMATCH);
+  test_comp("(^|\\b)a (^|\\b)b (^|\\b)c (^|\\b)d", REG_EXTENDED, 0);
+  test_exec("a b c d", 0, REG_OK, 0, 7, 0, 0, 2, 2, 4, 4, 6, 6, END);
+  test_exec("xa b c d", 0, REG_NOMATCH);
+
+  /* Groups that can only match the empty string share their tags, so every
+     such group in an alternation reports the same empty span, as for
+     "a(()|())".  Only the overall match depends on which path was taken. */
+  test_comp("((^)|(\\b))a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, 0, 0, 0, 0, END);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, 1, 1, 1, 1, END);
+  test_comp("a((\\b)|($))", REG_EXTENDED, 0);
+  test_exec("a b", 0, REG_OK, 0, 1, 1, 1, 1, 1, 1, 1, END);
+  test_exec("a", 0, REG_OK, 0, 1, 1, 1, 1, 1, 1, 1, END);
+  test_exec("a", REG_NOTEOL, REG_OK, 0, 1, 1, 1, 1, 1, 1, 1, END);
+  test_comp("a(($)|(\\b))", REG_EXTENDED, 0);
+  test_exec("a b", 0, REG_OK, 0, 1, 1, 1, 1, 1, 1, 1, END);
+  test_exec("a", 0, REG_OK, 0, 1, 1, 1, 1, 1, 1, 1, END);
+
+  /* An optional group that only holds assertions may be skipped.  As with
+     "x()?y", the group still reports an empty span. */
+  test_comp("(^)?a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, END);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_comp("(^)*a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, END);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_comp("(^)+a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("x(\\B)?y", REG_EXTENDED, 0);
+  test_exec("xy", 0, REG_OK, 0, 2, 1, 1, END);
+  test_comp("x(\\b)?y", REG_EXTENDED, 0);
+  test_exec("xy", 0, REG_OK, 0, 2, 1, 1, END);
+
+  /* Chains of empty alternatives must not blow up the automaton. */
+  test_comp("(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)"
+	    "(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)(^|\\b)"
+	    "(^|\\b)(^|\\b)a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2,
+	    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, END);
+  test_comp("((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))"
+	    "((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))"
+	    "((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))"
+	    "((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))((^)|(\\b))a",
+	    REG_EXTENDED | REG_NOSUB, 0);
+  test_exec(" a", 0, REG_OK, END);
+
+  /* Each optional group doubles the ways to reach the next position, but
+     the ways need the same assertions, so they must not multiply the
+     transitions. */
+  test_comp("x(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?", REG_EXTENDED | REG_NOSUB, 0);
+  test_exec("xyy", 0, REG_OK, END);
+  test_exec("x y", 0, REG_OK, END);
+  test_exec("y", 0, REG_NOMATCH);
+  test_comp("x(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?(\\B|y)?"
+	    "(\\B|y)?(\\B|y)?", REG_EXTENDED, 0);
+  test_exec("x", 0, REG_OK, 0, 1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_exec("xy", 0, REG_OK, 0, 2, 1, 2,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_exec("xyy", 0, REG_OK, 0, 3, 1, 2, 2, 3,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, END);
+
+  /* Repetitions of a group that may match an assertion, followed by a back
+     reference, as in Pi-hole filters. */
+  test_comp("(((((\\B|.)|[a-c])){1,2})*)\\1", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_OK, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_exec("ads.double", 0, REG_OK, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, END);
+  test_comp("((((((((\\B|.){1,2})*){1,2})*){1,2})*){1,2})*",
+	    REG_EXTENDED | REG_NOSUB, 0);
+  test_exec("ab", 0, REG_OK, END);
+
+  /* Skipping an optional assertion is taken exactly where the assertion
+     fails. */
+  test_comp("(^)?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_exec("a", REG_NOTBOL, REG_OK, 0, 1, 0, 0, END);
+  test_comp("(^)?a", REG_EXTENDED | REG_NEWLINE, 0);
+  test_exec("b\na", 0, REG_OK, 2, 3, 2, 2, END);
+  test_comp("a($)?", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_OK, 0, 1, 1, 1, END);
+  test_exec("a", REG_NOTEOL, REG_OK, 0, 1, 1, 1, END);
+  test_comp("a($)?", REG_EXTENDED | REG_NEWLINE, 0);
+  test_exec("a\nb", 0, REG_OK, 0, 1, 1, 1, END);
+  test_comp("(\\<)?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+  test_comp("a(\\>)?", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_OK, 0, 1, 1, 1, END);
+  test_exec("a ", 0, REG_OK, 0, 1, 1, 1, END);
+  test_comp("(\\b)?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+  test_comp("(\\B)?a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, 1, 1, END);
+
+  /* Assertions that contradict each other never hold. */
+  test_comp("x\\b\\By", REG_EXTENDED, 0);
+  test_exec("xy", 0, REG_NOMATCH);
+  test_exec("x y", 0, REG_NOMATCH);
+  test_comp("(\\b\\B|c)d", REG_EXTENDED, 0);
+  test_exec("cd", 0, REG_OK, 0, 2, 0, 1, END);
+  test_exec("d", 0, REG_NOMATCH);
+  test_comp("(\\b\\B)*a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, END);
+  test_comp("x(\\b\\B)?y", REG_EXTENDED, 0);
+  test_exec("xy", 0, REG_OK, 0, 2, 1, 1, END);
+
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
 #ifdef SRC_IN_ISO_8859_1
