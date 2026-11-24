@@ -584,6 +584,7 @@ newTrePatternObject(void)
   self = PyObject_New(TrePatternObject, &TrePatternType);
   if (self == NULL)
     return NULL;
+  memset(&self->rgx, '\0', sizeof(self->rgx));
   self->flags = 0;
   return self;
 }
@@ -662,6 +663,11 @@ PyTre_ncompile(PyObject *self, PyObject *args)
 #else
   ucs_pattern = (Py_UCS1 *) calloc(sizeof(Py_UCS1), pat_len+1);
 #endif
+  if (ucs_pattern == NULL)
+    {
+      Py_DECREF(rv);
+      return PyErr_NoMemory();
+    }
   switch (codepoint_kind)
     {
 #ifdef TRE_WCHAR
