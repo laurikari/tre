@@ -728,6 +728,15 @@ main(int argc, char **argv)
 	    "this is demo data!\n",
 	    0, REG_OK, 0, 120, 93, 100, END);
 
+  /* The approximate matcher has room for the costs of three
+     approximate bounds; the copies of a repeated one share its costs. */
+  test_comp("a{~1}b{~1}c{~1}", REG_EXTENDED, 0);
+  test_exec("xbc", 0, REG_OK, 0, 3, END);
+  test_comp("(a{~1}){5}", REG_EXTENDED | REG_NOSUB, 0);
+  test_exec("aaxaa", 0, REG_OK, END);
+  test_comp("a{~1}b{~1}c{~1}d{~1}", REG_EXTENDED, REG_ESPACE);
+  test_comp("{~}?{~}?{~}?{~}?{~}?D", REG_EXTENDED, REG_ESPACE);
+
   /* Approximate matching and back referencing cannot be used together. */
   test_comp("(foo{~})\\1", REG_EXTENDED, REG_BADPAT);
 

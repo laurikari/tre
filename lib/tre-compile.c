@@ -1969,6 +1969,8 @@ tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags)
 			   &tnfa->params_depth);
   if (errcode != REG_OK)
     ERROR_EXIT(errcode);
+  if (tnfa->params_depth > TRE_M_MAX_DEPTH)
+    ERROR_EXIT(REG_ESPACE);
 
   /* Add a dummy node for the final state.
      XXX - For certain patterns this dummy node can be optimized away,

@@ -218,6 +218,11 @@ typedef enum {
   TRE_PARAM_LAST	    = 9
 } tre_param_t;
 
+/* Largest TRE_PARAM_DEPTH the approximate matcher has room for.  Each
+   approximate bound in a pattern gets its own depth, so this is also
+   the most approximate bounds a pattern can have. */
+#define TRE_M_MAX_DEPTH 3
+
 /* Unset matching parameter */
 #define TRE_PARAM_UNSET -1
 
