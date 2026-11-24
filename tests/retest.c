@@ -1846,6 +1846,22 @@ main(int argc, char **argv)
       test_nexec("foo\000bar", 7, 0, REG_OK, 5, 6, END);
       test_comp("c$", REG_EXTENDED, 0);
       test_exec("abc", 0, REG_OK, 2, 3, END);
+
+      /* A class name of 40 two-byte characters converts to more bytes
+	 than the class name buffer holds. */
+      {
+	char long_class[3 + 2 * 40 + 4];
+	int i;
+
+	memcpy(long_class, "[[:", 3);
+	for (i = 0; i < 40; i++)
+	  {
+	    long_class[3 + 2 * i] = (char)0xa4;
+	    long_class[3 + 2 * i + 1] = (char)0xa2;
+	  }
+	memcpy(long_class + 3 + 2 * 40, ":]]", 4);
+	test_comp(long_class, REG_EXTENDED, REG_ECTYPE);
+      }
     }
   else
     {
