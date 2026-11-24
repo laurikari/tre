@@ -321,7 +321,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 		  mbstate_t state;
 		  const tre_char_t *src = tmp_wcs;
 		  memset(&state, '\0', sizeof(state));
-		  len = wcsrtombs(tmp_str, &src, sizeof(tmp_str), &state);
+		  len = wcsrtombs(tmp_str, &src, sizeof(tmp_str) - 1, &state);
 		}
 #elif defined HAVE_WCSTOMBS
 		len = wcstombs(tmp_str, tmp_wcs, 63);
