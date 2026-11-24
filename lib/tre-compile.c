@@ -1002,7 +1002,7 @@ tre_expand_ast(tre_mem_t mem, tre_stack_t *stack, tre_ast_node_t *ast,
 		old_params[TRE_PARAM_DEPTH] = params_depth;
 		/* XXX - this is the only place where ast_new_node is
 		   needed -- should be moved inside AST module. */
-		node_copy = tre_ast_new_node(mem, ITERATION,
+		node_copy = tre_ast_new_node(mem, node->type,
 					     sizeof(tre_iteration_t));
 		if (!node_copy)
 		  return REG_ESPACE;

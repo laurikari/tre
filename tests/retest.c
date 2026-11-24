@@ -728,6 +728,27 @@ main(int argc, char **argv)
 	    "this is demo data!\n",
 	    0, REG_OK, 0, 120, 93, 100, END);
 
+  /* Approximate matching of a bounded repetition: the parameters apply
+     to the expanded copies as a whole. */
+  test_comp("(ab){2~1}c", REG_EXTENDED, 0);
+  test_exec("ababc", 0, REG_OK, 0, 5, 2, 4, END);
+  test_exec("abXbc", 0, REG_OK, 0, 5, 2, 4, END);
+  test_exec("xabaXcx", 0, REG_OK, 1, 6, 3, 5, END);
+  test_exec("aXXbc", 0, REG_NOMATCH);
+  test_exec("abc", 0, REG_NOMATCH);
+  test_comp("x(ab){1,2~1}y", REG_EXTENDED, 0);
+  test_exec("xababy", 0, REG_OK, 0, 6, 3, 5, END);
+  test_exec("xaby", 0, REG_OK, 0, 4, 1, 3, END);
+  test_exec("xabaXy", 0, REG_OK, 0, 6, 3, 5, END);
+  test_exec("xy", 0, REG_NOMATCH);
+  test_comp("(foobar){2~1}", REG_EXTENDED, 0);
+  test_exec("foobarfoobar", 0, REG_OK, 0, 12, 6, 12, END);
+  test_exec("foobarfobar", 0, REG_OK, 0, 11, 6, 11, END);
+  test_exec("fobarfobar", 0, REG_NOMATCH);
+  test_comp("a{2+14}{2+4}", REG_EXTENDED, 0);
+  test_exec("aaaa", 0, REG_OK, 0, 4, END);
+  test_exec("aaa", 0, REG_NOMATCH);
+
   /* Approximate matching and back referencing cannot be used together. */
   test_comp("(foo{~})\\1", REG_EXTENDED, REG_BADPAT);
 
