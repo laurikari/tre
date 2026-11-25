@@ -35,6 +35,8 @@ typedef enum {
 #define IS_PARAMETER(x) ((x)->code_min == PARAMETER)
 
 
+struct tre_empty_path;
+
 /* A generic AST node.  All AST nodes consist of this node on the top
    level with `obj' pointing to the actual content. */
 typedef struct {
@@ -46,6 +48,9 @@ typedef struct {
   unsigned int num_tags;
   tre_pos_and_tags_t *firstpos;
   tre_pos_and_tags_t *lastpos;
+  /* The ways of matching the empty string through the node, in order of
+     POSIX preference; computed with firstpos and lastpos. */
+  struct tre_empty_path *empty_paths;
 } tre_ast_node_t;
 
 
