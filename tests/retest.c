@@ -641,6 +641,22 @@ main(int argc, char **argv)
     test_exec("zzzzzz", 0, REG_NOMATCH);
   }
 
+  /* The same with few states queued at the start of a position: deleting
+     the "x" adds every branch to the delete-handling deque from within
+     the loop that processes it, so that loop must grow the deque too. */
+  {
+    static char fan_out[300 * 2 + 16];
+    char *p = fan_out;
+    int i;
+    p += sprintf(p, "(x(");
+    for (i = 0; i < 300; i++)
+      p += sprintf(p, "%sa", i > 0 ? "|" : "");
+    sprintf(p, ")b){~2}");
+    test_comp(fan_out, REG_EXTENDED | REG_NOSUB, 0);
+    test_exec("zab", 0, REG_OK, END);
+    test_exec("zzz", 0, REG_NOMATCH);
+  }
+
 #if KNOWN_BUG
   /* Should these match or not? */
   test_comp("(a)*-\\1b", REG_EXTENDED, 0);
