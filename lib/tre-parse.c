@@ -612,6 +612,18 @@ tre_parse_int(const tre_char_t **regex, const tre_char_t *regex_end)
 }
 
 
+/* Returns 1 if `node' is an assertion that is not in parentheses.  A
+   duplication symbol right after one, as in "^*", is undefined in POSIX.
+   TRE has always required the assertion to hold there, and repeating an
+   assertion changes nothing, so the duplication symbol is left out. */
+static int
+tre_is_bare_assertion(const tre_ast_node_t *node)
+{
+  return node->type == LITERAL
+    && IS_ASSERTION((tre_literal_t *)node->obj)
+    && node->submatch_id < 0;
+}
+
 static reg_errcode_t
 tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 {
@@ -859,6 +871,13 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
       if (min < 0 && max < 0)
 	/* Only approximate parameters set, no repetitions. */
 	min = max = 1;
+
+      if (tre_is_bare_assertion(*result)
+	  && !(approx || costs_set || counts_set))
+	{
+	  ctx->re = r;
+	  return REG_OK;
+	}
 
       *result = tre_ast_new_iter(ctx->mem, *result, min, max, minimal);
       if (!*result)
@@ -1162,6 +1181,11 @@ tre_parse(tre_parse_ctx_t *ctx)
 		DPRINT(("tre_parse: %s star: '%.*" STRF "'\n",
 			minimal ? "  minimal" : "greedy", REST(tmp_re)));
 		ctx->re++;
+		if (tre_is_bare_assertion(result))
+		  {
+		    STACK_PUSHX(stack, int, PARSE_POSTFIX);
+		    break;
+		  }
 		tmp_node = tre_ast_new_iter(ctx->mem, result, rep_min, rep_max,
 					    minimal);
 		if (tmp_node == NULL)

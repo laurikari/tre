@@ -1513,6 +1513,48 @@ main(int argc, char **argv)
   test_comp("x(\\b\\B)?y", REG_EXTENDED, 0);
   test_exec("xy", 0, REG_OK, 0, 2, 1, 1, END);
 
+  /* A duplication symbol right after an assertion that is not in
+     parentheses is undefined in POSIX.  The assertion must still hold, as
+     TRE has always done. */
+  test_comp("^*$", REG_EXTENDED, 0);
+  test_exec("", 0, REG_OK, 0, 0, END);
+  test_exec("ab", 0, REG_NOMATCH);
+  test_comp("^?a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("^+a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("^*?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("a$*", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, END);
+  test_exec("ab", 0, REG_NOMATCH);
+  test_comp("^{0,2}a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("^{1,3}a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("^{1}", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 0, 0, END);
+  test_comp("^{0}a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, END);
+  test_comp("\\b*a", REG_EXTENDED, 0);
+  test_exec(" a", 0, REG_OK, 1, 2, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("\\<?a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_NOMATCH);
+  test_comp("(a)^*b", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_NOMATCH);
+  test_comp("(^*)a", REG_EXTENDED, 0);
+  test_exec("a", 0, REG_OK, 0, 1, 0, 0, END);
+  test_exec("ba", 0, REG_NOMATCH);
+  /* In parentheses, the assertion may be skipped. */
+  test_comp("a(^)*b", REG_EXTENDED, 0);
+  test_exec("ab", 0, REG_OK, 0, 2, 1, 1, END);
+  test_comp("(^){0,2}a", REG_EXTENDED, 0);
+  test_exec("ba", 0, REG_OK, 1, 2, 1, 1, END);
+
   /* Shorthands for character classes. */
   test_comp("\\w+", REG_EXTENDED, 0);
 #ifdef SRC_IN_ISO_8859_1
