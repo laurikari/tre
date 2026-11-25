@@ -625,6 +625,38 @@ main(int argc, char **argv)
   test_comp("^!pfast [0-9]{1,15} ([0-9]{1,3}\\.){3}[0-9]{1,3}[0-9]{1,5}$",
 	    REG_EXTENDED, 0);
 
+  /* An alternation with many branches.	 The resulting TNFA has well over
+     512 states reachable at one position, so the approximate matcher's
+     delete-handling deque must grow beyond its old fixed size (this
+     matters here because test_exec() also runs each test with
+     REG_APPROX_MATCHER). */
+  {
+    static char many_branches[600 * 5];
+    char *p = many_branches;
+    int i;
+    for (i = 0; i < 600; i++)
+      p += sprintf(p, "%sx%03d", i > 0 ? "|" : "", i);
+    test_comp(many_branches, REG_EXTENDED, 0);
+    test_exec("zzx059zz", 0, REG_OK, 2, 6, END);
+    test_exec("zzzzzz", 0, REG_NOMATCH);
+  }
+
+  /* The same with few states queued at the start of a position: deleting
+     the "x" adds every branch to the delete-handling deque from within
+     the loop that processes it, so that loop must grow the deque too. */
+  {
+    static char fan_out[300 * 2 + 16];
+    char *p = fan_out;
+    int i;
+    p += sprintf(p, "(x(");
+    for (i = 0; i < 300; i++)
+      p += sprintf(p, "%sa", i > 0 ? "|" : "");
+    sprintf(p, ")b){~2}");
+    test_comp(fan_out, REG_EXTENDED | REG_NOSUB, 0);
+    test_exec("zab", 0, REG_OK, END);
+    test_exec("zzz", 0, REG_NOMATCH);
+  }
+
 #if KNOWN_BUG
   /* Should these match or not? */
   test_comp("(a)*-\\1b", REG_EXTENDED, 0);
